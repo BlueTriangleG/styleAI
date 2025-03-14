@@ -1,0 +1,57 @@
+.hero {
+  $primary-color: #2D4B37;
+  $secondary-color: #4A6B56;
+  $hover-color: #1F3526;
+  background-color: #FFFFFF;  min-height: 100dvh;
+
+  .container {
+    margin: 0 auto;
+    padding: 4rem 1rem;
+    max-width: 1200px;
+    text-align: center;
+    background-color: #FFFFFF;
+  }
+
+  .content {
+    margin-bottom: 3rem;
+
+    h1 {
+      font-size: 3.5rem;
+      font-weight: bold;
+      color: $primary-color;
+      margin-bottom: 2rem;
+      line-height: 1.2;
+
+      .highlight {
+        color: #FF9999;
+      }
+    }
+
+    .startButton {
+      background-color: #000000;
+      color: white;
+      padding: 0.75rem 3rem;
+      border-radius: 0.25rem;
+      font-size: 1.125rem;
+      transition: background-color 0.3s;
+
+      &:hover {
+        background-color: #333333;
+      }
+    }
+  }
+
+  .imageGrid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 1rem;
+    padding: 0 2rem;
+
+    .gridImage {
+      border-radius: 1rem;
+      object-fit: cover;
+      width: 100%;
+      height: auto;
+    }
+  }
+}

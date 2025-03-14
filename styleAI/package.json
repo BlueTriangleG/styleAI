@@ -1,0 +1,49 @@
+{
+  "name": "styleAI",
+  "version": "0.1.17",
+  "private": false,
+  "bin": {
+    "create-prompt-is-all-you-need": "bin/cli.js"
+  },
+  "scripts": {
+    "dev": "next dev --turbopack",
+    "build": "next build",
+    "start": "next start",
+    "lint": "next lint"
+  },
+  "dependencies": {
+    "@emotion/react": "^11.14.0",
+    "@emotion/styled": "^11.14.0",
+    "@mui/icons-material": "^6.4.7",
+    "@mui/material": "^6.4.7",
+    "@types/js-cookie": "^3.0.6",
+    "@types/pg": "^8.11.11",
+    "chalk": "^4.1.2",
+    "commander": "^11.1.0",
+    "fs-extra": "^11.2.0",
+    "inquirer": "^8.2.6",
+    "jose": "^6.0.10",
+    "js-cookie": "^3.0.5",
+    "jsonwebtoken": "^9.0.2",
+    "next": "15.2.2",
+    "ora": "^5.4.1",
+    "pg": "^8.14.0",
+    "react": "^19.0.0",
+    "react-dom": "^19.0.0",
+    "zustand": "^5.0.3"
+  },
+  "devDependencies": {
+    "@tailwindcss/postcss": "^4",
+    "@types/jsonwebtoken": "^9.0.9",
+    "@types/node": "^20",
+    "@types/react": "^19",
+    "@types/react-dom": "^19",
+    "css-loader": "^7.1.2",
+    "less": "^4.2.2",
+    "less-loader": "^12.2.0",
+    "sass": "^1.85.1",
+    "style-loader": "^4.0.0",
+    "tailwindcss": "^4",
+    "typescript": "^5"
+  }
+}
