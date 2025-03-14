@@ -1,7 +1,7 @@
 .header {
-  $bg-color: #FFFFFF;
-  $text-color: #2D4B37;
-  $hover-color: #1F3526;
+  $bg-color: #ffffff;
+  $text-color: #2d4b37;
+  $hover-color: #1f3526;
 
   background-color: $bg-color;
   padding: 0.7rem;
@@ -43,6 +43,21 @@
       &:hover {
         color: $hover-color;
       }
+    }
+  }
+
+  .loginButton {
+    background-color: #000000;
+    color: #ffffff !important;
+    padding: 0.5rem 1.5rem;
+    border-radius: 4px;
+    font-weight: 500;
+    transition: background-color 0.3s, transform 0.2s;
+
+    &:hover {
+      background-color: #333333;
+      color: #ffffff !important;
+      transform: translateY(-2px);
     }
   }
 }
