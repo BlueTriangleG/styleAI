@@ -2,6 +2,17 @@
 
 import Image from 'next/image';
 import { useRouter } from 'next/navigation';
+import CircularGallery from '@/components/WelcomePage/CircularGallery';
+
+// 定义示例图片数据
+const galleryItems = [
+  { image: '/gallery/outfit1.png', text: 'Casual Style' },
+  { image: '/gallery/outfit2.png', text: 'Formal Wear' },
+  { image: '/gallery/outfit3.png', text: 'Street Fashion' },
+  { image: '/gallery/outfit3.png', text: 'Business Casual' },
+  { image: '/gallery/outfit1.png', text: 'Evening Elegance' },
+  { image: '/gallery/outfit2.png', text: 'Summer Vibes' },
+];
 
 export function Hero() {
   const router = useRouter();
@@ -25,8 +36,16 @@ export function Hero() {
             Start
           </button>
         </div>
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 px-0 md:px-8">
-          {/* You can add images here if needed */}
+        <div className="grid grid-cols-1 md:grid-cols-1 gap-4 px-0 md:px-8">
+          <div style={{ height: '600px', position: 'relative' }}>
+            <CircularGallery
+              items={galleryItems}
+              bend={3}
+              textColor="#ffffff"
+              borderRadius={0.05}
+              font="bold 24px 'Playfair Display'"
+            />
+          </div>
         </div>
       </div>
     </main>
