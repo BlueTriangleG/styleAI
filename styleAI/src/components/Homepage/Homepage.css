@@ -10,26 +10,13 @@
   --img-3: url('data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACAAAAAXCAYAAABqBU3hAAAMEElEQVR4AQCBAH7/AC9Smv8xVJv/M1ad/zZZoP85W6L/O12j/ztdo/87XKH/Oluf/zlZnf85WZz/O1qc/z1cnf9BX57/RmKg/0plov9OaKP/UWuj/1Rso/9XbqL/WnCi/15zo/9idqT/Z3ml/2p8pf9tfaX/bn2j/218oP9reZ3/aHaY/2Vzlf9kcZP/AIEAfv8AOVyh/ztdo/89X6X/QGKo/0Jkqv9EZqv/RGaq/0Rlqf9DY6b/QmKk/0Jho/9DYqL/RmOj/0lmpP9Oaab/Um2o/1VvqP9Zcan/W3Oo/151qP9hd6j/ZXmo/2l8qf9tf6r/cYKq/3ODqv9zg6j/coGk/3B+oP9tepz/aneY/2h1lv8AgQB+/wBKbK//TG2w/05vsv9RcrX/U3S3/1R1t/9Vdbf/VHS1/1Jys/9RcLD/UW+v/1Jwrv9Uca7/WHSv/1t2sf9febL/Y3yz/2Z+s/9of7L/a4Gx/26Dsf9yhbH/dYiy/3mKs/98jLP/fo2y/36Mr/98iqv/eYan/3aCov9zf57/cX2c/wCBAH7/AF9/vv9ggL//Y4LB/2WFxP9nh8X/aIfG/2iHxf9nhcP/ZYPA/2SBvv9jgLz/ZIC7/2aBu/9phLz/bYa9/3CJvv9zi77/do2+/3mOvv97kL3/fpK9/4KUvf+Flr7/iZm+/4uavv+Mmrz/jJm5/4mWtP+Fka//gY2q/36Jpf98h6P/AIEAfv8Ac5DK/3SRzP92lM7/eJbQ/3qY0f97mNL/e5fR/3mWz/94k8z/dpHJ/3WQx/91kMb/d5HF/3qTxv99lcf/gZjI/4Sayf+HnMn/iZ3J/4yfyP+Pocj/k6PI/5amyf+ZqMn/nKnJ/5ypx/+bp8P/mKO+/5OeuP+OmbL/ipSt/4iSqv8AgQB+/wCBnND/gp3R/4Sf0/+GodX/iKPX/4mj1/+Iotb/h6HT/4We0f+DnM7/gprM/4Kayv+Em8v/h53L/4qgzf+Oo87/kaXP/5Snz/+XqdD/m6vQ/56u0P+isNH/prPS/6m10v+rt9L/q7bP/6mzy/+mr8X/oKm//5ujuP+Xn7P/lJyw/wCBAH7/AIegzf+Ioc7/iqLP/4yk0f+OptP/jqbT/46l0v+Mo8//iqHN/4ifyv+Incj/iJ3H/4qfyP+Nocn/kaTL/5Wnzf+Zqs7/na3P/6Cw0f+ks9L/qbbT/6261f+yvdb/tcDX/7fB1/+4wNT/tb3Q/7G4yv+sssP/pqy8/6Gntv+epLP/AIEAfv8AhZq//4abwP+HncL/iZ7E/4ugxf+LoMX/ip/E/4mdwv+Hm7//hZm9/4WYvP+GmLv/iJq8/4ydvv+QocH/laXE/5qpxv+frMj/o7DL/6i0zf+uuc//s73S/7jB1f+9xdb/v8fX/8DG1f++w9D/ub7K/7O4w/+tsbv/qKy1/6Wpsv8AgQB+/wB7jar/fI6r/32Prf9/ka7/gJKv/4CSr/9/ka7/fo+s/3yNqv97jKj/e4un/32MqP+Aj6n/hJKs/4mXsP+Om7P/lKC3/5qluv+gqr7/pq/B/6y1xf+zu8n/ucDN/7/E0P/Cx9H/w8fQ/8HEzP+8v8X/trm+/7Cytv+rrLD/qKmt/wCBAH7/AG18kf9ufZH/b36T/3B/lP9xgJX/cX+U/3B+k/9ufJH/bXuP/2x5jv9seY7/bnuP/3J+kf93gpX/fYeZ/4ONnv+Jk6L/kJin/5eeq/+epbD/pqy2/66zu/+1ucD/u7/E/8DCxv/Bw8X/v8DC/7u7vP+1tbT/rq6t/6mop/+mpaP/AIEAfv8AX2p2/19rd/9ga3j/YWx5/2Fsef9gbHj/X2p3/11odf9cZnP/W2Vy/1xmcv9eaHT/Ymt3/2hwe/9udoD/dXyF/3yCi/+DiZD/i5CW/5OXnP+bn6L/pKao/6yur/+0tLT/ubm2/7u6tv+5uLP/tbOu/6+tpv+ppp//o6CZ/6Cdlf8AgQB+/wBTW1//U1xg/1RcYP9UXGD/VFxg/1JaX/9RWF3/TlZb/01UWf9MU1j/TVRY/09WWv9UWl7/WV9i/2BlaP9na23/bnJz/3V4ef99f3//hoeF/4+PjP+YmJT/oaCa/6mnoP+urKT/sa6k/7Csov+sqJz/pqGV/6Cajv+alYj/l5KE/wCBAH7/AE1STv9NUk7/TVJO/0xRTf9LUEz/SU5K/0dLSP9ESEX/QkZD/0FFQv9CRUP/REhF/0hLSP9OUE3/VFZS/1tcWP9iY13/aWlj/3Bwaf95d2//goB3/4uIfv+UkYX/nJiL/6Kdj/+ln5D/pJ6O/6Caif+ak4L/lI16/46HdP+LhHH/AIEAfv8ATU9D/01OQ/9MTkL/S0xB/0hKP/9GRzz/QkQ5/z9ANv88PjT/Ozwy/zs8M/8+PjX/QkI4/0dHPf9MTEL/UlFH/1hXTP9fXVH/ZmNW/21qXP92cWL/f3pq/4eCcf+PiXf/lY57/5iQfP+Xj3r/k4t1/46Fbv+Hfmf/gnhh/391Xf8AgQB+/wBSUT7/UVA9/1BPPP9OTTr/S0o3/0dGNP9DQjD/Pz0s/zw6Kf86OCj/Ojgo/zw6Kv8/PS3/REEx/0lGNv9OSzr/U08+/1hUQv9eWUb/ZF9L/2xlUf90bVj/fHRe/4N7ZP+JgGj/i4Jp/4uBZv+HfGL/gXZb/3twVP91ak7/cmdK/wCBAH7/AFpWPf9ZVTz/V1M6/1RQN/9QTDT/S0gv/0dDK/9CPif/Pjsj/zw4Iv88OCL/Pjok/0E9J/9FQCr/SUQu/01IMf9RSzT/VU43/1lSOv9eVj7/ZFxD/2tiSP9yaU7/eW9T/35zV/+AdVf/f3RV/3tvUP92aUn/b2JC/2pdPP9nWjn/AIEAfv8AYlw9/2FbO/9fWDn/W1U2/1ZQMv9RSy3/S0Uo/0ZAI/9DPSD/QDoe/0A6Hv9CPCD/RT4j/0hCJv9MRSr/T0cs/1FKLv9UTDD/V04y/1pRNP9fVTf/ZVo8/2tgQf9xZUX/dWlI/3dqSf92aUb/cmRB/2xeO/9mVzT/YFIu/11PKv8AgQB+/wBpYDz/Z186/2RcOP9gWDT/W1Mv/1VNKv9PRyT/SkIg/0Y+Hf9EPBv/RDwc/0Y+Hv9JQSH/TEQk/09HJ/9SSSn/U0oq/1RLK/9WSyv/WE0s/1tQL/9gVDL/ZVk2/2pdOv9uYT3/cGI9/25gOv9rXDb/ZVUv/15PKP9ZSSL/VkYf/wCBAH7/AGtiOf9qYDf/Z100/2JYMP9dUyv/V00l/1FHIP9MQhz/SD4Z/0c9GP9HPRn/SUAc/0xDH/9QRiP/U0km/1VKJ/9WSyj/Vkon/1ZKJ/9XSyf/WU0o/11QK/9hVC7/Zlgy/2lbNP9rWzT/aVox/2VVLf9gTyb/WUkf/1RDGf9RQBb/AIEAfv8Aa2Az/2leMv9mWy//YVYq/1xQJf9VSiD/UEUb/0tAFv9IPRT/RzwU/0g9Fv9LQBn/T0Qd/1JHIf9VSiT/V0sm/1dLJv9XSyX/Vkok/1dJI/9YSiT/W00m/19QKP9jVCv/ZlYt/2dXLf9mVSv/YlEm/1xLIP9WRRn/UT8U/048EP8AgQB+/wBoXC3/Z1or/2NXKP9eUiT/WUwf/1NHGf9NQRT/ST0R/0Y6D/9GOg//SDwS/0s/Fv9PQxv/VEcf/1dKI/9YTCT/WUwk/1hLI/9XSSH/Vkgg/1dJIP9aSyL/XU4k/2FRJ/9kVCn/ZVQp/2RSJ/9gTiL/Wkkc/1RCFf9PPRD/TToN/wCBAH7/AGVYJ/9jVib/YFMi/1tOHv9VSBn/T0MU/0o9D/9GOQz/RDcL/0Q4DP9HOg//Sz4T/09DGf9URx7/V0sh/1lMI/9ZTCP/WEsi/1dJIP9WSB7/V0ge/1lKH/9cTCL/YFAk/2NSJv9kUyb/YlEk/19NH/9aRxn/VEET/088Dv9MOQv/AYEAfv8AY1Yk/2FUIv9eUB//WUwb/1NGFv9NQBD/SDsM/0Q3Cf9DNgj/QzYJ/0Y5Df9KPRL/T0IX/1RHHf9YSiD/WUwi/1pMIv9YSyH/V0kf/1ZIHf9XSB3/WUke/1xMIP9fTyP/YlEl/2NSJf9iUCP/Xkwe/1lHGP9TQRL/TzwN/0w5Cv9GlqqrSiPH3gAAAABJRU5ErkJggg==');
 }
 
-html, body {
-  width: 100vw;
-  min-height: 100vh;
-  font-family: Lora, sans-serif;
-  margin: 0;
-  padding: 0;
-  display: flex;
-  /* justify-content: center; */
-  align-items: center;
-  flex-direction: column;
-  font-size: clamp(18px, 2.5vw, 30px);
-  background-color: #E2EFDE;
-  color: #262B29;
-}
-
 .fake-shader {
   --saturate: 6;
   --sepia: 1;
   --hue: 360deg;
   
+  width: 100vw;
+  height: 100vh;
   background-size: cover;
   overflow: hidden;
   background-image: var(--img-1);
@@ -144,97 +131,3 @@ h1 {
   100% { filter: Saturate(var(--saturate)) Sepia(var(--sepia)) hue-rotate(var(--hue)); }
 }
 
-
-/* CSS for explanation */
-
-section {
-  min-height: 100vh;
-  display: flex;
-  width: 90vw;
-  max-width: 600px;
-  /* text-align: center; */
-  flex-direction: column;
-  gap: 0.5rem;
-  padding: 2rem 0;
-  
-  
-  h2 {
-    font-size: 2rem;
-    margin: 0;
-    padding: 0;
-  }
-  
-  code {
-    display: inline-block;
-    background-color: #AFD0BF;
-    padding: 0.2rem 0.4rem;
-    border-radius: 0.2rem;
-  }
-  
-  .images {
-    list-style-type: none;
-    margin: 0 auto;
-    padding: 0;
-    display: flex;
-    align-items: space-evenly;
-    justify-content: space-evenly;
-    width: 100%;
-    gap: 0.5rem;
-    
-    li {
-      flex: 1;
-    }
-    
-    img {
-      width: 100%;
-    }
-  }
-  
-  .examples {
-    padding: 0;
-    list-style-type: none;
-    
-    li {
-      border-radius: 0.5rem;
-      aspect-ratio: 1.6;
-      overflow: hidden;
-      margin-bottom: 1rem;
-      
-      > * {
-        width: 100%;
-        height: 100%;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-      }
-      
-      h3 {
-        font-size: 2rem;
-        color: #262B29;
-        
-        &.light {
-          color: #E2EFDE;
-        }
-      }
-    }
-  }
-}
-
-
-footer {
-  background-color: #262B29;
-  min-height: 30vh;
-  
-  
-  a {
-    color: #AFD0BF;
-    font-size: 0.6rem;
-    text-decoration: none;
-    
-    &:hover {
-      color: #E2EFDE;
-      text-decoration: underline;
-    }
-  }
-
-}
