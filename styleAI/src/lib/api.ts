@@ -7,10 +7,13 @@ interface RequestOptions extends RequestInit {
 
 const BASE_URL = '/api';
 
-async function request<T>(endpoint: string, options: RequestOptions = {}): Promise<T> {
+async function request<T>(
+  endpoint: string,
+  options: RequestOptions = {}
+): Promise<T> {
   const { token, params, ...restOptions } = options;
-  
-  // 构建完整的 URL，包括查询参数
+
+  // Build complete URL including query parameters
   const url = new URL(`${BASE_URL}${endpoint}`, window.location.origin);
   if (params) {
     Object.entries(params).forEach(([key, value]) => {
@@ -18,11 +21,11 @@ async function request<T>(endpoint: string, options: RequestOptions = {}): Promi
     });
   }
 
-  // 设置默认请求头
+  // Set default request headers
   const headers = new Headers(options.headers);
   headers.set('Content-Type', 'application/json');
-  
-  // 如果提供了 token 或者可以从 auth 模块获取 token，则添加到请求头
+
+  // Add token to request headers if provided or available from auth module
   const authToken = token || getAuthToken();
   if (authToken) {
     headers.set('Authorization', `Bearer ${authToken}`);
@@ -30,39 +33,43 @@ async function request<T>(endpoint: string, options: RequestOptions = {}): Promi
 
   const response = await fetch(url.toString(), {
     ...restOptions,
-    headers
+    headers,
   });
 
   if (!response.ok) {
-    throw new Error(`API 请求失败: ${response.statusText}`);
+    throw new Error(`API request failed: ${response.statusText}`);
   }
 
   return response.json();
 }
 
-// 用户相关 API
+// User-related API
 export const userApi = {
   getUsers: () => request<{ users: any[] }>('/users'),
-  createUser: (data: any) => request('/users', {
-    method: 'POST',
-    body: JSON.stringify(data)
-  }),
+  createUser: (data: any) =>
+    request('/users', {
+      method: 'POST',
+      body: JSON.stringify(data),
+    }),
 };
 
-// 文章相关 API
+// Post-related API
 export const postApi = {
   getPosts: () => request<{ posts: any[] }>('/posts'),
-  createPost: (data: any) => request('/posts', {
-    method: 'POST',
-    body: JSON.stringify(data)
-  }),
-  updatePost: (id: number, data: any) => request(`/posts/${id}`, {
-    method: 'PUT',
-    body: JSON.stringify(data)
-  }),
-  deletePost: (id: number) => request(`/posts/${id}`, {
-    method: 'DELETE'
-  })
+  createPost: (data: any) =>
+    request('/posts', {
+      method: 'POST',
+      body: JSON.stringify(data),
+    }),
+  updatePost: (id: number, data: any) =>
+    request(`/posts/${id}`, {
+      method: 'PUT',
+      body: JSON.stringify(data),
+    }),
+  deletePost: (id: number) =>
+    request(`/posts/${id}`, {
+      method: 'DELETE',
+    }),
 };
 
 interface LoginResponse {
@@ -74,11 +81,11 @@ interface LoginResponse {
   token: string;
 }
 
-// 认证相关 API
+// Authentication-related API
 export const authApi = {
   login: (credentials: { username: string; password: string }) =>
     request<LoginResponse>('/auth', {
       method: 'POST',
-      body: JSON.stringify(credentials)
-    })
+      body: JSON.stringify(credentials),
+    }),
 };

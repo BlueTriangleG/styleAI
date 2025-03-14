@@ -5,7 +5,7 @@ import { useEffect, useState } from 'react';
 interface TestData {
   id: number;
   name: string;
-  description:string;
+  description: string;
 }
 
 export default function TestDataPage() {
@@ -18,12 +18,16 @@ export default function TestDataPage() {
       try {
         const response = await fetch('/api/test-db/get');
         if (!response.ok) {
-          throw new Error('获取数据失败');
+          throw new Error('Failed to fetch data');
         }
         const result = await response.json();
         setData(result);
       } catch (err) {
-        setError(err instanceof Error ? err.message : '获取数据时发生错误');
+        setError(
+          err instanceof Error
+            ? err.message
+            : 'Error occurred while fetching data'
+        );
       } finally {
         setLoading(false);
       }
@@ -33,16 +37,16 @@ export default function TestDataPage() {
   }, []);
 
   if (loading) {
-    return <div className="p-4">加载中...</div>;
+    return <div className="p-4">Loading...</div>;
   }
 
   if (error) {
-    return <div className="p-4 text-red-500">错误: {error}</div>;
+    return <div className="p-4 text-red-500">Error: {error}</div>;
   }
 
   return (
     <div className="p-4">
-      <h1 className="text-2xl font-bold mb-4">测试数据列表</h1>
+      <h1 className="text-2xl font-bold mb-4">Test Data List</h1>
       <div className="grid gap-4">
         {data.map((item) => (
           <div key={item.id} className="border p-4 rounded-lg shadow">
