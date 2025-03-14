@@ -12,12 +12,12 @@ export default function GitHubCallbackPage() {
   useEffect(() => {
     const token = searchParams.get('token');
     if (!token) {
-      setError('未获取到登录令牌');
+      setError('Login token not found');
       return;
     }
     const handleGitHubCallback = async () => {
       try {
-        // 解析JWT令牌
+        // Parse JWT token
         const tokenData = JSON.parse(atob(token.split('.')[1]));
         const user: User = {
           id: tokenData.id,
@@ -25,18 +25,18 @@ export default function GitHubCallbackPage() {
           provider: 'github',
           provider_id: tokenData.provider_id,
           created_at: new Date(),
-          updated_at: new Date()
+          updated_at: new Date(),
         };
-        console.log('准备登录的用户信息:', user);
+        console.log('User information for login:', user);
         console.log('JWT Token:', token);
-        // 使用authStore保存用户信息和token
+        // Save user information and token using authStore
         login(user, token);
-        console.log('登录完成');
-        
-        // 登录成功后跳转到仪表板
+        console.log('Login completed');
+
+        // Redirect to dashboard after successful login
         router.push('/');
       } catch (err) {
-        setError(err instanceof Error ? err.message : 'GitHub登录失败');
+        setError(err instanceof Error ? err.message : 'GitHub login failed');
       }
     };
 
@@ -50,9 +50,8 @@ export default function GitHubCallbackPage() {
           <div className="text-red-500 text-center">{error}</div>
           <button
             onClick={() => router.push('/login')}
-            className="mt-4 w-full bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600"
-          >
-            返回登录页面
+            className="mt-4 w-full bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600">
+            Return to Login
           </button>
         </div>
       </div>
@@ -62,7 +61,7 @@ export default function GitHubCallbackPage() {
   return (
     <div className="min-h-screen flex items-center justify-center bg-gray-100 p-4">
       <div className="bg-white rounded-lg shadow-lg p-6">
-        <div className="text-center">处理GitHub登录中...</div>
+        <div className="text-center">Processing GitHub login...</div>
       </div>
     </div>
   );
