@@ -1,38 +1,38 @@
 import { Pool } from 'pg';
 
-// 数据库连接配置
+// Database connection configuration
 const pool = new Pool({
   connectionString: process.env.DATABASE_URL,
   ssl: {
-    rejectUnauthorized: false // 在开发环境中可能需要设置为false
-  }
+    rejectUnauthorized: false, // May need to be set to false in development environment
+  },
 });
 
-// 执行查询的通用函数
+// General function for executing queries
 export async function query(text: string, params?: any[]) {
   try {
     const result = await pool.query(text, params);
     return result;
   } catch (error) {
-    console.error('数据库查询错误:', error);
+    console.error('Database query error:', error);
     throw error;
   }
 }
 
-// 获取单个连接（用于事务等需要保持连接的操作）
+// Get a single connection (for transactions and operations requiring a persistent connection)
 export async function getClient() {
   const client = await pool.connect();
   return client;
 }
 
-// 测试数据库连接
+// Test database connection
 export async function testConnection() {
   try {
     const result = await query('SELECT NOW()');
-    console.log('数据库连接成功:', result.rows[0]);
+    console.log('Database connection successful:', result.rows[0]);
     return true;
   } catch (error) {
-    console.error('数据库连接失败:', error);
+    console.error('Database connection failed:', error);
     return false;
   }
 }
