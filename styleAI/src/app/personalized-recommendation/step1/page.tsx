@@ -63,11 +63,23 @@ export default function Step1() {
     <>
       <RecommendationHeader />
       <motion.div
-        className="min-h-screen bg-white pt-20"
+        className="min-h-screen pt-20 relative"
         initial={{ opacity: 0, x: 100 }}
         animate={isTransitioning ? pageVariants.exit : { opacity: 1, x: 0 }}
         transition={{ duration: 0.5 }}>
-        <div className="container mx-auto px-4 py-6">
+        {/* 背景图片 */}
+        <div className="absolute inset-0 z-0 overflow-hidden">
+          <Image
+            src="/background/White Fur Texture.jpg"
+            alt="White Fur Texture Background"
+            fill
+            className="object-cover"
+            priority
+          />
+        </div>
+
+        {/* 内容区域 */}
+        <div className="container mx-auto px-4 py-6 relative z-10">
           <h1 className="text-4xl font-bold mb-10 text-left">
             Upload Your Photo
           </h1>
@@ -77,7 +89,7 @@ export default function Step1() {
             style={{ minHeight: 'calc(100vh - 200px)' }}>
             {/* Left side - Upload area */}
             <motion.div
-              className="w-full md:w-1/2 bg-gray-100 rounded-lg p-4 flex flex-col items-center justify-center"
+              className="w-full md:w-1/2 bg-white bg-opacity-90 rounded-lg p-4 flex flex-col items-center justify-center shadow-lg"
               style={{ minHeight: 'calc(100vh - 200px)' }}
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
@@ -101,7 +113,7 @@ export default function Step1() {
               ) : (
                 <div
                   onClick={handleUploadClick}
-                  className="w-full bg-gray-200 rounded-md flex flex-col items-center justify-center cursor-pointer hover:bg-gray-300 transition-colors"
+                  className="w-full bg-gray-100 rounded-md flex flex-col items-center justify-center cursor-pointer hover:bg-gray-200 transition-colors"
                   style={{ minHeight: 'calc(100vh - 250px)' }}>
                   {isUploading ? (
                     <p className="text-gray-600">Uploading...</p>
@@ -145,7 +157,7 @@ export default function Step1() {
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               transition={{ delay: 0.4 }}>
-              <div className="bg-white p-6 rounded-lg flex-grow">
+              <div className="bg-white bg-opacity-90 p-6 rounded-lg flex-grow shadow-lg">
                 <h2 className="text-2xl font-bold mb-6">
                   What you should do now:
                 </h2>
@@ -177,9 +189,9 @@ export default function Step1() {
               <motion.button
                 onClick={handleNextClick}
                 disabled={!image}
-                className={`w-full py-3 px-6 rounded-md text-white font-medium mt-4 ${
+                className={`w-full py-3 px-6 rounded-md text-white font-medium mt-4 shadow-md ${
                   image
-                    ? 'bg-[#8C9DAE] hover:bg-[#7A8A9A]'
+                    ? 'bg-[#84a59d] hover:bg-[#6b8c85]'
                     : 'bg-gray-400 cursor-not-allowed'
                 } transition-colors`}
                 whileHover={image ? { scale: 1.05 } : {}}
