@@ -11,14 +11,14 @@ export default function LoginPage() {
   const [error, setError] = useState('');
   const [formData, setFormData] = useState({
     username: '',
-    password: ''
+    password: '',
   });
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
-    setFormData(prev => ({
+    setFormData((prev) => ({
       ...prev,
-      [name]: value
+      [name]: value,
     }));
   };
 
@@ -31,20 +31,20 @@ export default function LoginPage() {
       const response = await fetch('/api/auth/login', {
         method: 'POST',
         headers: {
-          'Content-Type': 'application/json'
+          'Content-Type': 'application/json',
         },
-        body: JSON.stringify(formData)
+        body: JSON.stringify(formData),
       });
 
       const data = await response.json();
 
       if (!response.ok) {
-        throw new Error(data.error || '登录失败');
+        throw new Error(data.error || 'Login failed');
       }
 
       router.push('/dashboard');
     } catch (err) {
-      setError(err instanceof Error ? err.message : '登录失败');
+      setError(err instanceof Error ? err.message : 'Login failed');
     } finally {
       setLoading(false);
     }
@@ -58,13 +58,13 @@ export default function LoginPage() {
     <div className="min-h-screen flex items-center justify-center bg-gray-100 p-4">
       <div className="w-full max-w-md bg-white rounded-lg shadow-lg p-6">
         <div className="mb-6">
-          <h1 className="text-2xl font-semibold text-center">登录</h1>
+          <h1 className="text-2xl font-semibold text-center">Login</h1>
         </div>
         <form onSubmit={handleSubmit} className="space-y-4">
           <TextField
             type="text"
             name="username"
-            label="用户名"
+            label="Username"
             value={formData.username}
             onChange={handleChange}
             required
@@ -76,7 +76,7 @@ export default function LoginPage() {
           <TextField
             type="password"
             name="password"
-            label="密码"
+            label="Password"
             value={formData.password}
             onChange={handleChange}
             required
@@ -85,9 +85,7 @@ export default function LoginPage() {
             variant="outlined"
             margin="normal"
           />
-          {error && (
-            <div className="text-red-500 text-sm">{error}</div>
-          )}
+          {error && <div className="text-red-500 text-sm">{error}</div>}
           <Button
             type="submit"
             disabled={loading}
@@ -95,16 +93,15 @@ export default function LoginPage() {
             color="primary"
             fullWidth
             size="large"
-            sx={{ mt: 2 }}
-          >
-            {loading ? '登录中...' : '登录'}
+            sx={{ mt: 2 }}>
+            {loading ? 'Logging in...' : 'Login'}
           </Button>
           <div className="relative my-4">
             <div className="absolute inset-0 flex items-center">
               <div className="w-full border-t border-gray-300"></div>
             </div>
             <div className="relative flex justify-center text-sm">
-              <span className="px-2 bg-white text-gray-500">或</span>
+              <span className="px-2 bg-white text-gray-500">or</span>
             </div>
           </div>
           <Button
@@ -112,9 +109,8 @@ export default function LoginPage() {
             variant="outlined"
             fullWidth
             size="large"
-            startIcon={<GitHubIcon />}
-          >
-            使用 GitHub 登录
+            startIcon={<GitHubIcon />}>
+            Login with GitHub
           </Button>
         </form>
       </div>

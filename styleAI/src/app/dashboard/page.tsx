@@ -21,7 +21,7 @@ export default function DashboardPage() {
         const data = await response.json();
         setPosts(data.posts);
       } catch (error) {
-        console.error('获取文章列表失败:', error);
+        console.error('Failed to fetch posts:', error);
       } finally {
         setLoading(false);
       }
@@ -31,19 +31,19 @@ export default function DashboardPage() {
   }, []);
 
   if (loading) {
-    return <div className="p-4">加载中...</div>;
+    return <div className="p-4">Loading...</div>;
   }
 
   return (
     <div className="p-4">
-      <h1 className="text-2xl font-bold mb-4">仪表盘</h1>
+      <h1 className="text-2xl font-bold mb-4">Dashboard</h1>
       <div className="grid gap-4">
         {posts.map((post) => (
           <div key={post.id} className="p-4 border rounded-lg shadow">
             <h2 className="text-xl font-semibold">{post.title}</h2>
             <p className="mt-2 text-gray-600">{post.content}</p>
             <div className="mt-2 text-sm text-gray-500">
-              发布时间: {new Date(post.createdAt).toLocaleString()}
+              Published: {new Date(post.createdAt).toLocaleString()}
             </div>
           </div>
         ))}
