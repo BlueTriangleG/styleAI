@@ -20,6 +20,7 @@
     "@types/pg": "^8.11.11",
     "chalk": "^4.1.2",
     "commander": "^11.1.0",
+    "framer-motion": "^12.5.0",
     "fs-extra": "^11.2.0",
     "inquirer": "^8.2.6",
     "jose": "^6.0.10",

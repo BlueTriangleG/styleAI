@@ -4,10 +4,12 @@ import { useState, useRef } from 'react';
 import Image from 'next/image';
 import { useRouter } from 'next/navigation';
 import { RecommendationHeader } from '@/components/recommendation/Header';
+import { motion } from 'framer-motion';
 
 export default function Step1() {
   const [image, setImage] = useState<string | null>(null);
   const [isUploading, setIsUploading] = useState(false);
+  const [isTransitioning, setIsTransitioning] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const router = useRouter();
 
@@ -40,17 +42,33 @@ export default function Step1() {
         // Only access sessionStorage in browser environment
         sessionStorage.setItem('userImage', image);
       }
-      // Navigate to the next step
-      router.push('/personalized-recommendation/step2');
+
+      // Start transition animation
+      setIsTransitioning(true);
+
+      // Navigate to the next step after animation completes
+      setTimeout(() => {
+        router.push('/personalized-recommendation/step2');
+      }, 500); // Match this with animation duration
     }
+  };
+
+  // Animation variants
+  const pageVariants = {
+    initial: { opacity: 1, x: 0 },
+    exit: { opacity: 0, x: -100 },
   };
 
   return (
     <>
       <RecommendationHeader />
-      <div className="min-h-screen bg-white pt-20">
+      <motion.div
+        className="min-h-screen bg-white pt-20"
+        initial={{ opacity: 0, x: 100 }}
+        animate={isTransitioning ? pageVariants.exit : { opacity: 1, x: 0 }}
+        transition={{ duration: 0.5 }}>
         <div className="container mx-auto px-4 py-6">
-          <h1 className="text-3xl font-bold mb-10 text-left">
+          <h1 className="text-4xl font-bold mb-10 text-left">
             Upload Your Photo
           </h1>
 
@@ -58,9 +76,12 @@ export default function Step1() {
             className="flex flex-col md:flex-row gap-8"
             style={{ minHeight: 'calc(100vh - 200px)' }}>
             {/* Left side - Upload area */}
-            <div
+            <motion.div
               className="w-full md:w-1/2 bg-gray-100 rounded-lg p-4 flex flex-col items-center justify-center"
-              style={{ minHeight: 'calc(100vh - 200px)' }}>
+              style={{ minHeight: 'calc(100vh - 200px)' }}
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ delay: 0.2 }}>
               {image ? (
                 <div
                   className="relative w-full h-full"
@@ -85,7 +106,7 @@ export default function Step1() {
                   {isUploading ? (
                     <p className="text-gray-600">Uploading...</p>
                   ) : (
-                    <>
+                    <div className="flex flex-col items-center justify-center text-center px-4">
                       <svg
                         xmlns="http://www.w3.org/2000/svg"
                         className="h-16 w-16 text-gray-400 mb-4"
@@ -99,13 +120,13 @@ export default function Step1() {
                           d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"
                         />
                       </svg>
-                      <p className="text-xl font-semibold text-gray-700 mb-2 uppercase">
+                      <p className="text-xl font-semibold text-gray-700 mb-2 uppercase tracking-wider">
                         Upload your image here
                       </p>
                       <p className="text-sm text-gray-500">
                         Click to browse files
                       </p>
-                    </>
+                    </div>
                   )}
                 </div>
               )}
@@ -116,10 +137,14 @@ export default function Step1() {
                 accept="image/*"
                 className="hidden"
               />
-            </div>
+            </motion.div>
 
             {/* Right side - Instructions */}
-            <div className="w-full md:w-1/2 flex flex-col">
+            <motion.div
+              className="w-full md:w-1/2 flex flex-col"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ delay: 0.4 }}>
               <div className="bg-white p-6 rounded-lg flex-grow">
                 <h2 className="text-2xl font-bold mb-6">
                   What you should do now:
@@ -149,20 +174,22 @@ export default function Step1() {
                 </p>
               </div>
 
-              <button
+              <motion.button
                 onClick={handleNextClick}
                 disabled={!image}
                 className={`w-full py-3 px-6 rounded-md text-white font-medium mt-4 ${
                   image
                     ? 'bg-[#8C9DAE] hover:bg-[#7A8A9A]'
                     : 'bg-gray-400 cursor-not-allowed'
-                } transition-colors`}>
+                } transition-colors`}
+                whileHover={image ? { scale: 1.05 } : {}}
+                whileTap={image ? { scale: 0.95 } : {}}>
                 Next Stage
-              </button>
-            </div>
+              </motion.button>
+            </motion.div>
           </div>
         </div>
-      </div>
+      </motion.div>
     </>
   );
 }
