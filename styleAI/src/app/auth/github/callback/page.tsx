@@ -1,14 +1,15 @@
 'use client';
-import { useEffect, useState } from 'react';
+import { useEffect, useState, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { useAuthStore } from '@/store/authStore';
 import { User } from '@/types/user';
 
-export default function GitHubCallbackPage() {
+function GitHubCallbackContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const [error, setError] = useState<string | null>(null);
   const { login } = useAuthStore();
+  
   useEffect(() => {
     const token = searchParams.get('token');
     if (!token) {
@@ -41,7 +42,7 @@ export default function GitHubCallbackPage() {
     };
 
     handleGitHubCallback();
-  }, [searchParams.get('token'), router, login]);
+  }, [searchParams, router, login]);
 
   if (error) {
     return (
@@ -65,5 +66,19 @@ export default function GitHubCallbackPage() {
         <div className="text-center">处理GitHub登录中...</div>
       </div>
     </div>
+  );
+}
+
+export default function GitHubCallbackPage() {
+  return (
+    <Suspense fallback={
+      <div className="min-h-screen flex items-center justify-center bg-gray-100 p-4">
+        <div className="bg-white rounded-lg shadow-lg p-6">
+          <div className="text-center">加载中...</div>
+        </div>
+      </div>
+    }>
+      <GitHubCallbackContent />
+    </Suspense>
   );
 }
