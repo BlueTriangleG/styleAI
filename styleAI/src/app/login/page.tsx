@@ -61,7 +61,7 @@ export default function LoginPage() {
     <div className="min-h-screen flex items-center justify-center bg-black p-4">
       <div className="w-full max-w-md bg-[#1c1c1c] rounded-xl shadow-lg p-8">
         <div className="mb-6 text-center">
-          <h1 className="text-xl font-normal text-white">Welcome to Endless Tools!</h1>
+          <h1 className="text-xl font-normal text-white">Welcome to Style AI!</h1>
           <p className="text-sm text-gray-400 mt-1">Sign up now and enjoy a 7-day free trial.</p>
         </div>
         
