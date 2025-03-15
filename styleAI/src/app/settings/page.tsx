@@ -1,93 +1,98 @@
-'use client';
+"use client";
 
-import { useState } from 'react';
+import { useUser } from "@clerk/nextjs";
+import { useEffect } from "react";
+import { useRouter } from "next/navigation";
 
 export default function SettingsPage() {
-  const [settings, setSettings] = useState({
-    notifications: true,
-    theme: 'light',
-    language: 'zh',
-  });
+  const { user, isLoaded } = useUser();
+  const router = useRouter();
 
-  const handleToggleNotifications = () => {
-    setSettings((prev) => ({
-      ...prev,
-      notifications: !prev.notifications,
-    }));
-  };
+  // Redirect if not authenticated
+  useEffect(() => {
+    if (isLoaded && !user) {
+      router.push("/login");
+    }
+  }, [isLoaded, user, router]);
 
-  const handleThemeChange = (theme: string) => {
-    setSettings((prev) => ({
-      ...prev,
-      theme,
-    }));
-  };
-
-  const handleLanguageChange = (language: string) => {
-    setSettings((prev) => ({
-      ...prev,
-      language,
-    }));
-  };
+  // Show loading state
+  if (!isLoaded) {
+    return (
+      <div className="flex min-h-screen items-center justify-center">
+        <p className="text-lg">Loading...</p>
+      </div>
+    );
+  }
 
   return (
-    <div className="p-4">
-      <h1 className="text-2xl font-bold mb-6">Settings</h1>
+    <div className="container mx-auto p-4">
+      <h1 className="mb-6 text-3xl font-bold">Settings</h1>
 
-      <div className="space-y-6">
-        <div className="flex items-center justify-between">
-          <div>
-            <h3 className="text-lg font-medium">Notifications</h3>
-            <p className="text-sm text-gray-500">
-              Receive system notifications and updates
-            </p>
+      <div className="grid gap-6 md:grid-cols-2">
+        <div className="rounded-lg border border-gray-200 bg-white p-6 shadow-md">
+          <h2 className="mb-4 text-xl font-semibold">Profile Information</h2>
+          <div className="space-y-4">
+            <div>
+              <label className="block text-sm font-medium text-gray-700">Name</label>
+              <p className="mt-1 text-gray-900">{user?.fullName || "Not set"}</p>
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700">Email</label>
+              <p className="mt-1 text-gray-900">
+                {user?.primaryEmailAddress?.emailAddress || "Not set"}
+              </p>
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700">Username</label>
+              <p className="mt-1 text-gray-900">{user?.username || "Not set"}</p>
+            </div>
           </div>
-          <button
-            onClick={handleToggleNotifications}
-            className={`relative inline-flex h-6 w-11 items-center rounded-full ${
-              settings.notifications ? 'bg-blue-600' : 'bg-gray-200'
-            }`}>
-            <span
-              className={`inline-block h-4 w-4 transform rounded-full bg-white transition ${
-                settings.notifications ? 'translate-x-6' : 'translate-x-1'
-              }`}
-            />
-          </button>
-        </div>
-
-        <div>
-          <h3 className="text-lg font-medium mb-2">Theme</h3>
-          <div className="flex space-x-4">
-            <button
-              onClick={() => handleThemeChange('light')}
-              className={`px-4 py-2 rounded-md ${
-                settings.theme === 'light'
-                  ? 'bg-blue-600 text-white'
-                  : 'bg-gray-100'
-              }`}>
-              Light
-            </button>
-            <button
-              onClick={() => handleThemeChange('dark')}
-              className={`px-4 py-2 rounded-md ${
-                settings.theme === 'dark'
-                  ? 'bg-blue-600 text-white'
-                  : 'bg-gray-100'
-              }`}>
-              Dark
-            </button>
+          <div className="mt-6">
+            <a
+              href="https://accounts.clerk.dev/user/profile"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-block rounded-md bg-blue-600 px-4 py-2 text-white hover:bg-blue-700"
+            >
+              Edit Profile
+            </a>
           </div>
         </div>
 
-        <div>
-          <h3 className="text-lg font-medium mb-2">Language</h3>
-          <select
-            value={settings.language}
-            onChange={(e) => handleLanguageChange(e.target.value)}
-            className="block w-full max-w-xs rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500">
-            <option value="zh">Chinese</option>
-            <option value="en">English</option>
-          </select>
+        <div className="rounded-lg border border-gray-200 bg-white p-6 shadow-md">
+          <h2 className="mb-4 text-xl font-semibold">Account Settings</h2>
+          <div className="space-y-4">
+            <div>
+              <label className="block text-sm font-medium text-gray-700">
+                Account Created
+              </label>
+              <p className="mt-1 text-gray-900">
+                {user?.createdAt
+                  ? new Date(user.createdAt).toLocaleDateString()
+                  : "Unknown"}
+              </p>
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700">
+                Last Updated
+              </label>
+              <p className="mt-1 text-gray-900">
+                {user?.updatedAt
+                  ? new Date(user.updatedAt).toLocaleDateString()
+                  : "Unknown"}
+              </p>
+            </div>
+          </div>
+          <div className="mt-6">
+            <a
+              href="https://accounts.clerk.dev/user/security"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-block rounded-md bg-blue-600 px-4 py-2 text-white hover:bg-blue-700"
+            >
+              Security Settings
+            </a>
+          </div>
         </div>
       </div>
     </div>

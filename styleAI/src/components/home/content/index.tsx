@@ -6,11 +6,11 @@ import CircularGallery from '@/components/ui/CircularGallery';
 import BounceCards from '@/components/ui/BounceCards';
 
 const images = [
-  'gallery/outfit1.png',
-  'gallery/outfit2.png',
-  'gallery/outfit3.png',
-  'gallery/outfit4.png',
-  'gallery/outfit1.png',
+  process.env.NEXT_PUBLIC_BASE_PATH + '/gallery/outfit1.png',
+  process.env.NEXT_PUBLIC_BASE_PATH + '/gallery/outfit2.png',
+  process.env.NEXT_PUBLIC_BASE_PATH + '/gallery/outfit3.png',
+  process.env.NEXT_PUBLIC_BASE_PATH + '/gallery/outfit4.png',
+  process.env.NEXT_PUBLIC_BASE_PATH + '/gallery/outfit1.png',
 ];
 
 const transformStyles = [
@@ -23,19 +23,19 @@ const transformStyles = [
 
 const galleryItems = [
   {
-    video: "gallery/test.mp4",
+    video: process.env.NEXT_PUBLIC_BASE_PATH + "/gallery/test.mp4",
     text: 'Video 1',
   },
   {
-    video: "gallery/test.mp4",
+    video: process.env.NEXT_PUBLIC_BASE_PATH + "/gallery/test.mp4",
     text: 'Video 1',
   },
   {
-    video: "gallery/test.mp4",
+    video: process.env.NEXT_PUBLIC_BASE_PATH + "/gallery/test.mp4",
     text: 'Video 1',
   },
   {
-    video: "gallery/test.mp4",
+    video: process.env.NEXT_PUBLIC_BASE_PATH + "/gallery/test.mp4",
     text: 'Video 1',
   }
 ];
@@ -107,7 +107,7 @@ export function Hero() {
               <p className="text-[#2D4B37] font-medium transition-all group-hover:text-[#FF9999]">Explore More</p>
               <div className="mt-2 animate-bounce transition-transform group-hover:scale-110">
                 <Image 
-                  src="/doubledown.svg" 
+                  src={process.env.NEXT_PUBLIC_BASE_PATH + "/doubledown.svg"} 
                   alt="Scroll Down" 
                   width={40} 
                   height={40} 
