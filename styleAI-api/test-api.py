@@ -146,13 +146,15 @@ def test_wear_suit_pictures():
         return False
 
 def main():
+    # 在函数开始处声明全局变量
+    global API_URL, KNOWN_JOB_ID
+    
     parser = argparse.ArgumentParser(description="Test the StyleAI API server")
     parser.add_argument("--image", help="Path to an image file for testing image processing")
     parser.add_argument("--url", help="API server URL (default: http://localhost:5001)", default="http://localhost:5001")
     parser.add_argument("--job-id", help=f"Job ID for testing (default: {KNOWN_JOB_ID})", default=KNOWN_JOB_ID)
     args = parser.parse_args()
     
-    global API_URL, KNOWN_JOB_ID
     API_URL = args.url
     KNOWN_JOB_ID = args.job_id
     
