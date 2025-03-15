@@ -7,19 +7,19 @@ import BounceCards from '@/components/ui/BounceCards';
 import ScrollGallery from '@/components/ScrollGallery';
 
 const images = [
-  "gallery/outfit1.png",
-  "gallery/outfit2.png",
-  "gallery/outfit3.png",
-  "gallery/outfit4.png",
-  "gallery/outfit1.png",
+  'gallery/outfit1.png',
+  'gallery/outfit2.png',
+  'gallery/outfit3.png',
+  'gallery/outfit4.png',
+  'gallery/outfit1.png',
 ];
 
 const transformStyles = [
-  "rotate(5deg) translate(-150px)",
-  "rotate(0deg) translate(-70px)",
-  "rotate(-5deg)",
-  "rotate(5deg) translate(70px)",
-  "rotate(-5deg) translate(150px)"
+  'rotate(5deg) translate(-150px)',
+  'rotate(0deg) translate(-70px)',
+  'rotate(-5deg)',
+  'rotate(5deg) translate(70px)',
+  'rotate(-5deg) translate(150px)',
 ];
 
 const galleryItems = [
@@ -70,7 +70,7 @@ export function Hero() {
   }, []);
 
   return (
-    <div 
+    <div
       ref={containerRef}
       className="w-screen h-screen overflow-y-auto scroll-smooth snap-y snap-mandatory no-scrollbar"
     >
@@ -121,7 +121,7 @@ export function Hero() {
       </section>
 
       {/* Usecase Section - Second Screen */}
-      <section 
+      <section
         ref={usecaseRef}
         className="w-screen h-screen pt-20 flex justify-center items-center snap-start"
       >

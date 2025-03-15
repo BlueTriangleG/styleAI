@@ -335,7 +335,7 @@ class Media {
         console.error('Error playing video:', err);
       });
     };
-    
+
     // Add error handling
     video.onerror = () => {
       console.error(`Failed to load video: ${this.video}`);
@@ -514,10 +514,10 @@ class App {
   }
 
   createRenderer() {
-    this.renderer = new Renderer({ 
+    this.renderer = new Renderer({
       alpha: true,
       antialias: true,
-      dpr: Math.min(window.devicePixelRatio, 2)
+      dpr: Math.min(window.devicePixelRatio, 2),
     });
     this.gl = this.renderer.gl;
     this.gl.clearColor(0, 0, 0, 0);
@@ -742,7 +742,7 @@ export default function CircularGallery({
       style={{
         imageRendering: 'auto',
         WebkitFontSmoothing: 'antialiased',
-        MozOsxFontSmoothing: 'grayscale'
+        MozOsxFontSmoothing: 'grayscale',
       }}
       ref={containerRef}
     />
