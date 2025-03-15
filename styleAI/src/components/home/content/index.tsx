@@ -4,7 +4,7 @@ import Image from 'next/image';
 import { useRouter } from 'next/navigation';
 import CircularGallery from '@/components/ui/CircularGallery';
 import BounceCards from '@/components/ui/BounceCards';
-
+import ScrollGallery from '@/components/ScrollGallery';
 
 const images = [
   "gallery/outfit1.png",
@@ -95,11 +95,6 @@ export function Hero() {
             </div>
             
             <div className="flex justify-center">
-              {/* <button
-                className="bg-[#2D4B37] text-white px-8 py-3 rounded-md text-lg font-medium hover:bg-[#1A3326] transition-colors"
-                onClick={scrollToUsecase}>
-                Learn More
-              </button> */}
               <div 
                 className="flex flex-col items-center cursor-pointer mt-12 group"
                 onClick={scrollToUsecase}

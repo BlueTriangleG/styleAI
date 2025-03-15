@@ -240,7 +240,11 @@ class Media {
   }
 
   createShader() {
-    const texture = new Texture(this.gl, { generateMipmaps: false });
+    const texture = new Texture(this.gl, { 
+      generateMipmaps: true,
+      minFilter: this.gl.LINEAR_MIPMAP_LINEAR,
+      magFilter: this.gl.LINEAR
+    });
     this.program = new Program(this.gl, {
       depthTest: false,
       depthWrite: false,
@@ -268,10 +272,9 @@ class Media {
         uniform float uBorderRadius;
         varying vec2 vUv;
         
-        // Rounded box SDF for UV space
         float roundedBoxSDF(vec2 p, vec2 b, float r) {
-          vec2 d = abs(p) - b;
-          return length(max(d, vec2(0.0))) + min(max(d.x, d.y), 0.0) - r;
+          vec2 d = abs(p) - b + vec2(r);
+          return min(max(d.x, d.y), 0.0) + length(max(d, 0.0)) - r;
         }
         
         void main() {
@@ -285,13 +288,15 @@ class Media {
           );
           vec4 color = texture2D(tMap, uv);
           
-          // Apply rounded corners (assumes vUv in [0,1])
-          float d = roundedBoxSDF(vUv - 0.5, vec2(0.5 - uBorderRadius), uBorderRadius);
-          if(d > 0.0) {
+          float d = roundedBoxSDF(vUv - 0.5, vec2(0.5), uBorderRadius);
+          
+          float alpha = 1.0 - smoothstep(-0.002, 0.002, d);
+          
+          if(alpha < 0.01) {
             discard;
           }
           
-          gl_FragColor = vec4(color.rgb, 1.0);
+          gl_FragColor = vec4(color.rgb, alpha);
         }
       `,
       uniforms: {
@@ -306,14 +311,28 @@ class Media {
     });
     const img = new Image();
     img.crossOrigin = 'anonymous';
-    img.src = this.image;
+    
+    // High quality image loading
+    if ('imageSmoothingQuality' in this.gl) {
+      (this.gl as any).imageSmoothingQuality = 'high';
+    }
+    
     img.onload = () => {
       texture.image = img;
+      // Update texture when image loads
+      texture.needsUpdate = true;
       this.program.uniforms.uImageSizes.value = [
         img.naturalWidth,
         img.naturalHeight,
       ];
     };
+    
+    // Add error handling
+    img.onerror = () => {
+      console.error(`Failed to load image: ${this.image}`);
+    };
+    
+    img.src = this.image;
   }
 
   createMesh() {
@@ -473,7 +492,11 @@ class App {
   }
 
   createRenderer() {
-    this.renderer = new Renderer({ alpha: true });
+    this.renderer = new Renderer({ 
+      alpha: true,
+      antialias: true,
+      dpr: Math.min(window.devicePixelRatio, 2)
+    });
     this.gl = this.renderer.gl;
     this.gl.clearColor(0, 0, 0, 0);
     this.container.appendChild(this.renderer.gl.canvas as HTMLCanvasElement);
@@ -714,6 +737,11 @@ export default function CircularGallery({
   return (
     <div
       className="w-full h-full overflow-hidden cursor-grab active:cursor-grabbing"
+      style={{
+        imageRendering: 'auto',
+        WebkitFontSmoothing: 'antialiased',
+        MozOsxFontSmoothing: 'grayscale'
+      }}
       ref={containerRef}
     />
   );
