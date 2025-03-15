@@ -2,6 +2,9 @@
   $bg-color: #FFFFFF;
   $text-color: #2D4B37;
   $hover-color: #1F3526;
+  $button-bg: #2D4B37;
+  $button-text: #FFFFFF;
+  $button-hover: #1F3526;
 
   background-color: $bg-color;
   padding: 0.7rem;
@@ -31,7 +34,8 @@
 
   .nav-links {
     display: flex;
-    gap: 3rem;
+    align-items: center;
+    gap: 2rem;
 
     a {
       color: $text-color;
@@ -43,6 +47,22 @@
       &:hover {
         color: $hover-color;
       }
+    }
+  }
+
+  .authButton {
+    background-color: $button-bg;
+    color: $button-text;
+    border: none;
+    border-radius: 4px;
+    padding: 0.5rem 1rem;
+    font-size: 0.875rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: background-color 0.3s;
+
+    &:hover {
+      background-color: $button-hover;
     }
   }
 }
