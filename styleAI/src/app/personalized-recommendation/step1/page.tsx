@@ -41,7 +41,7 @@ export default function Step1() {
           await navigator.mediaDevices.getUserMedia({ video: true });
           setHasCamera(true);
 
-          // 获取所有可用的视频输入设备
+          // Get all available video input devices
           if (navigator.mediaDevices.enumerateDevices) {
             const devices = await navigator.mediaDevices.enumerateDevices();
             const videoDevices = devices.filter(
@@ -49,7 +49,7 @@ export default function Step1() {
             );
             setCameras(videoDevices);
 
-            // 如果有摄像头，默认选择第一个
+            // If camera exists, select the first one by default
             if (videoDevices.length > 0) {
               setSelectedCamera(videoDevices[0].deviceId);
             }
@@ -64,7 +64,7 @@ export default function Step1() {
     checkCamera();
   }, []);
 
-  // 加载已处理的图片信息
+  // Load processed image information
   useEffect(() => {
     if (typeof window !== 'undefined') {
       const images = getProcessedImagesInfo();
@@ -74,43 +74,43 @@ export default function Step1() {
 
   // Handle file selection
   const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    console.log('文件选择事件触发', e.target.files);
+    console.log('File selection event triggered', e.target.files);
     const file = e.target.files?.[0];
     if (!file) {
-      console.log('没有选择文件');
+      console.log('No file selected');
       return;
     }
 
     setIsUploading(true);
 
     try {
-      // 直接处理File对象
+      // Process File object directly
       console.log(
-        `处理文件: ${file.name}, 类型: ${file.type}, 大小: ${(
+        `Processing file: ${file.name}, type: ${file.type}, size: ${(
           file.size /
           (1024 * 1024)
         ).toFixed(2)}MB`
       );
 
-      // 使用客户端压缩方法直接处理File对象
+      // Use client-side compression method to process File object directly
       const processedImage = await processImageClient(file, 5);
 
-      // 更新已处理图片列表
+      // Update processed image list
       const images = getProcessedImagesInfo();
       setProcessedImages(images);
 
       setImage(processedImage);
       setIsUploading(false);
 
-      // 清空input的value，确保可以重新选择相同的文件
+      // Clear input value to ensure the same file can be selected again
       if (fileInputRef.current) {
         fileInputRef.current.value = '';
       }
     } catch (error) {
-      console.error('处理图片时出错:', error);
+      console.error('Error processing image:', error);
       setIsUploading(false);
 
-      // 出错时也清空input
+      // Also clear input on error
       if (fileInputRef.current) {
         fileInputRef.current.value = '';
       }
@@ -119,22 +119,22 @@ export default function Step1() {
 
   // Trigger file input click
   const handleUploadClick = () => {
-    console.log('触发文件上传点击事件');
-    // 防止重复触发
+    console.log('Triggering file upload click event');
+    // Prevent multiple triggers
     if (fileInputRef.current) {
       fileInputRef.current.click();
     }
   };
 
-  // 切换摄像头
+  // Switch camera
   const switchCamera = async () => {
-    // 切换前后摄像头
+    // Toggle between front and back cameras
     const newFacingMode = facingMode === 'user' ? 'environment' : 'user';
     setFacingMode(newFacingMode);
 
-    // 如果有多个摄像头，尝试找到对应的设备
+    // If there are multiple cameras, try to find the corresponding device
     if (cameras.length > 1) {
-      // 找到下一个摄像头
+      // Find the next camera
       const currentIndex = cameras.findIndex(
         (camera) => camera.deviceId === selectedCamera
       );
@@ -142,11 +142,11 @@ export default function Step1() {
       setSelectedCamera(cameras[nextIndex].deviceId);
     }
 
-    // 重新打开摄像头
+    // Restart camera
     await startCamera(newFacingMode);
   };
 
-  // 选择特定摄像头
+  // Select specific camera
   const handleCameraChange = async (
     e: React.ChangeEvent<HTMLSelectElement>
   ) => {
@@ -155,7 +155,7 @@ export default function Step1() {
     await startCamera(facingMode, deviceId);
   };
 
-  // 启动摄像头
+  // Start camera
   const startCamera = async (
     facingMode: 'user' | 'environment' = 'user',
     deviceId?: string
@@ -165,18 +165,18 @@ export default function Step1() {
         streamRef.current.getTracks().forEach((track) => track.stop());
       }
 
-      // 构建视频约束
+      // Build video constraints
       const videoConstraints: MediaTrackConstraints = {
         width: { ideal: 1920 },
         height: { ideal: 1080 },
         aspectRatio: 3 / 4,
       };
 
-      // 如果指定了设备ID，优先使用设备ID
+      // If device ID is specified, use it with priority
       if (deviceId) {
         videoConstraints.deviceId = { exact: deviceId };
       } else {
-        // 否则使用facingMode
+        // Otherwise use facingMode
         videoConstraints.facingMode = facingMode;
       }
 
@@ -214,42 +214,42 @@ export default function Step1() {
       const canvas = canvasRef.current;
       const videoDiv = videoDivRef.current;
 
-      // 获取视频容器的尺寸
+      // Get video container dimensions
       const containerWidth = videoDiv.clientWidth;
       const containerHeight = videoDiv.clientHeight;
 
-      // 设置canvas尺寸为容器尺寸，保持长方形比例
+      // Set canvas dimensions to container dimensions, maintaining rectangular ratio
       canvas.width = containerWidth;
       canvas.height = containerHeight;
 
-      // 计算视频在容器中的位置和尺寸
+      // Calculate video position and size in container
       const videoRatio = video.videoWidth / video.videoHeight;
       const containerRatio = containerWidth / containerHeight;
 
       let drawWidth, drawHeight, offsetX, offsetY;
 
       if (videoRatio > containerRatio) {
-        // 视频比容器更宽，以高度为基准
+        // Video is wider than container, use height as reference
         drawHeight = containerHeight;
         drawWidth = video.videoWidth * (containerHeight / video.videoHeight);
         offsetX = (containerWidth - drawWidth) / 2;
         offsetY = 0;
       } else {
-        // 视频比容器更高，以宽度为基准
+        // Video is taller than container, use width as reference
         drawWidth = containerWidth;
         drawHeight = video.videoHeight * (containerWidth / video.videoWidth);
         offsetX = 0;
         offsetY = (containerHeight - drawHeight) / 2;
       }
 
-      // 绘制视频帧到canvas
+      // Draw video frame to canvas
       const context = canvas.getContext('2d');
       if (context) {
-        // 先清空canvas
+        // Clear canvas first
         context.fillStyle = '#FFFFFF';
         context.fillRect(0, 0, canvas.width, canvas.height);
 
-        // 绘制视频帧
+        // Draw video frame
         context.drawImage(
           video,
           0,
@@ -262,24 +262,24 @@ export default function Step1() {
           drawHeight
         );
 
-        // 转换为数据URL
+        // Convert to data URL
         const photoDataUrl = canvas.toDataURL('image/jpeg', 0.95);
 
         try {
-          // 使用新的图片处理功能处理拍照图片
+          // Use new image processing feature to process photo
           const processedImage = await processImageClient(photoDataUrl, 5);
 
-          // 更新已处理图片列表
+          // Update processed image list
           const images = getProcessedImagesInfo();
           setProcessedImages(images);
 
           setImage(processedImage);
         } catch (error) {
-          console.error('处理拍照图片时出错:', error);
-          setImage(photoDataUrl); // 如果处理失败，使用原始图片
+          console.error('Error processing photo:', error);
+          setImage(photoDataUrl); // If processing fails, use original image
         }
 
-        // 关闭摄像头
+        // Close camera
         handleCloseCamera();
       }
     }
@@ -309,27 +309,39 @@ export default function Step1() {
       // Store the image in session storage or state management
       if (typeof window !== 'undefined') {
         // Only access sessionStorage in browser environment
-        sessionStorage.setItem('userImage', image);
+        try {
+          // 确保清除之前的数据
+          sessionStorage.removeItem('userImage');
+          // 存储新的图像数据
+          sessionStorage.setItem('userImage', image);
+          console.log('图像已成功存储到sessionStorage');
+        } catch (error) {
+          console.error('存储图像到sessionStorage时出错:', error);
+        }
       }
 
       // Start transition animation
       setIsTransitioning(true);
 
-      // Navigate to the loading page after animation completes
+      // 延长动画时间，确保有足够时间进行过渡
       setTimeout(() => {
-        router.push('/personalized-recommendation/loading');
-      }, 500); // Match this with animation duration
+        // 使用replace而不是push，避免浏览器历史记录问题
+        router.replace('/personalized-recommendation/loading');
+      }, 800); // 增加到800ms，给动画更多时间
+    } else {
+      // 如果没有图像，显示提示
+      alert('请先上传或拍摄一张照片');
     }
   };
 
-  // 下载当前图片
+  // Download current image
   const handleDownloadImage = () => {
     if (image) {
       downloadImage(image, `styleAI_image_${new Date().getTime()}.jpg`);
     }
   };
 
-  // 显示/隐藏已处理图片列表
+  // Show/hide processed image list
   const toggleProcessedImages = () => {
     setShowProcessedImages(!showProcessedImages);
   };
@@ -420,7 +432,7 @@ export default function Step1() {
                   ref={videoDivRef}
                   className="relative w-full flex flex-col items-center justify-center"
                   style={{
-                    height: 'calc(100% - 60px)', // 减去底部按钮的高度
+                    height: 'calc(100% - 60px)', // Subtract bottom button height
                     maxHeight: 'calc(100vh - 250px)',
                   }}>
                   <div
@@ -542,7 +554,7 @@ export default function Step1() {
                   <div className="absolute bottom-4 left-1/2 transform -translate-x-1/2 flex space-x-3">
                     <button
                       onClick={(e) => {
-                        e.stopPropagation(); // 阻止事件冒泡
+                        e.stopPropagation(); // Prevent event bubbling
                         handleUploadClick();
                       }}
                       className="bg-gray-200 hover:bg-gray-300 text-gray-800 font-semibold py-2 px-4 rounded-md shadow-md font-inter transition-all duration-200 hover:scale-105">
@@ -629,7 +641,7 @@ export default function Step1() {
                       <div className="flex flex-col sm:flex-row space-y-3 sm:space-y-0 sm:space-x-4 mt-2">
                         <button
                           onClick={(e) => {
-                            e.stopPropagation(); // 阻止事件冒泡
+                            e.stopPropagation(); // Prevent event bubbling
                             handleUploadClick();
                           }}
                           className="bg-[#84a59d] hover:bg-[#6b8c85] text-white font-semibold py-2 px-6 rounded-md shadow-md font-inter transition-all duration-200 hover:scale-105">
@@ -696,8 +708,10 @@ export default function Step1() {
                         d="M9 5l7 7-7 7"
                       />
                     </svg>
-                    {showProcessedImages ? '隐藏处理记录' : '显示处理记录'} (
-                    {processedImages.length})
+                    {showProcessedImages
+                      ? 'Hide processing record'
+                      : 'Show processing record'}{' '}
+                    ({processedImages.length})
                   </button>
 
                   {showProcessedImages && (
@@ -705,9 +719,9 @@ export default function Step1() {
                       <table className="w-full">
                         <thead>
                           <tr className="border-b border-gray-200">
-                            <th className="text-left py-1">时间</th>
-                            <th className="text-left py-1">文件名</th>
-                            <th className="text-right py-1">大小</th>
+                            <th className="text-left py-1">Time</th>
+                            <th className="text-left py-1">File Name</th>
+                            <th className="text-right py-1">Size</th>
                           </tr>
                         </thead>
                         <tbody>

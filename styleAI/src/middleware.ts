@@ -1,71 +1,75 @@
 import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
-import * as jose from 'jose';
+import { getToken, parseToken } from './lib/auth';
 
-// 不需要验证的路由
-const publicPaths = [
+// Routes that don't require authentication
+const publicRoutes = [
   '/login',
+  '/register',
+  '/forgot-password',
+  '/reset-password',
   '/api/auth/login',
-  '/api/auth/github',
-  '/api/auth/github/callback',
+  '/api/auth/register',
+  '/api/auth/refresh',
+  '/personalized-recommendation',
+  '/personalized-recommendation/step1',
+  '/personalized-recommendation/loading',
+  '/personalized-recommendation/step2',
 ];
 
 export function middleware(request: NextRequest) {
-  const { pathname } = request.nextUrl;
-  console.log('pathname', pathname);
+  // Check if it's a public route
+  const isPublicRoute = publicRoutes.some((route) =>
+    request.nextUrl.pathname.startsWith(route)
+  );
 
-  // 检查是否是公开路由
-  if (publicPaths.some((path) => pathname.startsWith(path))) {
-    return NextResponse.next();
-  }
+  if (isPublicRoute) return NextResponse.next();
 
-  // 获取认证token
+  // Get authentication token
   const token = request.cookies.get('auth_token')?.value;
-  console.log(request);
-  console.log('token', token);
 
   if (!token) {
-    // 如果是API请求，返回401状态码
-    if (pathname.startsWith('/api/')) {
-      return NextResponse.json(
-        { error: 'Unauthorized access' },
-        { status: 401 }
+    // If it's an API request, return 401 status code
+    if (request.nextUrl.pathname.startsWith('/api/')) {
+      return new NextResponse(
+        JSON.stringify({ message: 'Authentication required' }),
+        { status: 401, headers: { 'content-type': 'application/json' } }
       );
     }
-    // 否则重定向到登录页面
-    return NextResponse.redirect(new URL('/login', request.url));
+
+    // Otherwise redirect to login page
+    const loginUrl = new URL('/login', request.url);
+    loginUrl.searchParams.set('from', request.nextUrl.pathname);
+    return NextResponse.redirect(loginUrl);
   }
 
+  // Validate token
   try {
-    // 验证token
-    console.log('Starting token verification:', token);
-    try {
-      const secret = new TextEncoder().encode(process.env.JWT_SECRET!);
-      const decoded = jose.jwtVerify(token, secret);
-      console.log('Token verification successful, decoded result:', decoded);
-    } catch (verifyError) {
-      console.error('Token verification failed:', verifyError);
-      throw verifyError;
+    const payload = parseToken(token);
+    const currentTime = Math.floor(Date.now() / 1000);
+
+    if (!payload || !payload.exp || payload.exp < currentTime) {
+      // Token is invalid or expired
+      const response = NextResponse.redirect(new URL('/login', request.url));
+      response.cookies.delete('auth_token');
+      return response;
     }
-    console.log('Verification process completed');
+
     return NextResponse.next();
   } catch (error) {
-    console.error('Middleware error:', error);
-    // token无效
-    if (pathname.startsWith('/api/')) {
-      return NextResponse.json({ error: 'Invalid token' }, { status: 401 });
-    }
-    return NextResponse.redirect(new URL('/login', request.url));
+    // Invalid token
+    const response = NextResponse.redirect(new URL('/login', request.url));
+    response.cookies.delete('auth_token');
+    return response;
   }
 }
 
-// 配置需要进行中间件处理的路由
+// Configure routes that need middleware processing
 export const config = {
   matcher: [
-    // '/', // 根路径
+    // '/', // Root path
     '/dashboard/:path*',
-    '/settings/:path*',
-    '/personalized-recommendation/:path*',
-    '/api/((?!auth/login|auth/github).*)',
+    '/profile/:path*',
+    '/api/:path*',
   ],
 };
