@@ -1,17 +1,31 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import Image from 'next/image';
 import { RecommendationHeader } from '@/components/recommendation/Header';
-import { motion } from 'framer-motion';
+import { motion, useScroll, useTransform, MotionValue } from 'framer-motion';
 import LiquidChrome from '@/components/background/LiquidChrome';
 
 export default function Step2() {
   const [userImage, setUserImage] = useState<string | null>(null);
-  const [isTransitioning, setIsTransitioning] = useState(false);
   const [typingComplete, setTypingComplete] = useState<number>(0);
+  const [showScrollIndicator, setShowScrollIndicator] = useState(false);
+  const [isPageLoading, setIsPageLoading] = useState(true); // 页面加载状态
+  const [enableScrollEffects, setEnableScrollEffects] = useState(false); // 控制滚动效果
   const router = useRouter();
+  const scrollRef = useRef<HTMLDivElement>(null);
+  const recommendationsRef = useRef<HTMLDivElement>(null);
+
+  // 滚动动画控制 - 始终创建这些hooks，不管enableScrollEffects的值
+  const { scrollYProgress } = useScroll({
+    target: scrollRef,
+    offset: ['start start', 'end start'],
+  });
+
+  // 创建transform
+  const opacityTransform = useTransform(scrollYProgress, [0, 0.3], [1, 0]);
+  const scaleTransform = useTransform(scrollYProgress, [0, 0.3], [1, 0.95]);
 
   // 分析报告内容
   const analysisPoints = [
@@ -37,6 +51,36 @@ export default function Step2() {
     },
   ];
 
+  // 风格推荐内容
+  const styleRecommendations = [
+    {
+      title: 'Business Casual',
+      description:
+        'Based on your facial features and body type, business casual attire will complement your appearance perfectly. Focus on well-fitted blazers, button-down shirts, and tailored pants.',
+      examples: ['Style Example 1', 'Style Example 2', 'Style Example 3'],
+    },
+    {
+      title: 'Smart Casual',
+      description:
+        'For a more relaxed yet polished look, smart casual options would work well with your features. Consider premium t-shirts, chinos, and casual jackets.',
+      examples: ['Style Example 1', 'Style Example 2', 'Style Example 3'],
+    },
+    {
+      title: 'Formal Wear',
+      description:
+        'For special occasions, your features would be enhanced by well-tailored suits in navy or charcoal. Consider slim-fit designs with subtle patterns.',
+      examples: ['Style Example 1', 'Style Example 2', 'Style Example 3'],
+    },
+  ];
+
+  // 分析结果
+  const analysisResults = {
+    faceShape: 'Oval',
+    skinTone: 'Warm',
+    bodyType: 'Athletic',
+    styleMatch: 'Business Casual',
+  };
+
   useEffect(() => {
     // Only access sessionStorage in browser environment
     if (typeof window !== 'undefined') {
@@ -49,32 +93,53 @@ export default function Step2() {
       }
 
       setUserImage(storedImage);
-    }
 
-    // 设置打字动画的定时器
+      // 页面内容加载完成
+      setIsPageLoading(false);
+
+      // 延迟启用滚动效果，确保页面内容先显示
+      const scrollEffectsTimer = setTimeout(() => {
+        setEnableScrollEffects(true);
+      }, 1500);
+
+      return () => clearTimeout(scrollEffectsTimer);
+    }
+  }, [router]);
+
+  // 设置打字动画
+  useEffect(() => {
+    if (isPageLoading) return;
+
     const typingTimer = setInterval(() => {
       setTypingComplete((prev) => {
         if (prev < analysisPoints.length) {
           return prev + 1;
         } else {
           clearInterval(typingTimer);
+          // 所有分析点显示完成后，显示滚动指示器
+          setShowScrollIndicator(true);
           return prev;
         }
       });
     }, 1000); // 每秒显示一个分析点
 
     return () => clearInterval(typingTimer);
-  }, [router, analysisPoints.length]);
+  }, [isPageLoading, analysisPoints.length]);
 
-  // Handle next button click
-  const handleNextClick = () => {
-    // Start transition animation
-    setIsTransitioning(true);
+  // 滚动到推荐部分
+  const scrollToRecommendations = () => {
+    if (recommendationsRef.current) {
+      recommendationsRef.current.scrollIntoView({ behavior: 'smooth' });
+    }
+  };
 
-    // Navigate to the next step after animation completes
-    setTimeout(() => {
-      router.push('/personalized-recommendation/step3');
-    }, 500); // Match this with animation duration
+  // 计算最终的样式值
+  const getOpacityValue = () => {
+    return enableScrollEffects ? opacityTransform : 1;
+  };
+
+  const getScaleValue = () => {
+    return enableScrollEffects ? scaleTransform : 1;
   };
 
   // Animation variants
@@ -131,125 +196,311 @@ export default function Step2() {
     },
   };
 
+  const scrollIndicatorVariants = {
+    initial: { opacity: 0, y: 10 },
+    animate: {
+      opacity: [0, 1, 0],
+      y: [0, 10, 0],
+      transition: {
+        duration: 2,
+        repeat: Infinity,
+        repeatType: 'loop' as const,
+      },
+    },
+  };
+
   return (
     <>
       <RecommendationHeader />
-      <motion.div
-        className="min-h-screen pt-20 relative"
-        initial="initial"
-        animate={isTransitioning ? 'exit' : 'animate'}
-        variants={pageVariants}
-        transition={{ duration: 0.5 }}>
-        {/* 流动背景 */}
-        <div className="absolute inset-0 z-0 overflow-hidden">
-          <LiquidChrome
-            baseColor={[0.9, 0.9, 0.9]}
-            speed={0.2}
-            amplitude={0.5}
-            frequencyX={3}
-            frequencyY={2}
-            interactive={false}
-          />
-          <div className="absolute inset-0 bg-white/10 pointer-events-none"></div>
+
+      {/* 添加页面加载指示器 */}
+      {isPageLoading && (
+        <div className="fixed inset-0 bg-white z-50 flex items-center justify-center">
+          <div className="flex flex-col items-center">
+            <svg
+              className="w-16 h-16 text-[#84a59d] animate-spin-slow mb-4"
+              viewBox="0 0 24 24">
+              <path
+                fill="currentColor"
+                d="M12,1A11,11,0,1,0,23,12,11,11,0,0,0,12,1Zm0,19a8,8,0,1,1,8-8A8,8,0,0,1,12,20Z"
+                opacity="0.25"
+              />
+              <path
+                fill="currentColor"
+                d="M12,4a8,8,0,0,1,7.89,6.7A1.53,1.53,0,0,0,21.38,12h0a1.5,1.5,0,0,0,1.48-1.75,11,11,0,0,0-21.72,0A1.5,1.5,0,0,0,2.62,12h0a1.53,1.53,0,0,0,1.49-1.3A8,8,0,0,1,12,4Z"
+              />
+            </svg>
+            <p className="text-gray-600 font-inter text-lg">
+              Loading your analysis...
+            </p>
+          </div>
         </div>
+      )}
 
-        <div className="container mx-auto px-4 py-8 relative z-10">
-          <motion.h1
-            className="text-3xl font-bold mb-8 text-center font-playfair text-gray-800"
-            variants={itemVariants}>
-            Your Personalized Analysis
-          </motion.h1>
+      <div className="relative" ref={scrollRef}>
+        {/* 第一部分：分析页面 */}
+        <motion.div
+          className="min-h-screen pt-20 relative"
+          initial={{ opacity: 1 }}
+          animate={{ opacity: 1, x: 0 }}
+          style={{
+            opacity: getOpacityValue(),
+            scale: getScaleValue(),
+          }}
+          transition={{ duration: 0.5 }}>
+          {/* 流动背景 */}
+          <div className="absolute inset-0 z-0 overflow-hidden">
+            <LiquidChrome
+              baseColor={[0.9, 0.9, 0.9]}
+              speed={0.2}
+              amplitude={0.5}
+              frequencyX={3}
+              frequencyY={2}
+              interactive={false}
+            />
+            <div className="absolute inset-0 bg-white/10 pointer-events-none"></div>
+          </div>
 
-          {userImage ? (
-            <motion.div
-              className="flex flex-col md:flex-row gap-8 max-w-6xl mx-auto"
-              variants={containerVariants}>
-              {/* 左侧 - 用户照片 */}
+          <div className="container mx-auto px-4 py-8 relative z-10">
+            <motion.h1
+              className="text-3xl font-bold mb-8 text-center font-playfair text-gray-800"
+              variants={itemVariants}>
+              Your Personalized Analysis
+            </motion.h1>
+
+            {userImage ? (
               <motion.div
-                className="w-full md:w-1/2 flex justify-center"
+                className="flex flex-col md:flex-row gap-8 max-w-6xl mx-auto"
+                variants={containerVariants}>
+                {/* 左侧 - 用户照片 */}
+                <motion.div
+                  className="w-full md:w-1/2 flex justify-center"
+                  variants={itemVariants}>
+                  <div className="relative w-full max-w-md aspect-[3/4] shadow-lg rounded-lg overflow-hidden">
+                    <Image
+                      src={userImage}
+                      alt="Your uploaded image"
+                      fill
+                      className="object-contain rounded-md"
+                    />
+                  </div>
+                </motion.div>
+
+                {/* 右侧 - 分析报告 */}
+                <motion.div className="w-full md:w-1/2" variants={itemVariants}>
+                  <div className="bg-white/60 backdrop-blur-xs p-6 rounded-lg shadow-md h-full">
+                    <h2 className="text-2xl font-bold mb-6 font-playfair text-gray-800 border-b border-gray-200 pb-2">
+                      Your Style Analysis
+                    </h2>
+
+                    <div className="space-y-6 mb-8">
+                      {analysisPoints.map((point, index) => (
+                        <motion.div
+                          key={index}
+                          initial="initial"
+                          animate={
+                            typingComplete > index ? 'animate' : 'initial'
+                          }
+                          variants={textRevealVariants}
+                          className={`transition-opacity duration-500 ${
+                            typingComplete > index ? 'opacity-100' : 'opacity-0'
+                          }`}>
+                          <h3 className="text-lg font-bold font-playfair text-gray-800 mb-2">
+                            {index + 1}. {point.title}
+                          </h3>
+                          <p className="text-gray-700 font-inter">
+                            {point.content}
+                          </p>
+                        </motion.div>
+                      ))}
+                    </div>
+
+                    {showScrollIndicator && (
+                      <div className="flex flex-col items-center mt-8">
+                        <p className="text-gray-600 font-inter mb-2">
+                          Scroll down to see your style recommendations
+                        </p>
+                        <motion.div
+                          variants={scrollIndicatorVariants}
+                          initial="initial"
+                          animate="animate"
+                          onClick={scrollToRecommendations}
+                          className="cursor-pointer">
+                          <svg
+                            xmlns="http://www.w3.org/2000/svg"
+                            width="24"
+                            height="24"
+                            viewBox="0 0 24 24"
+                            fill="none"
+                            stroke="currentColor"
+                            strokeWidth="2"
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            className="text-gray-600">
+                            <path d="M12 5v14M5 12l7 7 7-7" />
+                          </svg>
+                        </motion.div>
+                      </div>
+                    )}
+                  </div>
+                </motion.div>
+              </motion.div>
+            ) : (
+              <motion.div
+                className="flex justify-center items-center h-64"
                 variants={itemVariants}>
-                <div className="relative w-full max-w-md aspect-[3/4] shadow-lg rounded-lg overflow-hidden">
-                  <Image
-                    src={userImage}
-                    alt="Your uploaded image"
-                    fill
-                    className="object-contain rounded-md"
-                  />
+                <div className="flex flex-col items-center">
+                  <svg
+                    className="w-12 h-12 text-[#84a59d] animate-spin-slow mb-4"
+                    viewBox="0 0 24 24">
+                    <path
+                      fill="currentColor"
+                      d="M12,1A11,11,0,1,0,23,12,11,11,0,0,0,12,1Zm0,19a8,8,0,1,1,8-8A8,8,0,0,1,12,20Z"
+                      opacity="0.25"
+                    />
+                    <path
+                      fill="currentColor"
+                      d="M12,4a8,8,0,0,1,7.89,6.7A1.53,1.53,0,0,0,21.38,12h0a1.5,1.5,0,0,0,1.48-1.75,11,11,0,0,0-21.72,0A1.5,1.5,0,0,0,2.62,12h0a1.53,1.53,0,0,0,1.49-1.3A8,8,0,0,1,12,4Z"
+                    />
+                  </svg>
+                  <p className="text-gray-500 font-inter">
+                    Loading your image...
+                  </p>
                 </div>
               </motion.div>
+            )}
+          </div>
+        </motion.div>
 
-              {/* 右侧 - 分析报告 */}
-              <motion.div className="w-full md:w-1/2" variants={itemVariants}>
-                <div className="bg-white/60 backdrop-blur-xs p-6 rounded-lg shadow-md h-full">
-                  <h2 className="text-2xl font-bold mb-6 font-playfair text-gray-800 border-b border-gray-200 pb-2">
-                    Your Style Analysis
-                  </h2>
+        {/* 第二部分：风格推荐 */}
+        <div ref={recommendationsRef} className="min-h-screen bg-white pt-20">
+          <div className="container mx-auto px-4 py-8">
+            <h1 className="text-3xl font-bold mb-8 text-center font-playfair text-gray-800">
+              Your Style Recommendations
+            </h1>
 
-                  <div className="space-y-6 mb-8">
-                    {analysisPoints.map((point, index) => (
-                      <motion.div
-                        key={index}
-                        initial="initial"
-                        animate={typingComplete > index ? 'animate' : 'initial'}
-                        variants={textRevealVariants}
-                        className={`transition-opacity duration-500 ${
-                          typingComplete > index ? 'opacity-100' : 'opacity-0'
-                        }`}>
-                        <h3 className="text-lg font-bold font-playfair text-gray-800 mb-2">
-                          {index + 1}. {point.title}
+            <div className="max-w-6xl mx-auto">
+              {userImage ? (
+                <div className="flex flex-col md:flex-row gap-8">
+                  <div className="w-full md:w-1/3">
+                    <div className="sticky top-24">
+                      <div className="relative w-full aspect-[3/4] mb-4 shadow-lg rounded-lg overflow-hidden">
+                        <Image
+                          src={userImage}
+                          alt="Your uploaded image"
+                          fill
+                          className="object-contain rounded-md"
+                        />
+                      </div>
+                      <div className="bg-white/60 backdrop-blur-xs p-4 rounded-lg shadow-md">
+                        <h3 className="font-bold text-lg mb-2 font-playfair text-gray-800">
+                          Your Analysis
                         </h3>
-                        <p className="text-gray-700 font-inter">
-                          {point.content}
-                        </p>
-                      </motion.div>
-                    ))}
+                        <ul className="space-y-2 font-inter">
+                          <li className="flex justify-between">
+                            <span className="text-gray-600">Face Shape:</span>
+                            <span className="font-medium">
+                              {analysisResults.faceShape}
+                            </span>
+                          </li>
+                          <li className="flex justify-between">
+                            <span className="text-gray-600">Skin Tone:</span>
+                            <span className="font-medium">
+                              {analysisResults.skinTone}
+                            </span>
+                          </li>
+                          <li className="flex justify-between">
+                            <span className="text-gray-600">Body Type:</span>
+                            <span className="font-medium">
+                              {analysisResults.bodyType}
+                            </span>
+                          </li>
+                          <li className="flex justify-between">
+                            <span className="text-gray-600">Style Match:</span>
+                            <span className="font-medium">
+                              {analysisResults.styleMatch}
+                            </span>
+                          </li>
+                        </ul>
+                      </div>
+                    </div>
                   </div>
 
-                  <motion.button
-                    onClick={handleNextClick}
-                    className="w-full py-3 px-6 rounded-md text-white font-medium bg-[#84a59d] hover:bg-[#6b8c85] transition-colors shadow-md font-inter mt-4"
-                    whileHover={{ scale: 1.05 }}
-                    whileTap={{ scale: 0.95 }}
-                    animate={{
-                      opacity:
-                        typingComplete >= analysisPoints.length ? 1 : 0.5,
-                      pointerEvents:
-                        typingComplete >= analysisPoints.length
-                          ? 'auto'
-                          : 'none',
-                    }}
-                    transition={{ duration: 0.3 }}>
-                    View Style Recommendations
-                  </motion.button>
+                  <div className="w-full md:w-2/3">
+                    <div className="bg-white/60 backdrop-blur-xs border border-white/20 rounded-lg p-6 mb-8 shadow-md">
+                      <h2 className="text-2xl font-bold mb-4 font-playfair text-gray-800">
+                        Recommended Styles
+                      </h2>
+
+                      <div className="space-y-8">
+                        {styleRecommendations.map((style, index) => (
+                          <div
+                            key={index}
+                            className="border-b pb-6 last:border-b-0">
+                            <h3 className="text-xl font-semibold mb-3 font-playfair text-gray-800">
+                              {style.title}
+                            </h3>
+                            <p className="text-gray-700 mb-4 font-inter">
+                              {style.description}
+                            </p>
+                            <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+                              {style.examples.map((example, i) => (
+                                <div
+                                  key={i}
+                                  className="bg-gray-100 h-40 rounded-md flex items-center justify-center">
+                                  <span className="text-gray-500 font-inter">
+                                    {example}
+                                  </span>
+                                </div>
+                              ))}
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+
+                    <div className="flex justify-between">
+                      <button
+                        onClick={() =>
+                          window.scrollTo({ top: 0, behavior: 'smooth' })
+                        }
+                        className="px-6 py-3 bg-gray-200 hover:bg-gray-300 text-gray-800 font-medium rounded-md transition-colors font-inter">
+                        Back to Analysis
+                      </button>
+                      <button
+                        onClick={() => router.push('/dashboard')}
+                        className="px-6 py-3 bg-[#84a59d] hover:bg-[#6b8c85] text-white font-medium rounded-md transition-colors shadow-md font-inter">
+                        Save Recommendations
+                      </button>
+                    </div>
+                  </div>
                 </div>
-              </motion.div>
-            </motion.div>
-          ) : (
-            <motion.div
-              className="flex justify-center items-center h-64"
-              variants={itemVariants}>
-              <div className="flex flex-col items-center">
-                <svg
-                  className="w-12 h-12 text-[#84a59d] animate-spin-slow mb-4"
-                  viewBox="0 0 24 24">
-                  <path
-                    fill="currentColor"
-                    d="M12,1A11,11,0,1,0,23,12,11,11,0,0,0,12,1Zm0,19a8,8,0,1,1,8-8A8,8,0,0,1,12,20Z"
-                    opacity="0.25"
-                  />
-                  <path
-                    fill="currentColor"
-                    d="M12,4a8,8,0,0,1,7.89,6.7A1.53,1.53,0,0,0,21.38,12h0a1.5,1.5,0,0,0,1.48-1.75,11,11,0,0,0-21.72,0A1.5,1.5,0,0,0,2.62,12h0a1.53,1.53,0,0,0,1.49-1.3A8,8,0,0,1,12,4Z"
-                  />
-                </svg>
-                <p className="text-gray-500 font-inter">
-                  Loading your image...
-                </p>
-              </div>
-            </motion.div>
-          )}
+              ) : (
+                <div className="flex justify-center items-center h-64">
+                  <div className="flex flex-col items-center">
+                    <svg
+                      className="w-12 h-12 text-[#84a59d] animate-spin-slow mb-4"
+                      viewBox="0 0 24 24">
+                      <path
+                        fill="currentColor"
+                        d="M12,1A11,11,0,1,0,23,12,11,11,0,0,0,12,1Zm0,19a8,8,0,1,1,8-8A8,8,0,0,1,12,20Z"
+                        opacity="0.25"
+                      />
+                      <path
+                        fill="currentColor"
+                        d="M12,4a8,8,0,0,1,7.89,6.7A1.53,1.53,0,0,0,21.38,12h0a1.5,1.5,0,0,0,1.48-1.75,11,11,0,0,0-21.72,0A1.5,1.5,0,0,0,2.62,12h0a1.53,1.53,0,0,0,1.49-1.3A8,8,0,0,1,12,4Z"
+                      />
+                    </svg>
+                    <p className="text-gray-500 font-inter">
+                      Loading your recommendations...
+                    </p>
+                  </div>
+                </div>
+              )}
+            </div>
+          </div>
         </div>
-      </motion.div>
+      </div>
     </>
   );
 }
