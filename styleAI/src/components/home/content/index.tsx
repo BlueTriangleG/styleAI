@@ -4,7 +4,6 @@ import Image from 'next/image';
 import { useRouter } from 'next/navigation';
 import CircularGallery from '@/components/ui/CircularGallery';
 import BounceCards from '@/components/ui/BounceCards';
-import ScrollGallery from '@/components/ScrollGallery';
 
 const images = [
   'gallery/outfit1.png',
