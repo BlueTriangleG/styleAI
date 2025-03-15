@@ -1,77 +1,88 @@
 #!/usr/bin/env node
 
-const { program } = require('commander');
-const path = require('path');
-const fs = require('fs-extra');
-const inquirer = require('inquirer');
-const chalk = require('chalk');
-const ora = require('ora');
+const fs = require('fs')
+const path = require('path')
+const { execSync } = require('child_process')
+const readline = require('readline')
 
-program
-  .version(require('../package.json').version)
-  .description('创建一个基于Next.js的全栈应用模板')
-  .argument('[project-name]', '项目名称')
-  .action(async (projectName) => {
-    try {
-      // 如果没有提供项目名称，提示用户输入
-      if (!projectName) {
-        const answers = await inquirer.prompt([
-          {
-            type: 'input',
-            name: 'projectName',
-            message: '请输入项目名称:',
-            validate: (input) => {
-              if (!input) return '项目名称不能为空';
-              return true;
-            }
-          }
-        ]);
-        projectName = answers.projectName;
-      }
+const rl = readline.createInterface({
+  input: process.stdin,
+  output: process.stdout,
+})
 
-      const targetDir = path.join(process.cwd(), projectName);
-      
-      // 检查目标目录是否已存在
-      if (fs.existsSync(targetDir)) {
-        const { overwrite } = await inquirer.prompt([
-          {
-            type: 'confirm',
-            name: 'overwrite',
-            message: `目录 ${projectName} 已存在。是否覆盖？`,
-            default: false
-          }
-        ]);
-        
-        if (!overwrite) {
-          console.log(chalk.red('✖') + ' 操作取消');
-          process.exit(1);
-        }
-        await fs.remove(targetDir);
-      }
+// Get project name from command line arguments
+const args = process.argv.slice(2)
+let projectName = args[0]
 
-      const spinner = ora('正在创建项目...').start();
-
-      // 复制模板文件
-      const templateDir = path.join(__dirname, '../template');
-      await fs.copy(templateDir, targetDir);
-
-      // 修改package.json
-      const pkgPath = path.join(targetDir, 'package.json');
-      const pkg = require(pkgPath);
-      pkg.name = projectName;
-      await fs.writeJSON(pkgPath, pkg, { spaces: 2 });
-
-      spinner.succeed('项目创建成功！');
-      
-      console.log('\n执行以下命令开始开发：\n');
-      console.log(chalk.cyan(`  cd ${projectName}`));
-      console.log(chalk.cyan('  npm install'));
-      console.log(chalk.cyan('  npm run dev'));
-
-    } catch (err) {
-      console.error(chalk.red('创建项目失败：'), err);
-      process.exit(1);
+// If no project name is provided, prompt the user to enter one
+if (!projectName) {
+  rl.question('Please enter a project name: ', (answer) => {
+    if (!answer) {
+      console.error('Project name is required')
+      rl.close()
+      process.exit(1)
     }
-  });
+    projectName = answer
+    createProject(projectName)
+    rl.close()
+  })
+} else {
+  createProject(projectName)
+  rl.close()
+}
 
-program.parse(process.argv);
+function createProject (name) {
+  const targetDir = path.join(process.cwd(), name)
+
+  // Check if target directory already exists
+  if (fs.existsSync(targetDir)) {
+    console.error(`Error: Directory ${name} already exists`)
+    process.exit(1)
+  }
+
+  console.log(`Creating a new StyleAI project in ${targetDir}...`)
+
+  // Create target directory
+  fs.mkdirSync(targetDir, { recursive: true })
+
+  // Get template directory path
+  const templateDir = path.join(__dirname, '../template')
+
+  // Copy template files
+  copyDir(templateDir, targetDir)
+
+  // Modify package.json
+  const packageJsonPath = path.join(targetDir, 'package.json')
+  if (fs.existsSync(packageJsonPath)) {
+    const packageJson = JSON.parse(fs.readFileSync(packageJsonPath, 'utf8'))
+    packageJson.name = name
+    fs.writeFileSync(packageJsonPath, JSON.stringify(packageJson, null, 2))
+  }
+
+  console.log('Installing dependencies...')
+  execSync('npm install', { cwd: targetDir, stdio: 'inherit' })
+
+  console.log(`
+Project ${name} created successfully!
+
+To get started:
+  cd ${name}
+  npm run dev
+  `)
+}
+
+function copyDir (src, dest) {
+  const entries = fs.readdirSync(src, { withFileTypes: true })
+
+  for (const entry of entries) {
+    const srcPath = path.join(src, entry.name)
+    const destPath = path.join(dest, entry.name)
+
+    if (entry.isDirectory()) {
+      fs.mkdirSync(destPath, { recursive: true })
+      copyDir(srcPath, destPath)
+    } else {
+      fs.copyFileSync(srcPath, destPath)
+    }
+  }
+}
