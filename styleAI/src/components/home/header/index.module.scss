@@ -1,0 +1,97 @@
+.header {
+  $bg-color: rgba(255, 255, 255, 0.9);
+  $text-color: #2d4b37;
+  $hover-color: #1f3526;
+  $button-bg: #2d4b37;
+  $button-text: #ffffff;
+  $button-hover: #1f3526;
+
+  background-color: $bg-color;
+  padding: 1rem 0;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+  backdrop-filter: blur(8px);
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 1000;
+
+  .container {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 1rem;
+
+    @media (min-width: 768px) {
+      padding: 0 2rem;
+    }
+  }
+
+  .logo {
+    font-size: 1.75rem;
+    font-weight: bold;
+    color: $text-color;
+    letter-spacing: -0.5px;
+    transition: color 0.3s;
+
+    &:hover {
+      color: $hover-color;
+    }
+  }
+
+  .button-group {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+  }
+
+  .primary-button {
+    background-color: $button-bg;
+    color: $button-text;
+    border: none;
+    border-radius: 0.375rem;
+    padding: 0.625rem 1.5rem;
+    font-size: 1rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: background-color 0.3s;
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+
+    &:hover {
+      background-color: $button-hover;
+    }
+  }
+
+  .secondary-button {
+    background-color: transparent;
+    color: $text-color;
+    border: 1px solid $text-color;
+    border-radius: 0.375rem;
+    padding: 0.625rem 1.5rem;
+    font-size: 1rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: background-color 0.3s, color 0.3s;
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+
+    &:hover {
+      background-color: rgba(45, 75, 55, 0.05);
+    }
+  }
+
+  .user-avatar {
+    width: 2.5rem;
+    height: 2.5rem;
+    border-radius: 50%;
+    overflow: hidden;
+    margin-left: 1rem;
+
+    img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+  }
+}

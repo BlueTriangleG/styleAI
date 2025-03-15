@@ -1,131 +1,153 @@
 import { query } from '../db';
 import { User } from '../../types/user';
 
-// 创建新用户
-export async function createUser(data: Omit<User, 'id' | 'created_at' | 'updated_at'>) {
-  const insertQuery = `
-    INSERT INTO users (
-      provider, provider_id, username, email, avatar_url,
-      github_profile_url, bio, access_token, refresh_token
-    )
-    VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)
-    RETURNING *;
-  `;
+// Create new user
+export async function createUser(userData: {
+  email: string;
+  password_hash?: string;
+  name?: string;
+  provider?: string;
+  provider_id?: string;
+  avatar_url?: string;
+}): Promise<any> {
   try {
-    const result = await query(insertQuery, [
-      data.provider,
-      data.provider_id,
-      data.username,
-      data.email,
-      data.avatar_url,
-      data.github_profile_url,
-      data.bio,
-      data.access_token,
-      data.refresh_token
-    ]);
+    const { email, password_hash, name, provider, provider_id, avatar_url } =
+      userData;
+
+    const result = await query(
+      `INSERT INTO users (
+        email, password_hash, name, provider, provider_id, avatar_url, created_at, updated_at
+      ) VALUES ($1, $2, $3, $4, $5, $6, NOW(), NOW()) RETURNING *`,
+      [email, password_hash, name, provider, provider_id, avatar_url]
+    );
+
     return result.rows[0];
   } catch (error) {
-    console.error('创建用户失败:', error);
+    console.error('Error creating user:', error);
     throw error;
   }
 }
 
-// 根据ID获取用户
-export async function getUserById(id: string) {
-  const selectQuery = 'SELECT * FROM users WHERE id = $1;';
+// Get user by ID
+export async function getUserById(id: number): Promise<any | null> {
   try {
-    const result = await query(selectQuery, [id]);
-    return result.rows[0];
+    const result = await query('SELECT * FROM users WHERE id = $1', [id]);
+    return result.rows.length > 0 ? result.rows[0] : null;
   } catch (error) {
-    console.error('获取用户失败:', error);
+    console.error('Error getting user by ID:', error);
     throw error;
   }
 }
 
-// 根据provider和provider_id获取用户
-export async function getUserByProvider(provider: string, providerId: string) {
-  const selectQuery = 'SELECT * FROM users WHERE provider = $1 AND provider_id = $2;';
+// Get user by provider and provider_id
+export async function getUserByProvider(
+  provider: string,
+  providerId: string
+): Promise<any | null> {
   try {
-    const result = await query(selectQuery, [provider, providerId]);
-    return result.rows[0];
+    const result = await query(
+      'SELECT * FROM users WHERE provider = $1 AND provider_id = $2',
+      [provider, providerId]
+    );
+    return result.rows.length > 0 ? result.rows[0] : null;
   } catch (error) {
-    console.error('获取用户失败:', error);
+    console.error('Error getting user by provider:', error);
     throw error;
   }
 }
 
-// 根据邮箱获取用户
-export async function getUserByEmail(email: string) {
-  const selectQuery = 'SELECT * FROM users WHERE email = $1;';
+// Get user by email
+export async function getUserByEmail(email: string): Promise<any | null> {
   try {
-    const result = await query(selectQuery, [email]);
-    return result.rows[0];
+    const result = await query('SELECT * FROM users WHERE email = $1', [email]);
+    return result.rows.length > 0 ? result.rows[0] : null;
   } catch (error) {
-    console.error('获取用户失败:', error);
+    console.error('Error getting user by email:', error);
     throw error;
   }
 }
 
-// 获取所有用户
-export async function getAllUsers() {
-  const selectQuery = 'SELECT * FROM users ORDER BY created_at DESC;';
+// Get all users
+export async function getAllUsers(): Promise<any[]> {
   try {
-    const result = await query(selectQuery);
+    const result = await query('SELECT * FROM users ORDER BY created_at DESC');
     return result.rows;
   } catch (error) {
-    console.error('获取用户列表失败:', error);
+    console.error('Error getting all users:', error);
     throw error;
   }
 }
 
-// 更新用户信息
-export async function updateUser(id: string, data: Partial<Omit<User, 'id' | 'created_at' | 'updated_at'>>) {
-  const updateFields = [];
-  const values = [];
-  let paramCount = 1;
+// Update user information
+export async function updateUser(
+  id: number,
+  userData: Partial<{
+    email: string;
+    password_hash: string;
+    name: string;
+    avatar_url: string;
+  }>
+): Promise<any | null> {
+  try {
+    // Build update fields dynamically
+    const updates: string[] = [];
+    const values: any[] = [];
+    let paramIndex = 1;
 
-  // 动态构建更新字段
-  Object.entries(data).forEach(([key, value]) => {
-    if (value !== undefined) {
-      updateFields.push(`${key} = $${paramCount}`);
-      values.push(value);
-      paramCount++;
+    if (userData.email !== undefined) {
+      updates.push(`email = $${paramIndex++}`);
+      values.push(userData.email);
     }
-  });
 
-  // 添加updated_at字段的更新
-  updateFields.push('updated_at = now()');
+    if (userData.password_hash !== undefined) {
+      updates.push(`password_hash = $${paramIndex++}`);
+      values.push(userData.password_hash);
+    }
 
-  // 如果没有要更新的字段，直接返回
-  if (updateFields.length === 1) {
-    return getUserById(id);
-  }
+    if (userData.name !== undefined) {
+      updates.push(`name = $${paramIndex++}`);
+      values.push(userData.name);
+    }
 
-  const updateQuery = `
-    UPDATE users
-    SET ${updateFields.join(', ')}
-    WHERE id = $${paramCount}
-    RETURNING *;
-  `;
+    if (userData.avatar_url !== undefined) {
+      updates.push(`avatar_url = $${paramIndex++}`);
+      values.push(userData.avatar_url);
+    }
 
-  try {
+    // Add updated_at field update
+    updates.push(`updated_at = NOW()`);
+
+    // If no fields to update, return null
+    if (updates.length === 1) {
+      return null;
+    }
+
     values.push(id);
-    const result = await query(updateQuery, values);
-    return result.rows[0];
+
+    const result = await query(
+      `UPDATE users 
+       SET ${updates.join(', ')} 
+       WHERE id = $${paramIndex} 
+       RETURNING *`,
+      values
+    );
+
+    return result.rows.length > 0 ? result.rows[0] : null;
   } catch (error) {
-    console.error('更新用户失败:', error);
+    console.error('Error updating user:', error);
     throw error;
   }
 }
 
-// 删除用户
-export async function deleteUser(id: string) {
-  const deleteQuery = 'DELETE FROM users WHERE id = $1 RETURNING *;';
+// Delete user
+export async function deleteUser(id: number): Promise<boolean> {
   try {
-    const result = await query(deleteQuery, [id]);
-    return result.rows[0];
+    const result = await query('DELETE FROM users WHERE id = $1 RETURNING id', [
+      id,
+    ]);
+    return result.rows.length > 0;
   } catch (error) {
-    console.error('删除用户失败:', error);
+    console.error('Error deleting user:', error);
     throw error;
   }
 }

@@ -4,42 +4,38 @@ import { processImageClient } from '@/lib/imageProcessor';
 export async function POST(request: NextRequest) {
   try {
     const data = await request.json();
+    const { image } = data;
 
-    if (!data.imageData) {
-      return NextResponse.json({ error: '缺少图片数据' }, { status: 400 });
+    if (!image) {
+      return NextResponse.json({ error: 'No image provided' }, { status: 400 });
     }
 
-    // 处理图片 - 在服务器端也使用客户端处理方法
-    // 注意：这在服务器端可能不能正常工作，因为Canvas API是浏览器特性
-    // 这里只是为了保持API兼容性
+    // Process image - using client-side processing method on server
+    // Note: This may not work properly on server-side as Canvas API is a browser feature
+    // This is just for API compatibility
+    let processedImage;
     try {
-      const processedImage = await processImageClient(data.imageData);
-
-      return NextResponse.json({
-        success: true,
-        processedImage,
-      });
+      processedImage = await processImageClient(image, 5);
     } catch (error) {
-      console.error('服务器端图片处理失败，返回原始图片:', error);
-
-      // 如果处理失败，返回原始图片
-      return NextResponse.json({
-        success: true,
-        processedImage: data.imageData,
-        warning: '服务器端处理失败，返回原始图片',
-      });
+      console.error('Error processing image:', error);
+      // If processing fails, return original image
+      processedImage = image;
     }
-  } catch (error) {
-    console.error('图片处理API错误:', error);
 
+    return NextResponse.json({
+      success: true,
+      processedImage,
+    });
+  } catch (error) {
+    console.error('Error in image processing API:', error);
     return NextResponse.json(
-      { error: '图片处理失败', details: (error as Error).message },
+      { error: 'Failed to process image' },
       { status: 500 }
     );
   }
 }
 
-// 设置较大的响应体大小限制，因为我们处理的是图片
+// Set larger response body size limit as we're handling images
 export const config = {
   api: {
     bodyParser: {

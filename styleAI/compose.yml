@@ -1,0 +1,43 @@
+version: '3'
+
+services:
+  styleai:
+    env_file:
+      - '.env.local'
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: production
+    ports:
+      - "3000:3000"
+    image: seanzzzz/dev:styleai
+    environment:
+      NODE_ENV: production
+      PORT: 3000
+      # All environment variables from .env.local will be passed automatically
+    volumes:
+      - styleai-data:/app/store
+    networks:
+      - styleai-network
+    restart: unless-stopped
+
+  nginx:
+    image: nginx:alpine
+    ports:
+      - "80:80"
+      - "443:443"  # For HTTPS
+    volumes:
+      - ./nginx.conf:/etc/nginx/conf.d/default.conf
+      # - ./certbot/conf:/etc/letsencrypt  # For SSL certificates
+      # - ./certbot/www:/var/www/certbot
+    depends_on:
+      - styleai
+    networks:
+      - styleai-network
+    restart: always
+
+volumes:
+  styleai-data:
+
+networks:
+  styleai-network:

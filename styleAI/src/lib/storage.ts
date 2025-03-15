@@ -21,14 +21,11 @@ class Storage {
     const data: StorageData<T> = {
       value,
       timestamp: Date.now(),
-      expires
+      expires,
     };
 
     try {
-      localStorage.setItem(
-        this.getKey(key),
-        JSON.stringify(data)
-      );
+      localStorage.setItem(this.getKey(key), JSON.stringify(data));
     } catch (error) {
       console.error('Storage设置失败:', error);
       throw error;
@@ -46,7 +43,7 @@ class Storage {
       if (!item) return null;
 
       const data: StorageData<T> = JSON.parse(item);
-      
+
       if (this.isExpired(data)) {
         this.remove(key);
         return null;
@@ -105,8 +102,8 @@ class Storage {
   }
 }
 
-// 导出默认实例
+// Export default instance
 export default new Storage();
 
-// 导出类以支持创建自定义实例
+// Export class to support custom instances
 export { Storage };
