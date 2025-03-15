@@ -15,9 +15,73 @@ export default function LoadingPage() {
   const [userImageExists, setUserImageExists] = useState<boolean | null>(null);
   const [jobId, setJobId] = useState<string>('');
   const jobCreatedRef = useRef<boolean>(false);
+  const dataFetchedRef = useRef<boolean>(false);
+  const [isDataReady, setIsDataReady] = useState(false);
 
-  // 创建job记录
-  const createJob = async (imageData: string) => {
+  // 获取个性化分析数据
+  const fetchAnalysisData = async (jobId: string) => {
+    try {
+      console.log('正在从API获取个性化分析数据...');
+      const data = await apiService.getPersonalizedAnalysis(jobId);
+      console.log('成功获取个性化分析数据:', data);
+
+      // 将数据存储在sessionStorage中
+      sessionStorage.setItem('analysisData', JSON.stringify(data));
+
+      // 标记数据已准备好
+      setIsDataReady(true);
+      dataFetchedRef.current = true;
+
+      return data;
+    } catch (error) {
+      console.error('获取个性化分析数据失败:', error);
+
+      // 使用默认数据
+      const defaultData = {
+        features: [
+          {
+            title: 'Striking Features',
+            content:
+              'They have a captivating look with expressive eyes and a warm smile that immediately draws attention.',
+          },
+          {
+            title: 'Well-Defined Facial Structure',
+            content:
+              'Their face features high cheekbones, a sharp jawline, and a balanced symmetry, giving them a classic yet modern appearance.',
+          },
+          {
+            title: 'Distinctive Style',
+            content:
+              'Their hairstyle and grooming are impeccably maintained, complementing their overall polished and stylish look.',
+          },
+          {
+            title: 'Elegant and Timeless',
+            content:
+              'With a natural elegance and subtle makeup, they exude a timeless charm that stands out in any setting.',
+          },
+        ],
+        colors: [
+          { name: 'Navy Blue', hex: '#000080' },
+          { name: 'Burgundy', hex: '#800020' },
+          { name: 'Forest Green', hex: '#228B22' },
+          { name: 'Charcoal Gray', hex: '#36454F' },
+        ],
+        styles: ['Classic', 'Professional', 'Elegant', 'Sophisticated'],
+      };
+
+      // 将默认数据存储在sessionStorage中
+      sessionStorage.setItem('analysisData', JSON.stringify(defaultData));
+
+      // 标记数据已准备好
+      setIsDataReady(true);
+      dataFetchedRef.current = true;
+
+      return defaultData;
+    }
+  };
+
+  // 创建job记录并获取分析数据
+  const createJobAndFetchData = async (imageData: string) => {
     // 如果已经创建过job，则不再创建
     if (jobCreatedRef.current) {
       console.log('已经创建过job记录，不再重复创建');
@@ -36,6 +100,9 @@ export default function LoadingPage() {
 
       // 将jobId存储在sessionStorage中，以便在step2页面使用
       sessionStorage.setItem('currentJobId', newJobId);
+
+      // 获取分析数据
+      await fetchAnalysisData(newJobId);
     } catch (error) {
       console.error('创建job记录失败:', error);
       // 如果创建job失败，生成一个临时的jobId
@@ -45,6 +112,9 @@ export default function LoadingPage() {
       console.log(`使用临时jobId: ${tempJobId}`);
       setJobId(tempJobId);
       sessionStorage.setItem('currentJobId', tempJobId);
+
+      // 使用临时ID获取分析数据
+      await fetchAnalysisData(tempJobId);
     }
   };
 
@@ -69,8 +139,8 @@ export default function LoadingPage() {
 
         setUserImageExists(true);
 
-        // 创建job记录
-        createJob(userImage);
+        // 创建job记录并获取分析数据
+        createJobAndFetchData(userImage);
       } catch (error) {
         console.error('访问sessionStorage时出错:', error);
         router.replace('/personalized-recommendation/step1');
@@ -85,8 +155,9 @@ export default function LoadingPage() {
         const newProgress = prev + Math.random() * 5; // 减小增量，延长加载时间
         console.log('当前进度:', Math.min(newProgress, 100).toFixed(1) + '%');
 
-        if (newProgress >= 100) {
-          console.log('加载完成，准备跳转到step2');
+        // 如果进度达到100%且数据已准备好，则跳转到step2
+        if (newProgress >= 100 && dataFetchedRef.current) {
+          console.log('加载完成且数据已准备好，准备跳转到step2');
           clearInterval(interval);
           // 开始过渡动画
           setIsTransitioning(true);
@@ -98,7 +169,14 @@ export default function LoadingPage() {
           }, 100); // 增加到1000ms
           return 100;
         }
-        return newProgress;
+
+        // 如果进度达到95%但数据还未准备好，则保持在95%
+        if (newProgress >= 95 && !dataFetchedRef.current) {
+          console.log('进度达到95%，等待数据准备完成...');
+          return 95;
+        }
+
+        return Math.min(newProgress, 100);
       });
     }, 400); // 增加间隔时间，使进度条更新更慢
 

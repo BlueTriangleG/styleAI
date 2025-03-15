@@ -4,4 +4,6 @@ pillow==10.0.0
 gunicorn==21.2.0
 python-dotenv==1.0.0
 requests==2.32.3
-uuid==1.30 
+uuid==1.30
+psycopg2-binary==2.9.9
+Werkzeug==2.3.7 

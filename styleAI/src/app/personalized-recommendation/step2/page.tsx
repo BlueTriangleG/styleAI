@@ -126,16 +126,38 @@ export default function Step2() {
     setAnalysisError(null);
 
     try {
-      console.log('正在从API获取个性化分析数据...');
-      const data = await apiService.getPersonalizedAnalysis(jobId);
-      console.log('成功获取个性化分析数据:', data);
+      console.log('正在从sessionStorage获取分析数据...');
+      // 从sessionStorage获取分析数据
+      const storedData = sessionStorage.getItem('analysisData');
+
+      if (!storedData) {
+        console.error('未找到分析数据，使用默认数据');
+        setAnalysisError('未找到分析数据，使用默认数据');
+        // 使用默认数据
+        const defaultData = {
+          features: defaultAnalysisPoints,
+          colors: [
+            { name: 'Navy Blue', hex: '#000080' },
+            { name: 'Burgundy', hex: '#800020' },
+            { name: 'Forest Green', hex: '#228B22' },
+            { name: 'Charcoal Gray', hex: '#36454F' },
+          ],
+          styles: ['Classic', 'Professional', 'Elegant', 'Sophisticated'],
+        };
+        setAnalysisData(defaultData);
+        return defaultData;
+      }
+
+      // 解析存储的数据
+      const data = JSON.parse(storedData);
+      console.log('成功获取分析数据:', data);
       setAnalysisData(data);
       return data;
     } catch (error) {
-      console.error('获取个性化分析数据失败:', error);
-      setAnalysisError('无法获取个性化分析数据，使用默认数据');
+      console.error('获取分析数据失败:', error);
+      setAnalysisError('无法获取分析数据，使用默认数据');
       // 使用默认数据
-      return {
+      const defaultData = {
         features: defaultAnalysisPoints,
         colors: [
           { name: 'Navy Blue', hex: '#000080' },
@@ -145,6 +167,8 @@ export default function Step2() {
         ],
         styles: ['Classic', 'Professional', 'Elegant', 'Sophisticated'],
       };
+      setAnalysisData(defaultData);
+      return defaultData;
     } finally {
       setIsLoadingAnalysis(false);
     }
