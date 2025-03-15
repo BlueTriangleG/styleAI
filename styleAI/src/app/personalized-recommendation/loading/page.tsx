@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation';
 import { motion } from 'framer-motion';
 import { RecommendationHeader } from '@/components/recommendation/Header';
 import LiquidChrome from '@/components/background/LiquidChrome';
+import ImageTrail from '@/components/ui/imageTail';
 
 export default function LoadingPage() {
   const router = useRouter();
@@ -35,7 +36,7 @@ export default function LoadingPage() {
           }, 500);
           return 100;
         }
-        return prevProgress + 5;
+        return prevProgress + 1;
       });
     }, 150);
 
@@ -104,25 +105,37 @@ export default function LoadingPage() {
   return (
     <>
       <RecommendationHeader />
+      <ImageTrail
+        items={[
+          'https://picsum.photos/id/287/300/300',
+          'https://picsum.photos/id/1001/300/300',
+          'https://picsum.photos/id/1025/300/300',
+          'https://picsum.photos/id/1026/300/300',
+          'https://picsum.photos/id/1027/300/300',
+          'https://picsum.photos/id/1028/300/300',
+          'https://picsum.photos/id/1029/300/300',
+          'https://picsum.photos/id/1030/300/300',
+        ]}
+        variant={1}
+      />
+      {/* 流动背景 */}
+      <div className="absolute inset-0 z-0 overflow-hidden">
+        <LiquidChrome
+          baseColor={[0.9, 0.9, 0.9]}
+          speed={0.3}
+          amplitude={0.7}
+          frequencyX={4}
+          frequencyY={3}
+          interactive={true}
+        />
+        <div className="absolute inset-0 bg-white/10 pointer-events-none"></div>
+      </div>
       <motion.div
         className="min-h-screen pt-20 relative"
         initial="initial"
         animate={isTransitioning ? 'exit' : 'animate'}
         variants={pageVariants}
         transition={{ duration: 0.5 }}>
-        {/* 流动背景 */}
-        <div className="absolute inset-0 z-0 overflow-hidden">
-          <LiquidChrome
-            baseColor={[0.9, 0.9, 0.9]}
-            speed={0.3}
-            amplitude={0.7}
-            frequencyX={4}
-            frequencyY={3}
-            interactive={false}
-          />
-          <div className="absolute inset-0 bg-white/10 pointer-events-none"></div>
-        </div>
-
         {/* 内容区域 */}
         <div className="container mx-auto px-4 py-8 relative z-10">
           <motion.div
