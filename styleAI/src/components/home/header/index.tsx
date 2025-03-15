@@ -10,22 +10,36 @@ export function Header() {
     router.push('/login');
   };
 
+  const handleStartClick = () => {
+    router.push('/personalized-recommendation/step1');
+  };
+
   return (
     <header className="fixed top-0 left-0 right-0 bg-white/90 backdrop-blur-xs shadow-sm z-50">
-      <div className="container mx-auto px-4 py-3 flex items-center justify-between">
-        {/* Logo */}
-        <Link
-          href="/"
-          className="text-2xl font-bold text-[#2D4B37] font-playfair">
-          Style-AI
-        </Link>
+      <div className="w-screen mx-auto px-8 md:px-16 py-3 flex items-center justify-between">
+        {/* Left side - Logo */}
+        <div className="flex items-center">
+          <Link
+            href="/"
+            className="text-2xl font-bold text-[#2D4B37] font-playfair">
+            Style-AI
+          </Link>
+        </div>
 
-        {/* Login Button */}
-        <button
-          onClick={handleLoginClick}
-          className="bg-black text-white px-6 py-2 rounded-md font-medium hover:bg-gray-800 transition-colors transform hover:-translate-y-0.5 font-inter">
-          Login
-        </button>
+        {/* Right side - Buttons */}
+        <div className="flex items-center gap-4">
+          <button
+            onClick={handleStartClick}
+            className="bg-black text-white px-6 py-2 rounded-md font-medium hover:bg-gray-800 transition-colors">
+            Start
+          </button>
+          
+          <button
+            onClick={handleLoginClick}
+            className="bg-transparent text-[#2D4B37] border border-[#2D4B37] px-6 py-2 rounded-md font-medium hover:bg-gray-100 transition-colors">
+            Login
+          </button>
+        </div>
       </div>
     </header>
   );
