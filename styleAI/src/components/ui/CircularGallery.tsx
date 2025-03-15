@@ -240,7 +240,11 @@ class Media {
   }
 
   createShader() {
-    const texture = new Texture(this.gl, { generateMipmaps: false });
+    const texture = new Texture(this.gl, {
+      generateMipmaps: true,
+      minFilter: this.gl.LINEAR_MIPMAP_LINEAR,
+      magFilter: this.gl.LINEAR,
+    });
     this.program = new Program(this.gl, {
       depthTest: false,
       depthWrite: false,
@@ -268,10 +272,9 @@ class Media {
         uniform float uBorderRadius;
         varying vec2 vUv;
         
-        // Rounded box SDF for UV space
         float roundedBoxSDF(vec2 p, vec2 b, float r) {
-          vec2 d = abs(p) - b;
-          return length(max(d, vec2(0.0))) + min(max(d.x, d.y), 0.0) - r;
+          vec2 d = abs(p) - b + vec2(r);
+          return min(max(d.x, d.y), 0.0) + length(max(d, 0.0)) - r;
         }
         
         void main() {
@@ -285,13 +288,15 @@ class Media {
           );
           vec4 color = texture2D(tMap, uv);
           
-          // Apply rounded corners (assumes vUv in [0,1])
-          float d = roundedBoxSDF(vUv - 0.5, vec2(0.5 - uBorderRadius), uBorderRadius);
-          if(d > 0.0) {
+          float d = roundedBoxSDF(vUv - 0.5, vec2(0.5), uBorderRadius);
+          
+          float alpha = 1.0 - smoothstep(-0.002, 0.002, d);
+          
+          if(alpha < 0.01) {
             discard;
           }
           
-          gl_FragColor = vec4(color.rgb, 1.0);
+          gl_FragColor = vec4(color.rgb, alpha);
         }
       `,
       uniforms: {
@@ -306,14 +311,28 @@ class Media {
     });
     const img = new Image();
     img.crossOrigin = 'anonymous';
-    img.src = this.image;
+
+    // High quality image loading
+    if ('imageSmoothingQuality' in this.gl) {
+      (this.gl as any).imageSmoothingQuality = 'high';
+    }
+
     img.onload = () => {
       texture.image = img;
+      // Update texture when image loads
+      texture.needsUpdate = true;
       this.program.uniforms.uImageSizes.value = [
         img.naturalWidth,
         img.naturalHeight,
       ];
     };
+
+    // Add error handling
+    img.onerror = () => {
+      console.error(`Failed to load image: ${this.image}`);
+    };
+
+    img.src = this.image;
   }
 
   createMesh() {
@@ -440,7 +459,7 @@ class App {
   raf: number = 0;
 
   boundOnResize!: () => void;
-  boundOnWheel!: (e: WheelEvent) => void;
+  boundOnWheel!: () => void;
   boundOnTouchDown!: (e: MouseEvent | TouchEvent) => void;
   boundOnTouchMove!: (e: MouseEvent | TouchEvent) => void;
   boundOnTouchUp!: () => void;
@@ -473,20 +492,14 @@ class App {
   }
 
   createRenderer() {
-    this.renderer = new Renderer({ alpha: true });
+    this.renderer = new Renderer({
+      alpha: true,
+      antialias: true,
+      dpr: Math.min(window.devicePixelRatio, 2),
+    });
     this.gl = this.renderer.gl;
     this.gl.clearColor(0, 0, 0, 0);
-
-    // 设置canvas样式，确保它填满容器
-    const canvas = this.renderer.gl.canvas as HTMLCanvasElement;
-    canvas.style.width = '100%';
-    canvas.style.height = '100%';
-    canvas.style.position = 'absolute';
-    canvas.style.top = '0';
-    canvas.style.left = '0';
-    canvas.style.pointerEvents = 'none'; // 让canvas不拦截鼠标事件
-
-    this.container.appendChild(canvas);
+    this.container.appendChild(this.renderer.gl.canvas as HTMLCanvasElement);
   }
 
   createCamera() {
@@ -515,52 +528,20 @@ class App {
   ) {
     const defaultItems = [
       {
-        image: `https://picsum.photos/seed/1/800/600?grayscale`,
+        image: 'gallery/outfit1.png',
         text: 'Bridge',
       },
       {
-        image: `https://picsum.photos/seed/2/800/600?grayscale`,
+        image: 'gallery/outfit2.png',
         text: 'Desk Setup',
       },
       {
-        image: `https://picsum.photos/seed/3/800/600?grayscale`,
+        image: 'gallery/outfit3.png',
         text: 'Waterfall',
       },
       {
-        image: `https://picsum.photos/seed/4/800/600?grayscale`,
+        image: 'gallery/outfit4.png',
         text: 'Strawberries',
-      },
-      {
-        image: `https://picsum.photos/seed/5/800/600?grayscale`,
-        text: 'Deep Diving',
-      },
-      {
-        image: `https://picsum.photos/seed/16/800/600?grayscale`,
-        text: 'Train Track',
-      },
-      {
-        image: `https://picsum.photos/seed/17/800/600?grayscale`,
-        text: 'Santorini',
-      },
-      {
-        image: `https://picsum.photos/seed/8/800/600?grayscale`,
-        text: 'Blurry Lights',
-      },
-      {
-        image: `https://picsum.photos/seed/9/800/600?grayscale`,
-        text: 'New York',
-      },
-      {
-        image: `https://picsum.photos/seed/10/800/600?grayscale`,
-        text: 'Good Boy',
-      },
-      {
-        image: `https://picsum.photos/seed/21/800/600?grayscale`,
-        text: 'Coastline',
-      },
-      {
-        image: `https://picsum.photos/seed/12/800/600?grayscale`,
-        text: 'Palm Trees',
       },
     ];
     const galleryItems = items && items.length ? items : defaultItems;
@@ -603,10 +584,8 @@ class App {
     this.onCheck();
   }
 
-  onWheel(e: WheelEvent) {
-    e.preventDefault(); // 阻止默认滚动行为
-    const delta = e.deltaY || e.deltaX;
-    this.scroll.target += delta * 0.01; // 调整滚动速度
+  onWheel() {
+    this.scroll.target += 2;
     this.onCheckDebounce();
   }
 
@@ -659,41 +638,28 @@ class App {
     this.boundOnTouchDown = this.onTouchDown.bind(this);
     this.boundOnTouchMove = this.onTouchMove.bind(this);
     this.boundOnTouchUp = this.onTouchUp.bind(this);
-
-    // 使用容器元素而不是canvas来绑定事件
     window.addEventListener('resize', this.boundOnResize);
-    this.container.addEventListener('wheel', this.boundOnWheel, {
-      passive: false,
-    });
-    this.container.addEventListener('mousedown', this.boundOnTouchDown);
-    this.container.addEventListener('mousemove', this.boundOnTouchMove);
-    this.container.addEventListener('mouseup', this.boundOnTouchUp);
-    this.container.addEventListener('touchstart', this.boundOnTouchDown);
-    this.container.addEventListener('touchmove', this.boundOnTouchMove);
-    this.container.addEventListener('touchend', this.boundOnTouchUp);
-
-    // 阻止默认的滚动行为
-    this.container.addEventListener('wheel', (e) => e.preventDefault(), {
-      passive: false,
-    });
+    window.addEventListener('mousewheel', this.boundOnWheel);
+    window.addEventListener('wheel', this.boundOnWheel);
+    window.addEventListener('mousedown', this.boundOnTouchDown);
+    window.addEventListener('mousemove', this.boundOnTouchMove);
+    window.addEventListener('mouseup', this.boundOnTouchUp);
+    window.addEventListener('touchstart', this.boundOnTouchDown);
+    window.addEventListener('touchmove', this.boundOnTouchMove);
+    window.addEventListener('touchend', this.boundOnTouchUp);
   }
 
   destroy() {
     window.cancelAnimationFrame(this.raf);
     window.removeEventListener('resize', this.boundOnResize);
-
-    // 从容器元素移除事件监听器
-    this.container.removeEventListener('wheel', this.boundOnWheel);
-    this.container.removeEventListener('mousedown', this.boundOnTouchDown);
-    this.container.removeEventListener('mousemove', this.boundOnTouchMove);
-    this.container.removeEventListener('mouseup', this.boundOnTouchUp);
-    this.container.removeEventListener('touchstart', this.boundOnTouchDown);
-    this.container.removeEventListener('touchmove', this.boundOnTouchMove);
-    this.container.removeEventListener('touchend', this.boundOnTouchUp);
-
-    // 移除阻止默认滚动的事件监听器
-    this.container.removeEventListener('wheel', (e) => e.preventDefault());
-
+    window.removeEventListener('mousewheel', this.boundOnWheel);
+    window.removeEventListener('wheel', this.boundOnWheel);
+    window.removeEventListener('mousedown', this.boundOnTouchDown);
+    window.removeEventListener('mousemove', this.boundOnTouchMove);
+    window.removeEventListener('mouseup', this.boundOnTouchUp);
+    window.removeEventListener('touchstart', this.boundOnTouchDown);
+    window.removeEventListener('touchmove', this.boundOnTouchMove);
+    window.removeEventListener('touchend', this.boundOnTouchUp);
     if (
       this.renderer &&
       this.renderer.gl &&
@@ -738,13 +704,13 @@ export default function CircularGallery({
 
   return (
     <div
-      className="w-full h-full overflow-hidden cursor-grab active:cursor-grabbing relative"
-      ref={containerRef}
+      className="w-full h-full overflow-hidden cursor-grab active:cursor-grabbing"
       style={{
-        touchAction: 'none',
-        position: 'relative',
-        zIndex: 1,
+        imageRendering: 'auto',
+        WebkitFontSmoothing: 'antialiased',
+        MozOsxFontSmoothing: 'grayscale',
       }}
+      ref={containerRef}
     />
   );
 }
