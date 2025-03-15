@@ -240,10 +240,10 @@ class Media {
   }
 
   createShader() {
-    const texture = new Texture(this.gl, { 
+    const texture = new Texture(this.gl, {
       generateMipmaps: true,
       minFilter: this.gl.LINEAR_MIPMAP_LINEAR,
-      magFilter: this.gl.LINEAR
+      magFilter: this.gl.LINEAR,
     });
     this.program = new Program(this.gl, {
       depthTest: false,
@@ -311,12 +311,12 @@ class Media {
     });
     const img = new Image();
     img.crossOrigin = 'anonymous';
-    
+
     // High quality image loading
     if ('imageSmoothingQuality' in this.gl) {
       (this.gl as any).imageSmoothingQuality = 'high';
     }
-    
+
     img.onload = () => {
       texture.image = img;
       // Update texture when image loads
@@ -326,12 +326,12 @@ class Media {
         img.naturalHeight,
       ];
     };
-    
+
     // Add error handling
     img.onerror = () => {
       console.error(`Failed to load image: ${this.image}`);
     };
-    
+
     img.src = this.image;
   }
 
@@ -492,10 +492,10 @@ class App {
   }
 
   createRenderer() {
-    this.renderer = new Renderer({ 
+    this.renderer = new Renderer({
       alpha: true,
       antialias: true,
-      dpr: Math.min(window.devicePixelRatio, 2)
+      dpr: Math.min(window.devicePixelRatio, 2),
     });
     this.gl = this.renderer.gl;
     this.gl.clearColor(0, 0, 0, 0);
@@ -528,19 +528,19 @@ class App {
   ) {
     const defaultItems = [
       {
-        image: "gallery/outfit1.png",
+        image: 'gallery/outfit1.png',
         text: 'Bridge',
       },
       {
-        image: "gallery/outfit2.png",
+        image: 'gallery/outfit2.png',
         text: 'Desk Setup',
       },
       {
-        image: "gallery/outfit3.png",
+        image: 'gallery/outfit3.png',
         text: 'Waterfall',
       },
       {
-        image: "gallery/outfit4.png",
+        image: 'gallery/outfit4.png',
         text: 'Strawberries',
       },
     ];
@@ -708,7 +708,7 @@ export default function CircularGallery({
       style={{
         imageRendering: 'auto',
         WebkitFontSmoothing: 'antialiased',
-        MozOsxFontSmoothing: 'grayscale'
+        MozOsxFontSmoothing: 'grayscale',
       }}
       ref={containerRef}
     />
