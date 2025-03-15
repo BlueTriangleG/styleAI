@@ -18,6 +18,9 @@ import io
 # API base URL
 API_URL = "http://localhost:5001"
 
+# 使用已知存在的jobId
+KNOWN_JOB_ID = "d2f79de6-ef8c-4e82-9a73-a874a6c96f78"
+
 def test_health():
     """Test the health check endpoint"""
     print("Testing health check endpoint...")
@@ -80,8 +83,8 @@ def test_personalized_analysis():
     """Test the personalized analysis endpoint"""
     print("Testing personalized analysis endpoint...")
     try:
-        # Generate a random job ID
-        job_id = str(uuid.uuid4())
+        # 使用已知存在的jobId
+        job_id = KNOWN_JOB_ID
         
         # Prepare request data
         data = {
@@ -113,8 +116,8 @@ def test_wear_suit_pictures():
     """Test the wear suit pictures endpoint"""
     print("Testing wear suit pictures endpoint...")
     try:
-        # Generate a random job ID
-        job_id = str(uuid.uuid4())
+        # 使用已知存在的jobId
+        job_id = KNOWN_JOB_ID
         
         # Prepare request data
         data = {
@@ -146,12 +149,15 @@ def main():
     parser = argparse.ArgumentParser(description="Test the StyleAI API server")
     parser.add_argument("--image", help="Path to an image file for testing image processing")
     parser.add_argument("--url", help="API server URL (default: http://localhost:5001)", default="http://localhost:5001")
+    parser.add_argument("--job-id", help=f"Job ID for testing (default: {KNOWN_JOB_ID})", default=KNOWN_JOB_ID)
     args = parser.parse_args()
     
-    global API_URL
+    global API_URL, KNOWN_JOB_ID
     API_URL = args.url
+    KNOWN_JOB_ID = args.job_id
     
     print(f"Testing API server at {API_URL}")
+    print(f"Using job ID: {KNOWN_JOB_ID}")
     
     # Test health check
     health_ok = test_health()
