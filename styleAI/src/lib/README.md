@@ -1,81 +1,81 @@
-# 图片处理模块
+# Image Processing Module
 
-这个模块提供了图片格式转换和压缩功能，确保上传的图片不超过 5MB 并转换为 JPEG 格式。
+This module provides image format conversion and compression functionality, ensuring uploaded images do not exceed 5MB and are converted to JPEG format.
 
-## 功能特点
+## Features
 
-- 检测图片大小，如果超过 5MB 则进行压缩
-- 支持将各种图片格式（PNG、GIF、WebP 等）转换为 JPEG
-- 使用 Canvas API 在浏览器中进行图片处理
-- 自动调整图片质量和尺寸以达到目标大小
-- 支持直接处理 File 对象或 Base64 字符串
-- 自动保存处理记录到 localStorage
-- 提供下载功能，将处理后的图片保存到本地
+- Detects image size and compresses if it exceeds 5MB
+- Supports converting various image formats (PNG, GIF, WebP, etc.) to JPEG
+- Uses Canvas API for image processing in the browser
+- Automatically adjusts image quality and dimensions to achieve target size
+- Supports direct processing of File objects or Base64 strings
+- Automatically saves processing records to localStorage
+- Provides download functionality to save processed images locally
 
-## 使用方法
+## Usage
 
-### 处理图片文件
+### Processing Image Files
 
 ```typescript
 import { processImageClient } from '@/lib/imageProcessor';
 
-// 处理 File 对象
+// Process File object
 async function handleFile(file: File) {
   try {
-    // 将图片压缩到5MB以下并转换为JPEG
+    // Compress image to under 5MB and convert to JPEG
     const processedImage = await processImageClient(file, 5);
 
-    // 使用处理后的图片
+    // Use the processed image
     setImage(processedImage);
   } catch (error) {
-    console.error('图片处理失败:', error);
+    console.error('Image processing failed:', error);
   }
 }
 ```
 
-### 处理 Base64 图片数据
+### Processing Base64 Image Data
 
 ```typescript
 import { processImageClient } from '@/lib/imageProcessor';
 
-// 处理 Base64 图片数据
+// Process Base64 image data
 async function handleBase64Image(imageData: string) {
   try {
-    // 将图片压缩到5MB以下并转换为JPEG
+    // Compress image to under 5MB and convert to JPEG
     const processedImage = await processImageClient(imageData, 5);
 
-    // 使用处理后的图片
+    // Use the processed image
     setImage(processedImage);
   } catch (error) {
-    console.error('图片处理失败:', error);
+    console.error('Image processing failed:', error);
   }
 }
 ```
 
-### 下载图片到本地
+### Downloading Images
 
 ```typescript
 import { downloadImage } from '@/lib/imageProcessor';
 
-// 下载图片
+// Download image
 function handleDownload(imageData: string) {
   downloadImage(imageData, 'my_image.jpg');
 }
 ```
 
-### 获取处理记录
+### Getting Processing Records
 
 ```typescript
 import { getProcessedImagesInfo } from '@/lib/imageProcessor';
 
-// 获取处理记录
+// Get processing records
 function showHistory() {
   const images = getProcessedImagesInfo();
-  console.log(`共处理了 ${images.length} 张图片`);
+  console.log(`Processed ${images.length} images`);
 
   images.forEach((img) => {
     console.log(
-      `${img.fileName}: ${img.size.toFixed(2)}MB, 时间: ${new Date(
+      `${img.fileName}: ${img.size.toFixed(2)}MB, Time: ${new Date(
         img.timestamp
       ).toLocaleString()}`
     );
@@ -83,30 +83,30 @@ function showHistory() {
 }
 ```
 
-## 技术实现
+## Technical Implementation
 
-- 使用 Canvas API 进行图片绘制和压缩
-- 递归调整质量参数直到达到目标大小
-- 自动缩小过大的图片尺寸
-- 保持图片的原始宽高比
-- 对 PNG 等带透明度的图片添加白色背景
-- 使用 localStorage 存储处理记录
+- Uses Canvas API for image drawing and compression
+- Recursively adjusts quality parameters until target size is reached
+- Automatically resizes oversized images
+- Maintains original aspect ratio
+- Adds white background to PNG and other formats with transparency
+- Uses localStorage to store processing records
 
-## 注意事项
+## Notes
 
-1. 此模块仅在客户端（浏览器）环境中工作
-2. 依赖于 Canvas API，在某些旧浏览器上可能不支持
-3. 大图片处理可能需要较长时间，建议添加加载指示器
-4. 压缩过程中会有一定的质量损失
-5. 处理记录存储在 localStorage 中，容量有限
-6. 下载功能需要用户交互触发，不能在后台自动下载
+1. This module only works in client-side (browser) environments
+2. Depends on Canvas API, which may not be supported in some older browsers
+3. Processing large images may take time, consider adding a loading indicator
+4. Compression process will result in some quality loss
+5. Processing records are stored in localStorage, which has limited capacity
+6. Download functionality requires user interaction to trigger, cannot download automatically in the background
 
-## 配置
+## Configuration
 
-可以在调用 `processImageClient` 函数时调整以下参数：
+You can adjust the following parameters when calling the `processImageClient` function:
 
-- 最大图片大小（默认 5MB）
-- 内部代码中可调整的参数：
-  - 最大图片尺寸（默认 1920x1080）
-  - 初始压缩质量（根据原始大小动态调整）
-  - 最大压缩尝试次数（默认 10 次）
+- Maximum image size (default 5MB)
+- Internally adjustable parameters:
+  - Maximum image dimensions (default 1920x1080)
+  - Initial compression quality (dynamically adjusted based on original size)
+  - Maximum compression attempts (default 10 attempts)

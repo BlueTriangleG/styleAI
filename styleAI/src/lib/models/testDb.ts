@@ -6,7 +6,6 @@ interface TestDb {
   description: string;
 }
 
-
 // 插入数据
 export async function insertTestDb(data: Omit<TestDb, 'id'>) {
   const insertQuery = `
@@ -48,7 +47,10 @@ export async function getTestDbById(id: number) {
 }
 
 // 更新数据
-export async function updateTestDb(id: number, data: Partial<Omit<TestDb, 'id'>>) {
+export async function updateTestDb(
+  id: number,
+  data: Partial<Omit<TestDb, 'id'>>
+) {
   const updateQuery = `
     UPDATE test_db
     SET name = COALESCE($1, name),

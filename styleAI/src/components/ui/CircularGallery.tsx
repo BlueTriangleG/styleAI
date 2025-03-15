@@ -161,7 +161,7 @@ interface Viewport {
 interface MediaProps {
   geometry: Plane;
   gl: GL;
-  image: string;
+  video: string;
   index: number;
   length: number;
   renderer: Renderer;
@@ -179,7 +179,7 @@ class Media {
   extra: number = 0;
   geometry: Plane;
   gl: GL;
-  image: string;
+  video: string;
   index: number;
   length: number;
   renderer: Renderer;
@@ -202,11 +202,12 @@ class Media {
   speed: number = 0;
   isBefore: boolean = false;
   isAfter: boolean = false;
+  videoElement: HTMLVideoElement | null = null;
 
   constructor({
     geometry,
     gl,
-    image,
+    video,
     index,
     length,
     renderer,
@@ -221,7 +222,7 @@ class Media {
   }: MediaProps) {
     this.geometry = geometry;
     this.gl = gl;
-    this.image = image;
+    this.video = video;
     this.index = index;
     this.length = length;
     this.renderer = renderer;
@@ -240,11 +241,12 @@ class Media {
   }
 
   createShader() {
-    const texture = new Texture(this.gl, {
-      generateMipmaps: true,
-      minFilter: this.gl.LINEAR_MIPMAP_LINEAR,
-      magFilter: this.gl.LINEAR,
+    const texture = new Texture(this.gl, { 
+      generateMipmaps: false,
+      minFilter: this.gl.LINEAR,
+      magFilter: this.gl.LINEAR 
     });
+    
     this.program = new Program(this.gl, {
       depthTest: false,
       depthWrite: false,
@@ -260,7 +262,6 @@ class Media {
         void main() {
           vUv = uv;
           vec3 p = position;
-          p.z = (sin(p.x * 4.0 + uTime) * 1.5 + cos(p.y * 2.0 + uTime) * 1.5) * (0.1 + uSpeed * 0.5);
           gl_Position = projectionMatrix * modelViewMatrix * vec4(p, 1.0);
         }
       `,
@@ -309,30 +310,52 @@ class Media {
       },
       transparent: true,
     });
-    const img = new Image();
-    img.crossOrigin = 'anonymous';
-
-    // High quality image loading
-    if ('imageSmoothingQuality' in this.gl) {
-      (this.gl as any).imageSmoothingQuality = 'high';
-    }
-
-    img.onload = () => {
-      texture.image = img;
-      // Update texture when image loads
-      texture.needsUpdate = true;
+    
+    // Create video element
+    const video = document.createElement('video');
+    video.crossOrigin = 'anonymous';
+    video.loop = true;
+    video.muted = true;
+    video.playsInline = true;
+    video.autoplay = true;
+    
+    // Store video element for later use
+    this.videoElement = video;
+    
+    // Set up video loading and texture update
+    video.onloadedmetadata = () => {
+      // Update texture dimensions
       this.program.uniforms.uImageSizes.value = [
-        img.naturalWidth,
-        img.naturalHeight,
+        video.videoWidth,
+        video.videoHeight,
       ];
+      
+      // Start playing the video
+      video.play().catch(err => {
+        console.error('Error playing video:', err);
+      });
     };
 
     // Add error handling
-    img.onerror = () => {
-      console.error(`Failed to load image: ${this.image}`);
+    video.onerror = () => {
+      console.error(`Failed to load video: ${this.video}`);
     };
-
-    img.src = this.image;
+    
+    // Set the video source
+    video.src = this.video;
+    
+    // Set the video as the texture source
+    texture.image = video;
+    
+    // Set up continuous texture update for video frames
+    const updateTexture = () => {
+      if (video.readyState >= video.HAVE_CURRENT_DATA) {
+        texture.needsUpdate = true;
+      }
+      requestAnimationFrame(updateTexture);
+    };
+    
+    updateTexture();
   }
 
   createMesh() {
@@ -382,7 +405,6 @@ class Media {
     }
 
     this.speed = scroll.current - scroll.last;
-    this.program.uniforms.uTime.value += 0.04;
     this.program.uniforms.uSpeed.value = this.speed;
 
     const planeOffset = this.plane.scale.x / 2;
@@ -413,7 +435,7 @@ class Media {
         ];
       }
     }
-    this.scale = this.screen.height / 1500;
+    this.scale = this.screen.height / 1200;
     this.plane.scale.y =
       (this.viewport.height * (900 * this.scale)) / this.screen.height;
     this.plane.scale.x =
@@ -422,7 +444,7 @@ class Media {
       this.plane.scale.x,
       this.plane.scale.y,
     ];
-    this.padding = 2;
+    this.padding = 2.5;
     this.width = this.plane.scale.x + this.padding;
     this.widthTotal = this.width * this.length;
     this.x = this.width * this.index;
@@ -430,7 +452,7 @@ class Media {
 }
 
 interface AppConfig {
-  items?: { image: string; text: string }[];
+  items?: { video: string; text: string }[];
   bend?: number;
   textColor?: string;
   borderRadius?: number;
@@ -453,7 +475,7 @@ class App {
   scene!: Transform;
   planeGeometry!: Plane;
   medias: Media[] = [];
-  mediasImages: { image: string; text: string }[] = [];
+  mediasVideos: { video: string; text: string }[] = [];
   screen!: { width: number; height: number };
   viewport!: { width: number; height: number };
   raf: number = 0;
@@ -520,7 +542,7 @@ class App {
   }
 
   createMedias(
-    items: { image: string; text: string }[] | undefined,
+    items: { video: string; text: string }[] | undefined,
     bend: number = 1,
     textColor: string,
     borderRadius: number,
@@ -528,31 +550,31 @@ class App {
   ) {
     const defaultItems = [
       {
-        image: 'gallery/outfit1.png',
-        text: 'Bridge',
+        video: "gallery/video1.mp4",
+        text: 'Video 1',
       },
       {
-        image: 'gallery/outfit2.png',
-        text: 'Desk Setup',
+        video: "gallery/video2.mp4",
+        text: 'Video 2',
       },
       {
-        image: 'gallery/outfit3.png',
-        text: 'Waterfall',
+        video: "gallery/video3.mp4",
+        text: 'Video 3',
       },
       {
-        image: 'gallery/outfit4.png',
-        text: 'Strawberries',
+        video: "gallery/video4.mp4",
+        text: 'Video 4',
       },
     ];
     const galleryItems = items && items.length ? items : defaultItems;
-    this.mediasImages = galleryItems.concat(galleryItems);
-    this.medias = this.mediasImages.map((data, index) => {
+    this.mediasVideos = galleryItems.concat(galleryItems);
+    this.medias = this.mediasVideos.map((data, index) => {
       return new Media({
         geometry: this.planeGeometry,
         gl: this.gl,
-        image: data.image,
+        video: data.video,
         index,
-        length: this.mediasImages.length,
+        length: this.mediasVideos.length,
         renderer: this.renderer,
         scene: this.scene,
         screen: this.screen,
@@ -660,6 +682,18 @@ class App {
     window.removeEventListener('touchstart', this.boundOnTouchDown);
     window.removeEventListener('touchmove', this.boundOnTouchMove);
     window.removeEventListener('touchend', this.boundOnTouchUp);
+    
+    // Clean up video elements
+    if (this.medias) {
+      this.medias.forEach(media => {
+        if (media.videoElement) {
+          media.videoElement.pause();
+          media.videoElement.src = '';
+          media.videoElement.load();
+        }
+      });
+    }
+    
     if (
       this.renderer &&
       this.renderer.gl &&
@@ -673,7 +707,7 @@ class App {
 }
 
 interface CircularGalleryProps {
-  items?: { image: string; text: string }[];
+  items?: { video: string; text: string }[];
   bend?: number;
   textColor?: string;
   borderRadius?: number;

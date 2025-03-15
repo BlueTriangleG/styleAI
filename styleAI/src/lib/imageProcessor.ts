@@ -1,11 +1,13 @@
 'use client';
 
+import ApiService from './api/ApiService';
+
 /**
- * 客户端版本的图片处理函数
- * 使用Canvas API在浏览器中压缩图片并转换为JPEG格式
- * @param imageData Base64编码的图片数据或File对象
- * @param maxSizeMB 最大文件大小(MB)
- * @returns 处理后的Base64图片数据
+ * Client-side version of image processing function
+ * Uses Canvas API in the browser to compress images and convert to JPEG format
+ * @param imageData Base64 encoded image data or File object
+ * @param maxSizeMB Maximum file size (MB)
+ * @returns Processed Base64 image data
  */
 export async function processImageClient(
   imageData: string | File,
@@ -17,55 +19,55 @@ export async function processImageClient(
       let mimeType: string;
       let sizeInMB: number;
 
-      // 处理File对象
+      // Process File object
       if (imageData instanceof File) {
-        // 获取文件MIME类型
+        // Get file MIME type
         mimeType = imageData.type;
 
-        // 计算文件大小
+        // Calculate file size
         sizeInMB = imageData.size / (1024 * 1024);
         console.log(
-          `原始文件大小: ${sizeInMB.toFixed(2)}MB, 类型: ${mimeType}`
+          `Original file size: ${sizeInMB.toFixed(2)}MB, type: ${mimeType}`
         );
 
-        // 将File转换为Base64
+        // Convert File to Base64
         base64Data = await fileToBase64(imageData);
       } else {
-        // 处理Base64字符串
+        // Process Base64 string
         const matches = imageData.match(/^data:([A-Za-z-+\/]+);base64,(.+)$/);
 
         if (!matches || matches.length !== 3) {
-          throw new Error('无效的图片数据格式');
+          throw new Error('Invalid image data format');
         }
 
         mimeType = matches[1];
         const rawBase64 = matches[2];
 
-        // 计算图片大小（以MB为单位）
+        // Calculate image size (in MB)
         sizeInMB = (rawBase64.length * 3) / 4 / (1024 * 1024);
         console.log(
-          `原始图片大小: ${sizeInMB.toFixed(2)}MB, 类型: ${mimeType}`
+          `Original image size: ${sizeInMB.toFixed(2)}MB, type: ${mimeType}`
         );
 
         base64Data = imageData;
       }
 
-      // 如果图片已经是JPEG格式且小于最大大小，直接返回
+      // If image is already JPEG and smaller than max size, return directly
       if (sizeInMB <= maxSizeMB && mimeType === 'image/jpeg') {
-        // 保存到本地
+        // Save to local storage
         saveImageLocally(base64Data, 'original.jpg');
         return resolve(base64Data);
       }
 
-      // 创建图片元素
+      // Create image element
       const img = new Image();
       img.onload = () => {
-        // 创建Canvas
+        // Create Canvas
         const canvas = document.createElement('canvas');
         let width = img.width;
         let height = img.height;
 
-        // 如果图片太大，按比例缩小
+        // If image is too large, scale proportionally
         const MAX_WIDTH = 1920;
         const MAX_HEIGHT = 1080;
 
@@ -82,13 +84,13 @@ export async function processImageClient(
         canvas.width = width;
         canvas.height = height;
 
-        // 绘制图片到Canvas
+        // Draw image to Canvas
         const ctx = canvas.getContext('2d');
         if (!ctx) {
-          return reject(new Error('无法创建Canvas上下文'));
+          return reject(new Error('Cannot create Canvas context'));
         }
 
-        // 如果是PNG等带透明度的格式，先填充白色背景
+        // For PNG or other formats with transparency, fill white background first
         if (mimeType === 'image/png' || mimeType === 'image/webp') {
           ctx.fillStyle = '#FFFFFF';
           ctx.fillRect(0, 0, width, height);
@@ -96,7 +98,7 @@ export async function processImageClient(
 
         ctx.drawImage(img, 0, 0, width, height);
 
-        // 计算初始质量
+        // Calculate initial quality
         let quality = 0.9;
         if (sizeInMB > 10) {
           quality = 0.7;
@@ -104,27 +106,72 @@ export async function processImageClient(
           quality = 0.8;
         }
 
-        // 压缩图片
+        // Compress image
         compressWithQuality(canvas, quality, maxSizeMB, resolve);
       };
 
       img.onerror = (error) => {
-        console.error('图片加载失败:', error);
-        reject(new Error('图片加载失败'));
+        console.error('Image loading failed:', error);
+        reject(new Error('Image loading failed'));
       };
 
       img.src = base64Data;
     } catch (error) {
-      console.error('图片处理失败:', error);
+      console.error('Image processing failed:', error);
       reject(error);
     }
   });
 }
 
 /**
- * 将File对象转换为Base64字符串
- * @param file 文件对象
- * @returns Base64字符串
+ * Process image using the server API
+ * @param imageData Base64 encoded image data or File object
+ * @param maxSizeMB Maximum file size (MB)
+ * @returns Processed Base64 image data
+ */
+export async function processImageServer(
+  imageData: string | File,
+  maxSizeMB: number = 5
+): Promise<string> {
+  try {
+    // Create API service instance
+    const apiService = new ApiService();
+
+    // Check if server is available
+    const isServerAvailable = await apiService.isServerAvailable();
+    if (!isServerAvailable) {
+      console.warn(
+        'API server is not available, falling back to client-side processing'
+      );
+      return processImageClient(imageData, maxSizeMB);
+    }
+
+    // Convert File to Base64 if needed
+    let base64Data: string;
+    if (imageData instanceof File) {
+      base64Data = await fileToBase64(imageData);
+    } else {
+      base64Data = imageData;
+    }
+
+    // Process image using API
+    const processedImage = await apiService.processImage(base64Data);
+
+    // Save to local storage
+    saveImageLocally(processedImage, 'processed_server.jpg');
+
+    return processedImage;
+  } catch (error) {
+    console.error('Server image processing failed:', error);
+    console.warn('Falling back to client-side processing');
+    return processImageClient(imageData, maxSizeMB);
+  }
+}
+
+/**
+ * Convert File object to Base64 string
+ * @param file File object
+ * @returns Base64 string
  */
 function fileToBase64(file: File): Promise<string> {
   return new Promise((resolve, reject) => {
@@ -140,12 +187,12 @@ function fileToBase64(file: File): Promise<string> {
 }
 
 /**
- * 递归压缩图片直到达到目标大小
- * @param canvas Canvas元素
- * @param quality 初始质量
- * @param maxSizeMB 最大文件大小(MB)
- * @param resolve Promise解析函数
- * @param attempt 尝试次数
+ * Recursively compress image until target size is reached
+ * @param canvas Canvas element
+ * @param quality Initial quality
+ * @param maxSizeMB Maximum file size (MB)
+ * @param resolve Promise resolve function
+ * @param attempt Attempt count
  */
 function compressWithQuality(
   canvas: HTMLCanvasElement,
@@ -155,8 +202,8 @@ function compressWithQuality(
   attempt: number = 1
 ): void {
   if (attempt > 10) {
-    // 防止无限递归
-    console.log(`达到最大压缩尝试次数，使用最低质量`);
+    // Prevent infinite recursion
+    console.log(`Maximum compression attempts reached, using lowest quality`);
     const finalImage = canvas.toDataURL('image/jpeg', 0.5);
     saveImageLocally(finalImage, `compressed_final.jpg`);
     resolve(finalImage);
@@ -165,100 +212,102 @@ function compressWithQuality(
 
   const dataUrl = canvas.toDataURL('image/jpeg', quality);
 
-  // 检查压缩后的大小
+  // Check compressed size
   const base64Data = dataUrl.split(',')[1];
   const compressedSize = (base64Data.length * 3) / 4 / (1024 * 1024);
   console.log(
-    `压缩尝试 #${attempt}: 质量=${quality.toFixed(
+    `Compression attempt #${attempt}: quality=${quality.toFixed(
       2
-    )}, 大小=${compressedSize.toFixed(2)}MB`
+    )}, size=${compressedSize.toFixed(2)}MB`
   );
 
   if (compressedSize <= maxSizeMB) {
-    console.log(`压缩成功: 最终大小=${compressedSize.toFixed(2)}MB`);
-    // 保存到本地
+    console.log(
+      `Compression successful: final size=${compressedSize.toFixed(2)}MB`
+    );
+    // Save to local storage
     saveImageLocally(dataUrl, `compressed_${compressedSize.toFixed(1)}MB.jpg`);
     resolve(dataUrl);
   } else {
-    // 继续压缩，降低质量
+    // Continue compressing, reduce quality
     const newQuality = quality * 0.8;
-    console.log(`继续压缩: 新质量=${newQuality.toFixed(2)}`);
+    console.log(`Continue compressing: new quality=${newQuality.toFixed(2)}`);
     compressWithQuality(canvas, newQuality, maxSizeMB, resolve, attempt + 1);
   }
 }
 
 /**
- * 保存图片到本地
- * @param dataUrl 图片的Base64数据
- * @param fileName 文件名
+ * Save image to local storage
+ * @param dataUrl Image Base64 data
+ * @param fileName File name
  */
 function saveImageLocally(dataUrl: string, fileName: string): void {
   try {
-    // 创建下载链接
+    // Create download link
     const link = document.createElement('a');
     link.href = dataUrl;
     link.download = fileName;
 
-    // 添加到文档中并触发点击
+    // Add to document and trigger click
     document.body.appendChild(link);
 
-    // 使用localStorage存储最近处理的图片信息
+    // Use localStorage to store recently processed image info
     const imageInfo = {
       timestamp: new Date().toISOString(),
       fileName: fileName,
       size: (dataUrl.length * 3) / 4 / (1024 * 1024),
     };
 
-    // 存储图片信息
+    // Store image info
     const storedImages = JSON.parse(
       localStorage.getItem('processedImages') || '[]'
     );
     storedImages.push(imageInfo);
 
-    // 只保留最近10张图片的信息
+    // Only keep the most recent 10 images
     if (storedImages.length > 10) {
       storedImages.shift();
     }
 
     localStorage.setItem('processedImages', JSON.stringify(storedImages));
 
-    console.log(`图片信息已保存到localStorage: ${fileName}`);
+    console.log(`Image info saved to localStorage: ${fileName}`);
   } catch (error) {
-    console.error('保存图片到本地失败:', error);
+    console.error('Failed to save image locally:', error);
   }
 }
 
 /**
- * 下载图片到本地
- * @param dataUrl 图片的Base64数据
- * @param fileName 文件名
+ * Download image to local
+ * @param dataUrl Image Base64 data
+ * @param fileName File name
  */
 export function downloadImage(
   dataUrl: string,
   fileName: string = 'processed_image.jpg'
 ): void {
   try {
-    // 创建下载链接
+    // Create download link
     const link = document.createElement('a');
     link.href = dataUrl;
     link.download = fileName;
 
-    // 添加到文档中并触发点击
+    // Add to document and trigger click
     document.body.appendChild(link);
     link.click();
 
-    // 清理
+    // Cleanup
     document.body.removeChild(link);
 
-    console.log(`图片已下载: ${fileName}`);
+    console.log(`Image downloaded: ${fileName}`);
   } catch (error) {
-    console.error('下载图片失败:', error);
+    console.error('Failed to download image:', error);
   }
 }
 
 /**
- * 获取最近处理的图片信息
- * @returns 图片信息数组
+ * Get recently processed image info
+ * @returns Array of image info
  */
 export function getProcessedImagesInfo(): Array<{
   timestamp: string;
@@ -268,13 +317,28 @@ export function getProcessedImagesInfo(): Array<{
   try {
     return JSON.parse(localStorage.getItem('processedImages') || '[]');
   } catch (error) {
-    console.error('获取处理图片信息失败:', error);
+    console.error('Failed to get processed image info:', error);
     return [];
   }
 }
 
 /**
- * 为了保持API兼容性，提供一个processImage函数
- * 在客户端环境中，这只是processImageClient的别名
+ * Process image using the best available method
+ * Tries server-side processing first, falls back to client-side if server is unavailable
  */
-export const processImage = processImageClient;
+export const processImage = async (
+  imageData: string | File,
+  maxSizeMB: number = 5,
+  preferServer: boolean = true
+): Promise<string> => {
+  if (preferServer) {
+    try {
+      return await processImageServer(imageData, maxSizeMB);
+    } catch (error) {
+      console.warn('Server processing failed, falling back to client-side');
+      return processImageClient(imageData, maxSizeMB);
+    }
+  } else {
+    return processImageClient(imageData, maxSizeMB);
+  }
+};
