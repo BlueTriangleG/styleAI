@@ -1,33 +1,34 @@
-from flask import Flask, request, jsonify
+from flask import Flask, jsonify, request
+from config import Config
+from models import db, User
 
 app = Flask(__name__)
+app.config.from_object(Config)
 
-# Mock data
-mock_users = [
-    {"id": 1, "name": "张三", "age": 25},
-    {"id": 2, "name": "李四", "age": 30},
-    {"id": 3, "name": "王五", "age": 28}
-]
+# 绑定数据库
+db.init_app(app)
 
-@app.route('/api/users', methods=['POST'])
-def create_user():
+@app.route('/')
+def index():
+    return "Flask Connected to Neon Postgres!"
 
-    data = request.get_json()
-    
-    new_user = {
-        "id": len(mock_users) + 1,
-        "name": data.get('name', ''),
-        "age": data.get('age', 0)
-    }
-    
-    # 添加到mock数据中
-    mock_users.append(new_user)
-    
-    return jsonify({
-        "status": "success",
-        "message": "用户创建成功",
-        "data": new_user
-    }), 201
+@app.route('/add_user', methods=['POST'])
+def add_user():
+    data = request.json
+    if not data or "name" not in data:
+        return jsonify({"error": "Missing name"}), 400
+
+    new_user = User(name=data["name"])
+    db.session.add(new_user)
+    db.session.commit()
+    return jsonify({"message": "User added!", "id": new_user.id})
+
+@app.route('/get_users', methods=['GET'])
+def get_users():
+    users = User.query.all()
+    return jsonify([{"id": user.id, "name": user.name} for user in users])
 
 if __name__ == '__main__':
-    app.run(debug=True, port=5000)
+    with app.app_context():
+        db.create_all()  # 初始化数据库表
+    app.run(debug=True)
