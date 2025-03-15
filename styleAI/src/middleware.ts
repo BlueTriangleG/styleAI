@@ -14,6 +14,10 @@ export function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
   console.log("pathname",pathname);
 
+  // Set redirect URL to avoid redirect problem under nginx proxy
+  const redirectURL = request.nextUrl.clone();
+  redirectURL.pathname = '/login';
+
   // 检查是否是公开路由
   if (publicPaths.some(path => pathname.startsWith(path))) {
     return NextResponse.next();
@@ -30,7 +34,7 @@ export function middleware(request: NextRequest) {
       return NextResponse.json({ error: '未授权访问' }, { status: 401 });
     }
     // 否则重定向到登录页面
-    return NextResponse.redirect(new URL('/login', request.url));
+    return NextResponse.redirect(redirectURL);
   }
 
   try {
@@ -52,7 +56,7 @@ export function middleware(request: NextRequest) {
     if (pathname.startsWith('/api/')) {
       return NextResponse.json({ error: 'token无效' }, { status: 401 });
     }
-    return NextResponse.redirect(new URL('/login', request.url));
+    return NextResponse.redirect(redirectURL);
   }
 }
 
