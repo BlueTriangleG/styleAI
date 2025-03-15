@@ -262,7 +262,6 @@ class Media {
         void main() {
           vUv = uv;
           vec3 p = position;
-          p.z = (sin(p.x * 4.0 + uTime) * 1.5 + cos(p.y * 2.0 + uTime) * 1.5) * (0.1 + uSpeed * 0.5);
           gl_Position = projectionMatrix * modelViewMatrix * vec4(p, 1.0);
         }
       `,
@@ -406,7 +405,6 @@ class Media {
     }
 
     this.speed = scroll.current - scroll.last;
-    this.program.uniforms.uTime.value += 0.04;
     this.program.uniforms.uSpeed.value = this.speed;
 
     const planeOffset = this.plane.scale.x / 2;
@@ -439,9 +437,9 @@ class Media {
     }
     this.scale = this.screen.height / 1200;
     this.plane.scale.y =
-      (this.viewport.height * (1000 * this.scale)) / this.screen.height;
+      (this.viewport.height * (900 * this.scale)) / this.screen.height;
     this.plane.scale.x =
-      (this.viewport.width * (800 * this.scale)) / this.screen.width;
+      (this.viewport.width * (700 * this.scale)) / this.screen.width;
     this.plane.program.uniforms.uPlaneSizes.value = [
       this.plane.scale.x,
       this.plane.scale.y,
