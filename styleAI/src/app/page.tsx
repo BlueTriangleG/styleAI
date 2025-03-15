@@ -4,7 +4,7 @@ import { Hero } from "@/components/home/content";
 
 export default function Home() {
   return (
-    <div className="min-h-screen bg-[#E6F4EA]">
+    <div className="h-screen overflow-hidden">
       <Header />
       <Hero />
     </div>
