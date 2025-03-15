@@ -51,7 +51,8 @@ export default function LoginPage() {
   };
 
   const handleGitHubLogin = () => {
-    window.location.href = '/api/auth/github';
+    router.push('/api/auth/github');
+    // window.location.href = '/api/auth/github';
   };
 
   return (
