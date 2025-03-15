@@ -36,7 +36,7 @@ export default function LoadingPage() {
           }, 500);
           return 100;
         }
-        return prevProgress + 1;
+        return prevProgress + 10;
       });
     }, 150);
 
@@ -105,21 +105,23 @@ export default function LoadingPage() {
   return (
     <>
       <RecommendationHeader />
-      <ImageTrail
-        items={[
-          'https://picsum.photos/id/287/300/300',
-          'https://picsum.photos/id/1001/300/300',
-          'https://picsum.photos/id/1025/300/300',
-          'https://picsum.photos/id/1026/300/300',
-          'https://picsum.photos/id/1027/300/300',
-          'https://picsum.photos/id/1028/300/300',
-          'https://picsum.photos/id/1029/300/300',
-          'https://picsum.photos/id/1030/300/300',
-        ]}
-        variant={1}
-      />
+      <div className="fixed inset-0 z-[100] pointer-events-none">
+        <ImageTrail
+          items={[
+            'https://picsum.photos/id/287/300/300',
+            'https://picsum.photos/id/1001/300/300',
+            'https://picsum.photos/id/1025/300/300',
+            'https://picsum.photos/id/1026/300/300',
+            'https://picsum.photos/id/1027/300/300',
+            'https://picsum.photos/id/1028/300/300',
+            'https://picsum.photos/id/1029/300/300',
+            'https://picsum.photos/id/1030/300/300',
+          ]}
+          variant={1}
+        />
+      </div>
       {/* 流动背景 */}
-      <div className="absolute inset-0 z-0 overflow-hidden">
+      <div className="absolute inset-0 z-0 overflow-hidden pointer-events-auto">
         <LiquidChrome
           baseColor={[0.9, 0.9, 0.9]}
           speed={0.3}
