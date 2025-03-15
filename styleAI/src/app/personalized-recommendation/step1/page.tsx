@@ -252,17 +252,53 @@ export default function Step1() {
       // Start transition animation
       setIsTransitioning(true);
 
-      // Navigate to the next step after animation completes
+      // Navigate to the loading page after animation completes
       setTimeout(() => {
-        router.push('/personalized-recommendation/step2');
+        router.push('/personalized-recommendation/loading');
       }, 500); // Match this with animation duration
     }
   };
 
   // Animation variants
   const pageVariants = {
-    initial: { opacity: 1, x: 0 },
+    initial: { opacity: 0, x: 100 },
+    animate: { opacity: 1, x: 0 },
     exit: { opacity: 0, x: -100 },
+  };
+
+  const containerVariants = {
+    initial: { opacity: 0 },
+    animate: {
+      opacity: 1,
+      transition: {
+        duration: 0.5,
+        when: 'beforeChildren',
+        staggerChildren: 0.2,
+      },
+    },
+    exit: {
+      opacity: 0,
+      transition: {
+        duration: 0.3,
+        when: 'afterChildren',
+        staggerChildren: 0.1,
+        staggerDirection: -1,
+      },
+    },
+  };
+
+  const itemVariants = {
+    initial: { y: 20, opacity: 0 },
+    animate: {
+      y: 0,
+      opacity: 1,
+      transition: { duration: 0.5 },
+    },
+    exit: {
+      y: -20,
+      opacity: 0,
+      transition: { duration: 0.3 },
+    },
   };
 
   return (
@@ -270,13 +306,14 @@ export default function Step1() {
       <RecommendationHeader />
       <motion.div
         className="min-h-screen pt-20 relative"
-        initial={{ opacity: 0, x: 100 }}
-        animate={isTransitioning ? pageVariants.exit : { opacity: 1, x: 0 }}
+        initial="initial"
+        animate={isTransitioning ? 'exit' : 'animate'}
+        variants={pageVariants}
         transition={{ duration: 0.5 }}>
         {/* 流动背景 */}
         <div className="absolute inset-0 z-0 overflow-hidden">
           <LiquidChrome
-            baseColor={[0.95, 0.95, 0.95]}
+            baseColor={[0.9, 0.9, 0.9]}
             speed={0.2}
             amplitude={0.5}
             frequencyX={3}
@@ -289,9 +326,11 @@ export default function Step1() {
 
         {/* 内容区域 */}
         <div className="container mx-auto px-4 py-6 relative z-10">
-          <h1 className="text-4xl font-bold mb-10 text-left font-playfair">
+          <motion.h1
+            className="text-4xl font-bold mb-10 text-left font-playfair"
+            variants={itemVariants}>
             Upload Your Photo
-          </h1>
+          </motion.h1>
 
           <div
             className="flex flex-col md:flex-row gap-8"
@@ -300,9 +339,7 @@ export default function Step1() {
             <motion.div
               className="w-full md:w-1/2 bg-white/60 backdrop-blur-xs rounded-lg p-4 flex flex-col items-center justify-center shadow-lg"
               style={{ minHeight: 'calc(100vh - 200px)' }}
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              transition={{ delay: 0.2 }}>
+              variants={containerVariants}>
               {isCameraOpen ? (
                 <div
                   ref={videoDivRef}
@@ -541,12 +578,12 @@ export default function Step1() {
             {/* Right side - Instructions */}
             <motion.div
               className="w-full md:w-1/2 flex flex-col"
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              transition={{ delay: 0.4 }}>
-              <div className="bg-white/40 backdrop-blur-xs rounded-lg flex-grow shadow-sm p-8 border border-white/20">
+              variants={containerVariants}>
+              <motion.div
+                className="bg-white/40 backdrop-blur-xs rounded-lg flex-grow shadow-sm p-8 border border-white/20"
+                variants={itemVariants}>
                 <div className="text-gray-700 space-y-6">
-                  <div className="space-y-3">
+                  <motion.div className="space-y-3" variants={itemVariants}>
                     <h2 className="text-xl font-bold font-playfair text-gray-800 mb-2">
                       Upload a Clear Picture:
                     </h2>
@@ -554,9 +591,9 @@ export default function Step1() {
                       <li>Use a half or full body shot.</li>
                       <li>Preferably choose a front view.</li>
                     </ul>
-                  </div>
+                  </motion.div>
 
-                  <div className="space-y-3">
+                  <motion.div className="space-y-3" variants={itemVariants}>
                     <h2 className="text-xl font-bold font-playfair text-gray-800 mb-2">
                       Ensure Your Face is Visible:
                     </h2>
@@ -567,9 +604,9 @@ export default function Step1() {
                         features.
                       </li>
                     </ul>
-                  </div>
+                  </motion.div>
 
-                  <div className="space-y-3">
+                  <motion.div className="space-y-3" variants={itemVariants}>
                     <h2 className="text-xl font-bold font-playfair text-gray-800 mb-2">
                       Review Your Picture:
                     </h2>
@@ -579,9 +616,9 @@ export default function Step1() {
                         guidelines.
                       </li>
                     </ul>
-                  </div>
+                  </motion.div>
 
-                  <div className="space-y-3">
+                  <motion.div className="space-y-3" variants={itemVariants}>
                     <h2 className="text-xl font-bold font-playfair text-gray-800 mb-2">
                       Proceed to the Next Stage:
                     </h2>
@@ -591,9 +628,9 @@ export default function Step1() {
                         Stage."
                       </li>
                     </ul>
-                  </div>
+                  </motion.div>
                 </div>
-              </div>
+              </motion.div>
 
               <motion.button
                 onClick={handleNextClick}
@@ -603,6 +640,7 @@ export default function Step1() {
                     ? 'bg-[#84a59d] hover:bg-[#6b8c85]'
                     : 'bg-gray-300 cursor-not-allowed'
                 } transition-colors`}
+                variants={itemVariants}
                 whileHover={image ? { scale: 1.05 } : {}}
                 whileTap={image ? { scale: 0.95 } : {}}>
                 Next Stage

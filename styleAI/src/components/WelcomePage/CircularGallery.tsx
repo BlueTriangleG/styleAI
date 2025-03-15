@@ -440,7 +440,7 @@ class App {
   raf: number = 0;
 
   boundOnResize!: () => void;
-  boundOnWheel!: () => void;
+  boundOnWheel!: (e: WheelEvent) => void;
   boundOnTouchDown!: (e: MouseEvent | TouchEvent) => void;
   boundOnTouchMove!: (e: MouseEvent | TouchEvent) => void;
   boundOnTouchUp!: () => void;
@@ -476,7 +476,17 @@ class App {
     this.renderer = new Renderer({ alpha: true });
     this.gl = this.renderer.gl;
     this.gl.clearColor(0, 0, 0, 0);
-    this.container.appendChild(this.renderer.gl.canvas as HTMLCanvasElement);
+
+    // 设置canvas样式，确保它填满容器
+    const canvas = this.renderer.gl.canvas as HTMLCanvasElement;
+    canvas.style.width = '100%';
+    canvas.style.height = '100%';
+    canvas.style.position = 'absolute';
+    canvas.style.top = '0';
+    canvas.style.left = '0';
+    canvas.style.pointerEvents = 'none'; // 让canvas不拦截鼠标事件
+
+    this.container.appendChild(canvas);
   }
 
   createCamera() {
@@ -593,8 +603,10 @@ class App {
     this.onCheck();
   }
 
-  onWheel() {
-    this.scroll.target += 2;
+  onWheel(e: WheelEvent) {
+    e.preventDefault(); // 阻止默认滚动行为
+    const delta = e.deltaY || e.deltaX;
+    this.scroll.target += delta * 0.01; // 调整滚动速度
     this.onCheckDebounce();
   }
 
@@ -647,28 +659,41 @@ class App {
     this.boundOnTouchDown = this.onTouchDown.bind(this);
     this.boundOnTouchMove = this.onTouchMove.bind(this);
     this.boundOnTouchUp = this.onTouchUp.bind(this);
+
+    // 使用容器元素而不是canvas来绑定事件
     window.addEventListener('resize', this.boundOnResize);
-    window.addEventListener('mousewheel', this.boundOnWheel);
-    window.addEventListener('wheel', this.boundOnWheel);
-    window.addEventListener('mousedown', this.boundOnTouchDown);
-    window.addEventListener('mousemove', this.boundOnTouchMove);
-    window.addEventListener('mouseup', this.boundOnTouchUp);
-    window.addEventListener('touchstart', this.boundOnTouchDown);
-    window.addEventListener('touchmove', this.boundOnTouchMove);
-    window.addEventListener('touchend', this.boundOnTouchUp);
+    this.container.addEventListener('wheel', this.boundOnWheel, {
+      passive: false,
+    });
+    this.container.addEventListener('mousedown', this.boundOnTouchDown);
+    this.container.addEventListener('mousemove', this.boundOnTouchMove);
+    this.container.addEventListener('mouseup', this.boundOnTouchUp);
+    this.container.addEventListener('touchstart', this.boundOnTouchDown);
+    this.container.addEventListener('touchmove', this.boundOnTouchMove);
+    this.container.addEventListener('touchend', this.boundOnTouchUp);
+
+    // 阻止默认的滚动行为
+    this.container.addEventListener('wheel', (e) => e.preventDefault(), {
+      passive: false,
+    });
   }
 
   destroy() {
     window.cancelAnimationFrame(this.raf);
     window.removeEventListener('resize', this.boundOnResize);
-    window.removeEventListener('mousewheel', this.boundOnWheel);
-    window.removeEventListener('wheel', this.boundOnWheel);
-    window.removeEventListener('mousedown', this.boundOnTouchDown);
-    window.removeEventListener('mousemove', this.boundOnTouchMove);
-    window.removeEventListener('mouseup', this.boundOnTouchUp);
-    window.removeEventListener('touchstart', this.boundOnTouchDown);
-    window.removeEventListener('touchmove', this.boundOnTouchMove);
-    window.removeEventListener('touchend', this.boundOnTouchUp);
+
+    // 从容器元素移除事件监听器
+    this.container.removeEventListener('wheel', this.boundOnWheel);
+    this.container.removeEventListener('mousedown', this.boundOnTouchDown);
+    this.container.removeEventListener('mousemove', this.boundOnTouchMove);
+    this.container.removeEventListener('mouseup', this.boundOnTouchUp);
+    this.container.removeEventListener('touchstart', this.boundOnTouchDown);
+    this.container.removeEventListener('touchmove', this.boundOnTouchMove);
+    this.container.removeEventListener('touchend', this.boundOnTouchUp);
+
+    // 移除阻止默认滚动的事件监听器
+    this.container.removeEventListener('wheel', (e) => e.preventDefault());
+
     if (
       this.renderer &&
       this.renderer.gl &&
@@ -713,8 +738,13 @@ export default function CircularGallery({
 
   return (
     <div
-      className="w-full h-full overflow-hidden cursor-grab active:cursor-grabbing"
+      className="w-full h-full overflow-hidden cursor-grab active:cursor-grabbing relative"
       ref={containerRef}
+      style={{
+        touchAction: 'none',
+        position: 'relative',
+        zIndex: 1,
+      }}
     />
   );
 }
