@@ -1,10 +1,10 @@
 'use client';
-
+import { useRef, useEffect } from 'react';
 import Image from 'next/image';
 import { useRouter } from 'next/navigation';
 import CircularGallery from '@/components/ui/CircularGallery';
 import BounceCards from '@/components/ui/BounceCards';
-import { useRef, useEffect } from 'react';
+
 
 const images = [
   "gallery/outfit1.png",
@@ -94,18 +94,27 @@ export function Hero() {
               />
             </div>
             
-            <div className="flex flex-col md:flex-row items-center justify-center gap-4">
-              <button
-                className="bg-black text-white px-12 py-3 rounded-md text-lg font-medium hover:bg-gray-800 transition-colors"
-                onClick={handleStartClick}>
-                Start
-              </button>
-              
-              <button
-                className="bg-transparent text-[#2D4B37] px-6 py-3 rounded-md text-lg font-medium hover:bg-gray-100 transition-colors border border-[#2D4B37]"
+            <div className="flex justify-center">
+              {/* <button
+                className="bg-[#2D4B37] text-white px-8 py-3 rounded-md text-lg font-medium hover:bg-[#1A3326] transition-colors"
                 onClick={scrollToUsecase}>
                 Learn More
-              </button>
+              </button> */}
+              <div 
+                className="flex flex-col items-center cursor-pointer mt-12 group"
+                onClick={scrollToUsecase}
+              >
+                <p className="text-[#2D4B37] mb-2 font-medium transition-all group-hover:text-[#FF9999]">Explore More</p>
+                <div className="animate-bounce transition-transform group-hover:scale-110">
+                  <Image 
+                    src="/doubledown.svg" 
+                    alt="Scroll Down" 
+                    width={40} 
+                    height={40} 
+                    className="transition-all group-hover:opacity-80"
+                  />
+                </div>
+              </div>
             </div>
           </div>
         </div>
@@ -133,13 +142,6 @@ export function Hero() {
               font="0px var(--font-playfair)"
             />
           </div>
-          {/* <div className="mt-8 text-center">
-            <button
-              className="bg-black text-white px-12 py-3 rounded-md text-lg font-medium hover:bg-gray-800 transition-colors"
-              onClick={handleStartClick}>
-              Get Started
-            </button>
-          </div> */}
         </div>
       </section>
     </div>
