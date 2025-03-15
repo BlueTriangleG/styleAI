@@ -2,16 +2,23 @@
 
 import Image from 'next/image';
 import { useRouter } from 'next/navigation';
-import CircularGallery from '@/components/WelcomePage/CircularGallery';
+import CircularGallery from '@/components/ui/CircularGallery';
+import BounceCards from '@/components/ui/BounceCards';
 
-// 定义示例图片数据
-const galleryItems = [
-  { image: '/gallery/outfit1.png', text: 'Casual Style' },
-  { image: '/gallery/outfit2.png', text: 'Formal Wear' },
-  { image: '/gallery/outfit3.png', text: 'Street Fashion' },
-  { image: '/gallery/outfit3.png', text: 'Business Casual' },
-  { image: '/gallery/outfit1.png', text: 'Evening Elegance' },
-  { image: '/gallery/outfit2.png', text: 'Summer Vibes' },
+const images = [
+  "https://picsum.photos/400/400?grayscale",
+  "https://picsum.photos/500/500?grayscale",
+  "https://picsum.photos/600/600?grayscale",
+  "https://picsum.photos/700/700?grayscale",
+  "https://picsum.photos/300/300?grayscale"
+];
+
+const transformStyles = [
+  "rotate(5deg) translate(-150px)",
+  "rotate(0deg) translate(-70px)",
+  "rotate(-5deg)",
+  "rotate(5deg) translate(70px)",
+  "rotate(-5deg) translate(150px)"
 ];
 
 export function Hero() {
@@ -30,22 +37,26 @@ export function Hero() {
             <br />
             Using <span className="text-[#FF9999]">STYLE-AI</span>
           </h1>
+          
+          <div className="flex justify-center mb-8">
+            <BounceCards
+              className="custom-bounceCards"
+              images={images}
+              containerWidth={500}
+              containerHeight={250}
+              animationDelay={1}
+              animationStagger={0.08}
+              easeType="elastic.out(1, 0.5)"
+              transformStyles={transformStyles}
+              enableHover={true}
+            />
+          </div>
+          
           <button
             className="bg-black text-white px-12 py-3 rounded-md text-lg font-medium hover:bg-gray-800 transition-colors"
             onClick={handleStartClick}>
             Start
           </button>
-        </div>
-        <div className="grid grid-cols-1 md:grid-cols-1 gap-4 px-0 md:px-8">
-          <div style={{ height: '600px', position: 'relative' }}>
-            <CircularGallery
-              items={galleryItems}
-              bend={3}
-              textColor="#ffffff"
-              borderRadius={0.05}
-              font="bold 24px 'Playfair Display'"
-            />
-          </div>
         </div>
       </div>
     </main>
