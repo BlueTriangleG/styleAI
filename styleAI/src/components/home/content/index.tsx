@@ -22,24 +22,23 @@ const transformStyles = [
   "rotate(-5deg) translate(150px)"
 ];
 
-// Gallery items for CircularGallery
 const galleryItems = [
   {
-    image: "gallery/outfit1.png",
-    text: ""
+    video: "gallery/test.mp4",
+    text: 'Video 1',
   },
   {
-    image: "gallery/outfit2.png",
-    text: ""
+    video: "gallery/test.mp4",
+    text: 'Video 1',
   },
   {
-    image: "gallery/outfit3.png",
-    text: ""
+    video: "gallery/test.mp4",
+    text: 'Video 1',
   },
   {
-    image: "gallery/outfit4.png",
-    text: ""
-  },
+    video: "gallery/test.mp4",
+    text: 'Video 1',
+  }
 ];
 
 export function Hero() {
