@@ -17,7 +17,7 @@ export function Header() {
         <div className="flex items-center">
           <Link
             href="/"
-            className="text-2xl font-bold text-[#2D4B37] font-playfair">
+            className="text-2xl font-bold text-[#2D4B37]">
             Style-AI
           </Link>
         </div>

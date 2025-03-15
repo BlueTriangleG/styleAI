@@ -122,9 +122,9 @@ export function Hero() {
       {/* Usecase Section - Second Screen */}
       <section
         ref={usecaseRef}
-        className="w-screen h-screen pt-20 flex justify-center items-center snap-start"
+        className="w-screen h-screen flex justify-center items-center snap-start"
       >
-        <div className="w-[80%] h-[100%] flex flex-col justify-between">
+        <div className="w-[80%] h-[100%] pt-20 flex flex-col justify-between bg-gray-200/50">
           {/* Title */}
           <div className="w-[100%] h-[30%]">
             <h2 className="p-5 text-center text-5xl font-bold text-[#2D4B37]">
