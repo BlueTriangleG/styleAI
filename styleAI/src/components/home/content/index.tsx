@@ -37,7 +37,14 @@ export function Hero() {
           </button>
         </div>
         <div className="grid grid-cols-1 md:grid-cols-1 gap-4 px-0 md:px-8">
-          <div style={{ height: '600px', position: 'relative' }}>
+          <div
+            style={{
+              height: '600px',
+              position: 'relative',
+              touchAction: 'none',
+              cursor: 'grab',
+            }}
+            className="overflow-hidden">
             <CircularGallery
               items={galleryItems}
               bend={3}
