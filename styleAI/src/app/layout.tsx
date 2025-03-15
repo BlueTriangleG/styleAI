@@ -1,7 +1,8 @@
 import type { Metadata } from 'next';
 import { Playfair_Display, Inter, Geist_Mono } from 'next/font/google';
 import './globals.css';
-import { ClerkProvider } from "@clerk/nextjs";
+import { ClerkProvider } from '@clerk/nextjs';
+import { UserSync } from '@/components/UserSync';
 
 const playfairDisplay = Playfair_Display({
   variable: '--font-playfair',
@@ -35,15 +36,15 @@ export default function RootLayout({
     <ClerkProvider
       appearance={{
         elements: {
-          formButtonPrimary: "bg-blue-600 hover:bg-blue-700 text-white",
-          footerActionLink: "text-blue-600 hover:text-blue-700",
+          formButtonPrimary: 'bg-blue-600 hover:bg-blue-700 text-white',
+          footerActionLink: 'text-blue-600 hover:text-blue-700',
         },
-      }}
-    >
+      }}>
       <html lang="en">
         <body
-        className={`${playfairDisplay.variable} ${inter.variable} ${geistMono.variable} font-inter antialiased`}
-        suppressHydrationWarning>
+          className={`${playfairDisplay.variable} ${inter.variable} ${geistMono.variable} font-inter antialiased`}
+          suppressHydrationWarning>
+          <UserSync />
           {children}
         </body>
       </html>
