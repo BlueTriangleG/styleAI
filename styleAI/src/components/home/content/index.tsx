@@ -7,11 +7,11 @@ import BounceCards from '@/components/ui/BounceCards';
 import ScrollGallery from '@/components/ScrollGallery';
 
 const images = [
-  'gallery/outfit1.png',
-  'gallery/outfit2.png',
-  'gallery/outfit3.png',
-  'gallery/outfit4.png',
-  'gallery/outfit1.png',
+  process.env.NEXT_PUBLIC_BASE_PATH + '/gallery/outfit1.png',
+  process.env.NEXT_PUBLIC_BASE_PATH + '/gallery/outfit2.png',
+  process.env.NEXT_PUBLIC_BASE_PATH + '/gallery/outfit3.png',
+  process.env.NEXT_PUBLIC_BASE_PATH + '/gallery/outfit4.png',
+  process.env.NEXT_PUBLIC_BASE_PATH + '/gallery/outfit1.png',
 ];
 
 const transformStyles = [
@@ -25,19 +25,19 @@ const transformStyles = [
 // Gallery items for CircularGallery
 const galleryItems = [
   {
-    image: 'gallery/outfit1.png',
+    image: process.env.NEXT_PUBLIC_BASE_PATH + '/gallery/outfit1.png',
     text: '',
   },
   {
-    image: 'gallery/outfit2.png',
+    image: process.env.NEXT_PUBLIC_BASE_PATH + '/gallery/outfit2.png',
     text: '',
   },
   {
-    image: 'gallery/outfit3.png',
+    image: process.env.NEXT_PUBLIC_BASE_PATH + '/gallery/outfit3.png',
     text: '',
   },
   {
-    image: 'gallery/outfit4.png',
+    image: process.env.NEXT_PUBLIC_BASE_PATH + '/gallery/outfit4.png',
     text: '',
   },
 ];
