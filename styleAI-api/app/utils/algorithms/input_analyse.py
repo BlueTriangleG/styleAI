@@ -144,13 +144,29 @@ def main(user_image_url):
     Main function to process user input image and return the description text.
     Parameters:
         user_image_url (str): URL or local file path of the user input image.
-                             Supports both HTTP URLs and local file paths (with 'file://' prefix).
+                             Supports HTTP URLs, local file paths (with 'file://' prefix),
+                             and absolute file paths.
     """
     logger.info(f"开始处理图像: {user_image_url}")
     
     # 创建输出目录
     output_dir = "output"
     os.makedirs(output_dir, exist_ok=True)
+    
+    # 检查是否是绝对路径且文件存在
+    if os.path.isabs(user_image_url) and os.path.exists(user_image_url):
+        logger.info(f"检测到有效的绝对文件路径: {user_image_url}")
+        # 直接使用绝对路径处理图像
+        logger.info("开始处理图像...")
+        user_text = process_single_image(user_image_url)
+        if not user_text:
+            logger.error("获取用户描述失败，退出")
+            return None
+        
+        logger.info(f"成功获取分析结果: {user_text[:100]}...")
+        return user_text
+    
+    # 如果不是绝对路径或文件不存在，则尝试下载或复制
     save_path = os.path.join(output_dir, "downloaded_input.jpg")
     logger.info(f"将保存图像到: {save_path}")
     
@@ -161,7 +177,7 @@ def main(user_image_url):
     
     # 检查文件是否存在
     if not os.path.exists(save_path):
-        logger.error(f"保存的图f像文件不存在: {save_path}")
+        logger.error(f"保存的图像文件不存在: {save_path}")
         return None
     
     # 检查文件大小
