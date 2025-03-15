@@ -6,6 +6,11 @@ import { useRouter } from 'next/navigation';
 import { RecommendationHeader } from '@/components/recommendation/Header';
 import { motion } from 'framer-motion';
 import LiquidChrome from '@/components/background/LiquidChrome';
+import {
+  processImageClient,
+  downloadImage,
+  getProcessedImagesInfo,
+} from '@/lib/imageProcessor';
 
 export default function Step1() {
   const [image, setImage] = useState<string | null>(null);
@@ -22,6 +27,10 @@ export default function Step1() {
   const streamRef = useRef<MediaStream | null>(null);
   const videoDivRef = useRef<HTMLDivElement>(null);
   const router = useRouter();
+  const [processedImages, setProcessedImages] = useState<
+    Array<{ timestamp: string; fileName: string; size: number }>
+  >([]);
+  const [showProcessedImages, setShowProcessedImages] = useState(false);
 
   // Check if device has camera
   useEffect(() => {
@@ -55,25 +64,66 @@ export default function Step1() {
     checkCamera();
   }, []);
 
+  // 加载已处理的图片信息
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      const images = getProcessedImagesInfo();
+      setProcessedImages(images);
+    }
+  }, []);
+
   // Handle file selection
-  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    console.log('文件选择事件触发', e.target.files);
     const file = e.target.files?.[0];
-    if (!file) return;
+    if (!file) {
+      console.log('没有选择文件');
+      return;
+    }
 
     setIsUploading(true);
 
-    // Create a FileReader to read the image
-    const reader = new FileReader();
-    reader.onload = (event) => {
-      setImage(event.target?.result as string);
+    try {
+      // 直接处理File对象
+      console.log(
+        `处理文件: ${file.name}, 类型: ${file.type}, 大小: ${(
+          file.size /
+          (1024 * 1024)
+        ).toFixed(2)}MB`
+      );
+
+      // 使用客户端压缩方法直接处理File对象
+      const processedImage = await processImageClient(file, 5);
+
+      // 更新已处理图片列表
+      const images = getProcessedImagesInfo();
+      setProcessedImages(images);
+
+      setImage(processedImage);
       setIsUploading(false);
-    };
-    reader.readAsDataURL(file);
+
+      // 清空input的value，确保可以重新选择相同的文件
+      if (fileInputRef.current) {
+        fileInputRef.current.value = '';
+      }
+    } catch (error) {
+      console.error('处理图片时出错:', error);
+      setIsUploading(false);
+
+      // 出错时也清空input
+      if (fileInputRef.current) {
+        fileInputRef.current.value = '';
+      }
+    }
   };
 
   // Trigger file input click
   const handleUploadClick = () => {
-    fileInputRef.current?.click();
+    console.log('触发文件上传点击事件');
+    // 防止重复触发
+    if (fileInputRef.current) {
+      fileInputRef.current.click();
+    }
   };
 
   // 切换摄像头
@@ -158,7 +208,7 @@ export default function Step1() {
   };
 
   // Take photo
-  const handleTakePhoto = () => {
+  const handleTakePhoto = async () => {
     if (videoRef.current && canvasRef.current && videoDivRef.current) {
       const video = videoRef.current;
       const canvas = canvasRef.current;
@@ -214,7 +264,20 @@ export default function Step1() {
 
         // 转换为数据URL
         const photoDataUrl = canvas.toDataURL('image/jpeg', 0.95);
-        setImage(photoDataUrl);
+
+        try {
+          // 使用新的图片处理功能处理拍照图片
+          const processedImage = await processImageClient(photoDataUrl, 5);
+
+          // 更新已处理图片列表
+          const images = getProcessedImagesInfo();
+          setProcessedImages(images);
+
+          setImage(processedImage);
+        } catch (error) {
+          console.error('处理拍照图片时出错:', error);
+          setImage(photoDataUrl); // 如果处理失败，使用原始图片
+        }
 
         // 关闭摄像头
         handleCloseCamera();
@@ -257,6 +320,18 @@ export default function Step1() {
         router.push('/personalized-recommendation/loading');
       }, 500); // Match this with animation duration
     }
+  };
+
+  // 下载当前图片
+  const handleDownloadImage = () => {
+    if (image) {
+      downloadImage(image, `styleAI_image_${new Date().getTime()}.jpg`);
+    }
+  };
+
+  // 显示/隐藏已处理图片列表
+  const toggleProcessedImages = () => {
+    setShowProcessedImages(!showProcessedImages);
   };
 
   // Animation variants
@@ -466,7 +541,10 @@ export default function Step1() {
                   />
                   <div className="absolute bottom-4 left-1/2 transform -translate-x-1/2 flex space-x-3">
                     <button
-                      onClick={handleUploadClick}
+                      onClick={(e) => {
+                        e.stopPropagation(); // 阻止事件冒泡
+                        handleUploadClick();
+                      }}
                       className="bg-gray-200 hover:bg-gray-300 text-gray-800 font-semibold py-2 px-4 rounded-md shadow-md font-inter transition-all duration-200 hover:scale-105">
                       Change Photo
                     </button>
@@ -496,6 +574,24 @@ export default function Step1() {
                         Use Camera
                       </button>
                     )}
+                    <button
+                      onClick={handleDownloadImage}
+                      className="bg-[#84a59d] hover:bg-[#6b8c85] text-white font-semibold py-2 px-4 rounded-md shadow-md font-inter transition-all duration-200 hover:scale-105 flex items-center justify-center">
+                      <svg
+                        xmlns="http://www.w3.org/2000/svg"
+                        className="h-5 w-5 mr-2"
+                        fill="none"
+                        viewBox="0 0 24 24"
+                        stroke="currentColor">
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          strokeWidth={2}
+                          d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"
+                        />
+                      </svg>
+                      Download
+                    </button>
                   </div>
                 </div>
               ) : (
@@ -504,14 +600,15 @@ export default function Step1() {
                   style={{
                     height: 'calc(100% - 20px)',
                     maxHeight: 'calc(100vh - 250px)',
-                  }}>
+                  }}
+                  onClick={handleUploadClick}>
                   {isUploading ? (
                     <p className="text-gray-600 font-inter">Uploading...</p>
                   ) : (
                     <div className="flex flex-col items-center justify-center text-center px-4">
                       <svg
                         xmlns="http://www.w3.org/2000/svg"
-                        className="h-16 w-16 text-gray-400 mb-4"
+                        className="h-16 w-16 text-gray-400 mb-4 cursor-pointer hover:text-gray-600"
                         fill="none"
                         viewBox="0 0 24 24"
                         stroke="currentColor">
@@ -525,13 +622,16 @@ export default function Step1() {
                       <p className="text-xl font-semibold text-gray-700 mb-2 uppercase tracking-wider font-playfair">
                         UPLOAD YOUR IMAGE HERE
                       </p>
-                      <p className="text-sm text-gray-500 font-inter mb-6">
+                      <p className="text-sm text-gray-500 font-inter mb-6 cursor-pointer hover:text-gray-700">
                         Click to browse files
                       </p>
 
                       <div className="flex flex-col sm:flex-row space-y-3 sm:space-y-0 sm:space-x-4 mt-2">
                         <button
-                          onClick={handleUploadClick}
+                          onClick={(e) => {
+                            e.stopPropagation(); // 阻止事件冒泡
+                            handleUploadClick();
+                          }}
                           className="bg-[#84a59d] hover:bg-[#6b8c85] text-white font-semibold py-2 px-6 rounded-md shadow-md font-inter transition-all duration-200 hover:scale-105">
                           Browse Files
                         </button>
@@ -572,7 +672,64 @@ export default function Step1() {
                 onChange={handleFileChange}
                 accept="image/*"
                 className="hidden"
+                id="file-upload-input"
               />
+
+              {/* 已处理图片列表 */}
+              {processedImages.length > 0 && (
+                <div className="w-full mt-4">
+                  <button
+                    onClick={toggleProcessedImages}
+                    className="text-sm text-gray-600 hover:text-gray-800 flex items-center">
+                    <svg
+                      xmlns="http://www.w3.org/2000/svg"
+                      className={`h-4 w-4 mr-1 transition-transform ${
+                        showProcessedImages ? 'rotate-90' : ''
+                      }`}
+                      fill="none"
+                      viewBox="0 0 24 24"
+                      stroke="currentColor">
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d="M9 5l7 7-7 7"
+                      />
+                    </svg>
+                    {showProcessedImages ? '隐藏处理记录' : '显示处理记录'} (
+                    {processedImages.length})
+                  </button>
+
+                  {showProcessedImages && (
+                    <div className="mt-2 bg-white/80 rounded-md p-3 text-xs max-h-32 overflow-y-auto">
+                      <table className="w-full">
+                        <thead>
+                          <tr className="border-b border-gray-200">
+                            <th className="text-left py-1">时间</th>
+                            <th className="text-left py-1">文件名</th>
+                            <th className="text-right py-1">大小</th>
+                          </tr>
+                        </thead>
+                        <tbody>
+                          {processedImages.map((img, index) => (
+                            <tr
+                              key={index}
+                              className="border-b border-gray-100">
+                              <td className="py-1">
+                                {new Date(img.timestamp).toLocaleTimeString()}
+                              </td>
+                              <td className="py-1">{img.fileName}</td>
+                              <td className="text-right py-1">
+                                {img.size.toFixed(2)} MB
+                              </td>
+                            </tr>
+                          ))}
+                        </tbody>
+                      </table>
+                    </div>
+                  )}
+                </div>
+              )}
             </motion.div>
 
             {/* Right side - Instructions */}
