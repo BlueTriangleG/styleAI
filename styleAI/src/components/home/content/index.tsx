@@ -7,11 +7,11 @@ import BounceCards from '@/components/ui/BounceCards';
 import { useRef, useEffect } from 'react';
 
 const images = [
-  "https://picsum.photos/400/400?grayscale",
-  "https://picsum.photos/500/500?grayscale",
-  "https://picsum.photos/600/600?grayscale",
-  "https://picsum.photos/700/700?grayscale",
-  "https://picsum.photos/300/300?grayscale"
+  "gallery/outfit1.png",
+  "gallery/outfit2.png",
+  "gallery/outfit3.png",
+  "gallery/outfit4.png",
+  "gallery/outfit1.png",
 ];
 
 const transformStyles = [
@@ -22,23 +22,24 @@ const transformStyles = [
   "rotate(-5deg) translate(150px)"
 ];
 
-// Sample use cases for the application
-const useCases = [
+// Gallery items for CircularGallery
+const galleryItems = [
   {
-    title: "Personal Style Analysis",
-    description: "Upload your photo and get a detailed analysis of your body shape, color palette, and style preferences.",
-    icon: "👕"
+    image: "gallery/outfit1.png",
+    text: ""
   },
   {
-    title: "AI Outfit Generation",
-    description: "Generate personalized outfit recommendations based on your style profile and preferences.",
-    icon: "👗"
+    image: "gallery/outfit2.png",
+    text: ""
   },
   {
-    title: "Seasonal Wardrobe Planning",
-    description: "Plan your seasonal wardrobe with AI-powered recommendations for upcoming trends and weather conditions.",
-    icon: "🧣"
-  }
+    image: "gallery/outfit3.png",
+    text: ""
+  },
+  {
+    image: "gallery/outfit4.png",
+    text: ""
+  },
 ];
 
 export function Hero() {
@@ -71,7 +72,7 @@ export function Hero() {
     >
       {/* Hero Section - First Screen */}
       <section className="bg-white h-screen w-screen flex items-center justify-center snap-start">
-        <div className="container mx-auto px-4 text-center pt-16">
+        <div className="w-screen mx-auto px-8 md:px-16 text-center pt-16">
           <div>
             <h1 className="text-5xl md:text-6xl font-bold text-[#2D4B37] mb-8 leading-tight">
               Generate your outfits
@@ -113,33 +114,32 @@ export function Hero() {
       {/* Usecase Section - Second Screen */}
       <section 
         ref={usecaseRef}
-        className="bg-[#F8F9FA] h-screen w-screen flex items-center justify-center snap-start"
+        className="bg-[#F8F9FA] h-screen w-screen flex flex-col items-center snap-start"
       >
-        <div className="container mx-auto px-4 py-16">
-          <h2 className="text-4xl md:text-5xl font-bold text-[#2D4B37] mb-12 text-center">
-            How <span className="text-[#FF9999]">STYLE-AI</span> Works
+        <div className="w-screen mx-auto px-8 md:px-16 py-4 mt-16">
+          <h2 className="text-4xl md:text-5xl font-bold text-[#2D4B37] mb-4 text-center">
+            Use Cases
           </h2>
+          <p className="text-gray-600 text-center max-w-4xl mx-auto mb-8">
+            Browse through our collection of fashion styles and find inspiration for your next outfit. Our AI will help you create personalized recommendations based on your preferences.
+          </p>
           
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-6xl mx-auto">
-            {useCases.map((useCase, index) => (
-              <div 
-                key={index} 
-                className="bg-white p-8 rounded-xl shadow-lg hover:shadow-xl transition-shadow duration-300"
-              >
-                <div className="text-5xl mb-4">{useCase.icon}</div>
-                <h3 className="text-2xl font-bold text-[#2D4B37] mb-3">{useCase.title}</h3>
-                <p className="text-gray-600">{useCase.description}</p>
-              </div>
-            ))}
+          <div className="flex justify-center items-center" style={{ height: '500px', width: '100%', margin: '0 auto' }}>
+            <CircularGallery 
+              items={galleryItems}
+              bend={4} 
+              textColor="transparent" 
+              borderRadius={0.05}
+              font="0px var(--font-playfair)"
+            />
           </div>
-          
-          <div className="mt-16 text-center">
+          {/* <div className="mt-8 text-center">
             <button
               className="bg-black text-white px-12 py-3 rounded-md text-lg font-medium hover:bg-gray-800 transition-colors"
               onClick={handleStartClick}>
               Get Started
             </button>
-          </div>
+          </div> */}
         </div>
       </section>
     </div>
