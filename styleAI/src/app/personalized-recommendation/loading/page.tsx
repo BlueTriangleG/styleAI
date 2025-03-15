@@ -5,7 +5,6 @@ import { useRouter } from 'next/navigation';
 import { motion } from 'framer-motion';
 import { RecommendationHeader } from '@/components/recommendation/Header';
 import LiquidChrome from '@/components/background/LiquidChrome';
-import ImageTrail from '@/components/ui/imageTail';
 
 export default function LoadingPage() {
   const router = useRouter();
@@ -105,21 +104,6 @@ export default function LoadingPage() {
   return (
     <>
       <RecommendationHeader />
-      <div className="fixed inset-0 z-[100] pointer-events-none">
-        <ImageTrail
-          items={[
-            'https://picsum.photos/id/287/300/300',
-            'https://picsum.photos/id/1001/300/300',
-            'https://picsum.photos/id/1025/300/300',
-            'https://picsum.photos/id/1026/300/300',
-            'https://picsum.photos/id/1027/300/300',
-            'https://picsum.photos/id/1028/300/300',
-            'https://picsum.photos/id/1029/300/300',
-            'https://picsum.photos/id/1030/300/300',
-          ]}
-          variant={1}
-        />
-      </div>
       {/* 流动背景 */}
       <div className="absolute inset-0 z-0 overflow-hidden pointer-events-auto">
         <LiquidChrome
