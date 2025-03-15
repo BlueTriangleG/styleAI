@@ -5,8 +5,11 @@ import { useRouter } from 'next/navigation';
 import { motion } from 'framer-motion';
 import { RecommendationHeader } from '@/components/recommendation/Header';
 import LiquidChrome from '@/components/background/LiquidChrome';
+<<<<<<< HEAD
 import ImageTrail from '@/components/ui/imageTail';
 import { apiService } from '@/lib/api/ApiService';
+=======
+>>>>>>> origin/dev
 
 export default function LoadingPage() {
   const router = useRouter();
