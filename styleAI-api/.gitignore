@@ -19,6 +19,13 @@ var/
 *.egg-info/
 .installed.cfg
 *.egg
+*.jpg
+*.png
+*.jpeg
+*.gif
+*.bmp
+*.tiff
+*.ico
 
 # Virtual Environment
 venv/
