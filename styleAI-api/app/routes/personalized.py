@@ -190,6 +190,7 @@ def personalized_analysis():
                                 
                                 # 尝试解析JSON
                                 analysis_result = json.loads(user_text).get('analysis', {})
+                                
                                 features = analysis_result.get('features', [])
                                 colors = analysis_result.get('colors', [])
                                 styles = analysis_result.get('styles', [])
@@ -216,11 +217,11 @@ def personalized_analysis():
             "styles": styles if analysis_result else MOCK_ANALYSIS_DATA["styles"]
         }
         
-        # 返回个性化分析结果
+        # 返回个性化分析结果，只包含必要的字段
         return jsonify({
             'status': 'success',
             'jobId': job_id,
-            'analysis': final_analysis,
+            'analysis': final_analysis
         })
         
     except Exception as e:

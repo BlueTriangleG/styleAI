@@ -116,7 +116,7 @@ class ApiService {
       console.log('获取到的个性化分析数据:', result);
 
       if (result.status === 'success') {
-        return result.data;
+        return result.analysis;
       } else {
         throw new Error(result.error || '获取个性化分析失败');
       }
