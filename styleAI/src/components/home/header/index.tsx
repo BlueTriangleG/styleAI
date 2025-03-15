@@ -12,7 +12,7 @@ export function Header() {
   const handleLoginClick = () => {
     router.push('/login');
   };
-
+  
   const handleStartClick = () => {
     router.push('/personalized-recommendation/step1');
   };
