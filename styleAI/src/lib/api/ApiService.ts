@@ -170,13 +170,18 @@ class ApiService {
     try {
       console.log('正在创建新的job记录');
 
-      const response = await fetch('/api/jobs/create', {
+      // 从localStorage获取数据库用户ID
+      const dbUserId =
+        typeof window !== 'undefined' ? localStorage.getItem('dbUserId') : null;
+
+      const response = await fetch('/styleai/api/jobs/create', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
           uploadedImage,
+          dbUserId, // 添加数据库用户ID
         }),
         credentials: 'include', // 包含cookie以便服务器可以验证用户身份
       });

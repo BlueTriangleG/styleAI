@@ -161,7 +161,7 @@ def main(user_image_url):
     
     # 检查文件是否存在
     if not os.path.exists(save_path):
-        logger.error(f"保存的图像文件不存在: {save_path}")
+        logger.error(f"保存的图f像文件不存在: {save_path}")
         return None
     
     # 检查文件大小
