@@ -2,53 +2,44 @@
 
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import Image from 'next/image';
+import { UserButton, SignedIn, SignedOut, SignInButton } from '@clerk/nextjs';
 
 export function RecommendationHeader() {
   const router = useRouter();
 
-  const handleAvatarClick = () => {
-    router.push('/settings');
-  };
-
   return (
-    <header className="fixed top-0 left-0 right-0 bg-white/1 backdrop-blur-xs shadow-sm z-50">
-      <div className="container mx-auto px-4 py-3 flex items-center justify-between">
+    <header className="fixed top-0 left-0 right-0 bg-white/90 backdrop-blur-sm shadow-sm z-50">
+      <div className="container mx-auto px-4 md:px-8 py-4 flex items-center justify-between">
         {/* Logo */}
         <Link
           href="/"
-          className="text-2xl font-bold text-[#2D4B37] font-playfair">
+          className="text-2xl font-bold text-[#2D4B37] font-playfair hover:text-[#1F3526] transition-colors">
           Style-AI
         </Link>
 
-        {/* Avatar */}
-        <div
-          className="w-10 h-10 rounded-full bg-gray-200 cursor-pointer overflow-hidden relative"
-          onClick={handleAvatarClick}>
-          {/* Default avatar icon */}
-          <div className="absolute inset-0 flex items-center justify-center text-gray-500">
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              className="h-6 w-6"
-              fill="none"
-              viewBox="0 0 24 24"
-              stroke="currentColor">
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={2}
-                d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"
+        {/* User Menu */}
+        <div className="flex items-center">
+          <SignedIn>
+            {/* User Button */}
+            <div>
+              <UserButton
+                appearance={{
+                  elements: {
+                    avatarBox: 'w-10 h-10',
+                  },
+                }}
               />
-            </svg>
-          </div>
+            </div>
+          </SignedIn>
 
-          {/* You can replace this with an actual user avatar if available */}
-          {/* <Image 
-            src="/path-to-user-avatar.jpg" 
-            alt="User Avatar" 
-            fill
-            className="object-cover"
-          /> */}
+          <SignedOut>
+            {/* Sign In Button for non-authenticated users */}
+            <SignInButton mode="modal">
+              <button className="bg-[#2D4B37] text-white px-6 py-2.5 rounded-md font-medium hover:bg-[#1F3526] transition-colors shadow-sm text-base">
+                Sign In
+              </button>
+            </SignInButton>
+          </SignedOut>
         </div>
       </div>
     </header>
