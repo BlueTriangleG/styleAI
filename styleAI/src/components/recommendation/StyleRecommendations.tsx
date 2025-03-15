@@ -49,7 +49,7 @@ export default function StyleRecommendations({
 
               <div className="flex flex-col md:flex-row gap-8">
                 {/* 左侧图片 */}
-                <div className="w-full md:w-1/3">
+                <div className="w-full md:w-1/3 relative">
                   <div className="bg-gray-200 aspect-[3/4] rounded-lg overflow-hidden shadow-md">
                     <div className="w-full h-full flex items-center justify-center">
                       <span className="text-gray-500 font-inter">
@@ -57,20 +57,9 @@ export default function StyleRecommendations({
                       </span>
                     </div>
                   </div>
-                </div>
 
-                {/* 中间图片 */}
-                <div className="w-full md:w-1/3 relative">
-                  <div className="bg-gray-200 aspect-[3/4] h-[50vh] rounded-lg overflow-hidden border-2 border-blue-400 shadow-lg">
-                    <div className="w-full h-full flex items-center justify-center">
-                      <span className="text-gray-500 font-inter">
-                        Style Example
-                      </span>
-                    </div>
-                  </div>
-
-                  {/* 箭头 */}
-                  <div className="hidden md:block absolute top-1/2 -left-12 transform -translate-y-1/2">
+                  {/* 箭头 - 移到右侧 */}
+                  <div className="hidden md:block absolute top-1/2 -right-8 transform -translate-y-1/2">
                     <svg
                       width="40"
                       height="40"
@@ -85,6 +74,17 @@ export default function StyleRecommendations({
                         strokeLinejoin="round"
                       />
                     </svg>
+                  </div>
+                </div>
+
+                {/* 中间图片 */}
+                <div className="w-full md:w-1/3 relative">
+                  <div className="bg-gray-200 aspect-[3/4] h-[50vh] rounded-lg overflow-hidden border-2 border-blue-400 shadow-lg">
+                    <div className="w-full h-full flex items-center justify-center">
+                      <span className="text-gray-500 font-inter">
+                        Style Example
+                      </span>
+                    </div>
                   </div>
                 </div>
 
