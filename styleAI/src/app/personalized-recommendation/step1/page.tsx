@@ -199,7 +199,12 @@ export default function Step1() {
   };
 
   // Open camera
-  const handleCameraClick = async () => {
+  const handleCameraClick = async (e?: React.MouseEvent) => {
+    // 阻止事件冒泡，防止触发文件上传
+    if (e) {
+      e.stopPropagation();
+    }
+
     setIsCameraOpen(true);
     const success = await startCamera(facingMode, selectedCamera || undefined);
     if (!success) {
@@ -562,7 +567,7 @@ export default function Step1() {
                     </button>
                     {hasCamera && (
                       <button
-                        onClick={handleCameraClick}
+                        onClick={(e) => handleCameraClick(e)}
                         className="bg-gray-200 hover:bg-gray-300 text-gray-800 font-semibold py-2 px-4 rounded-md shadow-md font-inter transition-all duration-200 hover:scale-105 flex items-center justify-center">
                         <svg
                           xmlns="http://www.w3.org/2000/svg"
@@ -613,7 +618,11 @@ export default function Step1() {
                     height: 'calc(100% - 20px)',
                     maxHeight: 'calc(100vh - 250px)',
                   }}
-                  onClick={handleUploadClick}>
+                  onClick={(e) => {
+                    // 确保点击空白区域时触发文件上传
+                    e.stopPropagation();
+                    handleUploadClick();
+                  }}>
                   {isUploading ? (
                     <p className="text-gray-600 font-inter">Uploading...</p>
                   ) : (
@@ -649,7 +658,7 @@ export default function Step1() {
                         </button>
                         {hasCamera && (
                           <button
-                            onClick={handleCameraClick}
+                            onClick={(e) => handleCameraClick(e)}
                             className="bg-gray-200 hover:bg-gray-300 text-gray-800 font-semibold py-2 px-6 rounded-md shadow-md font-inter transition-all duration-200 hover:scale-105 flex items-center justify-center">
                             <svg
                               xmlns="http://www.w3.org/2000/svg"

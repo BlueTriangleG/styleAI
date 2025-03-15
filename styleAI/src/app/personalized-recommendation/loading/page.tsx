@@ -20,6 +20,12 @@ export default function LoadingPage() {
 
   // 获取个性化分析数据
   const fetchAnalysisData = async (jobId: string) => {
+    // 如果数据已经获取过，则直接返回
+    if (dataFetchedRef.current) {
+      console.log('数据已经获取过，不再重复获取');
+      return;
+    }
+
     try {
       console.log('正在从API获取个性化分析数据...');
       const data = await apiService.getPersonalizedAnalysis(jobId);
@@ -27,6 +33,7 @@ export default function LoadingPage() {
 
       // 将数据存储在sessionStorage中
       sessionStorage.setItem('analysisData', JSON.stringify(data));
+      console.log('分析数据已存储到sessionStorage');
 
       // 标记数据已准备好
       setIsDataReady(true);
@@ -71,6 +78,7 @@ export default function LoadingPage() {
 
       // 将默认数据存储在sessionStorage中
       sessionStorage.setItem('analysisData', JSON.stringify(defaultData));
+      console.log('默认分析数据已存储到sessionStorage');
 
       // 标记数据已准备好
       setIsDataReady(true);
@@ -88,18 +96,26 @@ export default function LoadingPage() {
       return;
     }
 
+    // 标记job已创建，防止重复调用
+    jobCreatedRef.current = true;
+
     try {
       console.log('正在创建job记录...');
       // 创建job记录
       const newJobId = await apiService.createJob(imageData);
       console.log(`成功创建job记录，ID: ${newJobId}`);
 
-      // 设置jobId并标记已创建
+      // 设置jobId
       setJobId(newJobId);
-      jobCreatedRef.current = true;
 
       // 将jobId存储在sessionStorage中，以便在step2页面使用
       sessionStorage.setItem('currentJobId', newJobId);
+
+      // 如果数据已经获取过，则不再重复获取
+      if (dataFetchedRef.current) {
+        console.log('数据已经获取过，不再重复获取');
+        return;
+      }
 
       // 获取分析数据
       await fetchAnalysisData(newJobId);
@@ -112,6 +128,12 @@ export default function LoadingPage() {
       console.log(`使用临时jobId: ${tempJobId}`);
       setJobId(tempJobId);
       sessionStorage.setItem('currentJobId', tempJobId);
+
+      // 如果数据已经获取过，则不再重复获取
+      if (dataFetchedRef.current) {
+        console.log('数据已经获取过，不再重复获取');
+        return;
+      }
 
       // 使用临时ID获取分析数据
       await fetchAnalysisData(tempJobId);
