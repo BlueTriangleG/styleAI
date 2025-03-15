@@ -14,10 +14,12 @@ services:
     environment:
       NODE_ENV: production
       PORT: 3000
+      # All environment variables from .env.local will be passed automatically
     volumes:
       - styleai-data:/app/store
     networks:
       - styleai-network
+    restart: unless-stopped
 
   nginx:
     image: nginx:alpine
