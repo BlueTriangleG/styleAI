@@ -9,10 +9,13 @@ services:
       - '5001:5001'
     environment:
       - FLASK_APP=app.py
-      - FLASK_ENV=production
-      - FLASK_DEBUG=0
+      - FLASK_ENV=development
+      - FLASK_DEBUG=1
     volumes:
       - ./app:/app/app
+      - ./app.py:/app/app.py
+      - ./requirements.txt:/app/requirements.txt
+      - ./temp:/app/temp
     healthcheck:
       test: ['CMD', 'curl', '-f', 'http://localhost:5001/health']
       interval: 30s
