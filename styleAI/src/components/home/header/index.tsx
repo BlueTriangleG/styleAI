@@ -10,10 +10,6 @@ export function Header() {
     router.push('/login');
   };
 
-  const handleStartClick = () => {
-    router.push('/personalized-recommendation/step1');
-  };
-
   return (
     <header className="fixed top-0 left-0 right-0 bg-white/90 backdrop-blur-xs shadow-sm z-50">
       <div className="w-screen mx-auto px-8 md:px-16 py-3 flex items-center justify-between">
@@ -28,11 +24,6 @@ export function Header() {
 
         {/* Right side - Buttons */}
         <div className="flex items-center gap-4">
-          <button
-            onClick={handleStartClick}
-            className="bg-black text-white px-6 py-2 rounded-md font-medium hover:bg-gray-800 transition-colors">
-            Start
-          </button>
           
           <button
             onClick={handleLoginClick}

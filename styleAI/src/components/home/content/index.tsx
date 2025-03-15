@@ -119,15 +119,15 @@ export function Hero() {
         ref={usecaseRef}
         className="bg-[#F8F9FA] h-screen w-screen flex flex-col items-center snap-start"
       >
-        <div className="w-screen mx-auto px-8 md:px-16 py-4 mt-16">
+        <div className="bg-amber-50 w-screen h-screen mx-auto px-8 md:px-16 py-4 mt-16">
           <h2 className="text-4xl md:text-5xl font-bold text-[#2D4B37] mb-4 text-center">
             Use Cases
           </h2>
           <p className="text-gray-600 text-center max-w-4xl mx-auto mb-8">
             Browse through our collection of fashion styles and find inspiration for your next outfit. Our AI will help you create personalized recommendations based on your preferences.
           </p>
-          
-          <div className="flex justify-center items-center" style={{ height: '500px', width: '100%', margin: '0 auto' }}>
+           
+          <div className="flex justify-center items-center mx-auto bg-red-200 w-full h-3/5" >
             <CircularGallery 
               items={galleryItems}
               bend={4} 
@@ -135,6 +135,14 @@ export function Hero() {
               borderRadius={0.05}
               font="0px var(--font-playfair)"
             />
+          </div>
+
+          <div className="flex justify-center mt-8">
+            <button
+              onClick={handleStartClick}
+              className="bg-black text-white px-8 py-3 rounded-md font-medium hover:bg-gray-800 transition-colors">
+              Start
+            </button>
           </div>
         </div>
       </section>
