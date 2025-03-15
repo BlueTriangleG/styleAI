@@ -13,9 +13,11 @@ export default function Step2() {
   const [showScrollIndicator, setShowScrollIndicator] = useState(false);
   const [isPageLoading, setIsPageLoading] = useState(true); // 页面加载状态
   const [enableScrollEffects, setEnableScrollEffects] = useState(false); // 控制滚动效果
+  const [allowScroll, setAllowScroll] = useState(false); // 控制是否允许滚动
   const router = useRouter();
   const scrollRef = useRef<HTMLDivElement>(null);
   const recommendationsRef = useRef<HTMLDivElement>(null);
+  const analysisRef = useRef<HTMLDivElement>(null);
 
   // 滚动动画控制 - 始终创建这些hooks，不管enableScrollEffects的值
   const { scrollYProgress } = useScroll({
@@ -80,6 +82,33 @@ export default function Step2() {
     bodyType: 'Athletic',
     styleMatch: 'Business Casual',
   };
+
+  // 当滚动指示器显示时，启用滚动
+  useEffect(() => {
+    if (showScrollIndicator) {
+      setAllowScroll(true);
+    }
+  }, [showScrollIndicator]);
+
+  // 禁用滚动功能
+  useEffect(() => {
+    // 禁用滚动的函数
+    const preventScroll = (e: WheelEvent | TouchEvent) => {
+      if (!allowScroll) {
+        e.preventDefault();
+      }
+    };
+
+    // 添加事件监听器
+    window.addEventListener('wheel', preventScroll, { passive: false });
+    window.addEventListener('touchmove', preventScroll, { passive: false });
+
+    // 清理函数
+    return () => {
+      window.removeEventListener('wheel', preventScroll);
+      window.removeEventListener('touchmove', preventScroll);
+    };
+  }, [allowScroll]);
 
   useEffect(() => {
     // Only access sessionStorage in browser environment
@@ -211,6 +240,17 @@ export default function Step2() {
 
   return (
     <>
+      <style jsx global>{`
+        html {
+          scroll-behavior: smooth;
+        }
+
+        body {
+          overflow: ${allowScroll ? 'auto' : 'hidden'};
+          height: 100%;
+        }
+      `}</style>
+
       <RecommendationHeader />
 
       {/* 添加页面加载指示器 */}
@@ -240,6 +280,7 @@ export default function Step2() {
       <div className="relative" ref={scrollRef}>
         {/* 第一部分：分析页面 */}
         <motion.div
+          ref={analysisRef}
           className="min-h-screen pt-20 relative"
           initial={{ opacity: 1 }}
           animate={{ opacity: 1, x: 0 }}
@@ -314,34 +355,6 @@ export default function Step2() {
                         </motion.div>
                       ))}
                     </div>
-
-                    {showScrollIndicator && (
-                      <div className="flex flex-col items-center mt-8">
-                        <p className="text-gray-600 font-inter mb-2">
-                          Scroll down to see your style recommendations
-                        </p>
-                        <motion.div
-                          variants={scrollIndicatorVariants}
-                          initial="initial"
-                          animate="animate"
-                          onClick={scrollToRecommendations}
-                          className="cursor-pointer">
-                          <svg
-                            xmlns="http://www.w3.org/2000/svg"
-                            width="24"
-                            height="24"
-                            viewBox="0 0 24 24"
-                            fill="none"
-                            stroke="currentColor"
-                            strokeWidth="2"
-                            strokeLinecap="round"
-                            strokeLinejoin="round"
-                            className="text-gray-600">
-                            <path d="M12 5v14M5 12l7 7 7-7" />
-                          </svg>
-                        </motion.div>
-                      </div>
-                    )}
                   </div>
                 </motion.div>
               </motion.div>
@@ -367,6 +380,39 @@ export default function Step2() {
                     Loading your image...
                   </p>
                 </div>
+              </motion.div>
+            )}
+
+            {/* 滚动指示器 - 移至内容块下方居中 */}
+            {showScrollIndicator && userImage && (
+              <motion.div
+                className="flex flex-col items-center mt-12 mb-8"
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                transition={{ duration: 0.5, delay: 0.5 }}>
+                <p className="text-gray-600 font-inter mb-2 text-center">
+                  Scroll down to see your style recommendations
+                </p>
+                <motion.div
+                  variants={scrollIndicatorVariants}
+                  initial="initial"
+                  animate="animate"
+                  onClick={scrollToRecommendations}
+                  className="cursor-pointer bg-[#84a59d]/10 hover:bg-[#84a59d]/20 p-3 rounded-full transition-all duration-300">
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    width="32"
+                    height="32"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="2"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    className="text-[#84a59d]">
+                    <path d="M12 5v14M5 12l7 7 7-7" />
+                  </svg>
+                </motion.div>
               </motion.div>
             )}
           </div>
