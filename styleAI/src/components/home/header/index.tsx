@@ -12,7 +12,7 @@ export function Header() {
 
   return (
     <header className="fixed top-0 left-0 right-0 bg-white/90 backdrop-blur-xs shadow-sm z-50">
-      <div className="container mx-auto px-4 py-3 flex items-center justify-between">
+      <div className="w-screen mx-auto px-8 md:px-16 py-3 flex items-center justify-between">
         {/* Logo */}
         <Link
           href="/"
