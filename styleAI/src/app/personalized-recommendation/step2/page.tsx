@@ -151,6 +151,12 @@ export default function Step2() {
       // 解析存储的数据
       const data = JSON.parse(storedData);
       console.log('成功获取分析数据:', data);
+
+      // 打印分析数据的详细信息
+      console.log('分析特征:', data.features);
+      console.log('推荐颜色:', data.colors);
+      console.log('推荐风格:', data.styles);
+
       setAnalysisData(data);
       return data;
     } catch (error) {
@@ -180,31 +186,20 @@ export default function Step2() {
       // 从sessionStorage获取jobId
       const storedJobId = sessionStorage.getItem('currentJobId');
 
-      if (!storedJobId) {
-        console.error('未找到jobId，使用临时ID');
-        const tempJobId = `temp-${Date.now()}-${Math.floor(
-          Math.random() * 1000
-        )}`;
-        setJobId(tempJobId);
-        return await fetchAnalysisData(tempJobId);
+      // 设置jobId（如果存在）
+      if (storedJobId) {
+        console.log(`从sessionStorage获取的jobId: ${storedJobId}`);
+        setJobId(storedJobId);
+      } else {
+        console.log('未找到jobId，将使用空字符串');
       }
 
-      console.log(`从sessionStorage获取的jobId: ${storedJobId}`);
-      setJobId(storedJobId);
-
       // 获取个性化分析数据
-      return await fetchAnalysisData(storedJobId);
+      return await fetchAnalysisData(storedJobId || '');
     } catch (error) {
       console.error('获取jobId或分析数据失败:', error);
-      // 如果出错，使用临时jobId
-      const tempJobId = `temp-${Date.now()}-${Math.floor(
-        Math.random() * 1000
-      )}`;
-      console.log(`使用临时jobId: ${tempJobId}`);
-      setJobId(tempJobId);
-
-      // 获取个性化分析数据
-      return await fetchAnalysisData(tempJobId);
+      // 直接获取分析数据
+      return await fetchAnalysisData('');
     }
   };
 
@@ -257,7 +252,47 @@ export default function Step2() {
         setUserImage(storedImage);
         console.log('成功设置用户图像');
 
-        // 获取jobId并获取分析数据
+        // 检查分析数据是否已存在于sessionStorage中
+        const storedAnalysisData = sessionStorage.getItem('analysisData');
+        if (storedAnalysisData) {
+          console.log('在sessionStorage中找到分析数据');
+          try {
+            const parsedData = JSON.parse(storedAnalysisData);
+            console.log('解析的分析数据:', parsedData);
+
+            // 直接设置分析数据，避免重复调用API
+            setAnalysisData(parsedData);
+
+            // 获取jobId
+            const storedJobId = sessionStorage.getItem('currentJobId');
+            if (storedJobId) {
+              setJobId(storedJobId);
+              console.log(`从sessionStorage获取的jobId: ${storedJobId}`);
+            }
+
+            // 数据加载完成后，设置页面加载状态为false
+            setIsPageLoading(false);
+            console.log('页面加载完成，isPageLoading设置为false');
+
+            // Delay enabling scroll effects to ensure page content is displayed first
+            const scrollEffectsTimer = setTimeout(() => {
+              setEnableScrollEffects(true);
+              console.log('启用滚动效果');
+            }, 1500);
+
+            return () => {
+              console.log('Step2组件卸载，清除timer');
+              clearTimeout(scrollEffectsTimer);
+            };
+          } catch (e) {
+            console.error('解析分析数据时出错:', e);
+            // 如果解析出错，则继续使用getJobIdAndFetchData
+          }
+        } else {
+          console.log('在sessionStorage中未找到分析数据');
+        }
+
+        // 如果没有找到分析数据或解析出错，则使用getJobIdAndFetchData
         getJobIdAndFetchData().then(() => {
           // 数据加载完成后，设置页面加载状态为false
           setIsPageLoading(false);
@@ -386,8 +421,39 @@ export default function Step2() {
 
   // 从API获取的数据或默认数据
   const analysisPoints = analysisData?.features || defaultAnalysisPoints;
-  const styleRecommendations = defaultStyleRecommendations; // 这里可以根据API返回的数据构建风格推荐
-  const analysisResults = defaultAnalysisResults; // 这里可以根据API返回的数据构建分析结果
+  const recommendedColors = analysisData?.colors || [
+    { name: 'Navy Blue', hex: '#000080' },
+    { name: 'Burgundy', hex: '#800020' },
+    { name: 'Forest Green', hex: '#228B22' },
+    { name: 'Charcoal Gray', hex: '#36454F' },
+  ];
+  const recommendedStyles = analysisData?.styles || [
+    'Classic',
+    'Professional',
+    'Elegant',
+    'Sophisticated',
+  ];
+
+  // 构建风格推荐
+  const styleRecommendations = defaultStyleRecommendations.map((rec, index) => {
+    // 如果有推荐的风格，则使用它们
+    if (recommendedStyles && recommendedStyles.length > index) {
+      return {
+        ...rec,
+        title: recommendedStyles[index],
+      };
+    }
+    return rec;
+  });
+
+  const analysisResults = {
+    ...defaultAnalysisResults,
+    // 如果有推荐的风格，则使用第一个作为styleMatch
+    styleMatch:
+      recommendedStyles && recommendedStyles.length > 0
+        ? recommendedStyles[0]
+        : defaultAnalysisResults.styleMatch,
+  };
 
   return (
     <>
@@ -510,6 +576,12 @@ export default function Step2() {
                       <div className="text-red-500 mb-4">{analysisError}</div>
                     ) : (
                       <div className="space-y-6 mb-8">
+                        {/* 显示数据来源 */}
+                        <div className="text-sm text-gray-500 mb-4">
+                          数据来源:{' '}
+                          {jobId ? `API (JobID: ${jobId})` : '本地存储'}
+                        </div>
+
                         {analysisPoints.map((point, index) => (
                           <motion.div
                             key={index}
@@ -531,6 +603,57 @@ export default function Step2() {
                             </p>
                           </motion.div>
                         ))}
+
+                        {/* 显示推荐颜色 */}
+                        {typingComplete >= analysisPoints.length && (
+                          <motion.div
+                            initial="initial"
+                            animate="animate"
+                            variants={textRevealVariants}
+                            className="mt-8">
+                            <h3 className="text-lg font-bold font-playfair text-gray-800 mb-3">
+                              推荐颜色
+                            </h3>
+                            <div className="flex flex-wrap gap-3">
+                              {recommendedColors.map((color, index) => (
+                                <div
+                                  key={index}
+                                  className="flex flex-col items-center">
+                                  <div
+                                    className="w-12 h-12 rounded-full shadow-md mb-1"
+                                    style={{
+                                      backgroundColor: color.hex,
+                                    }}></div>
+                                  <span className="text-xs text-gray-700">
+                                    {color.name}
+                                  </span>
+                                </div>
+                              ))}
+                            </div>
+                          </motion.div>
+                        )}
+
+                        {/* 显示推荐风格 */}
+                        {typingComplete >= analysisPoints.length && (
+                          <motion.div
+                            initial="initial"
+                            animate="animate"
+                            variants={textRevealVariants}
+                            className="mt-4">
+                            <h3 className="text-lg font-bold font-playfair text-gray-800 mb-3">
+                              推荐风格
+                            </h3>
+                            <div className="flex flex-wrap gap-2">
+                              {recommendedStyles.map((style, index) => (
+                                <span
+                                  key={index}
+                                  className="px-3 py-1 bg-[#84a59d]/10 text-[#84a59d] rounded-full text-sm">
+                                  {style}
+                                </span>
+                              ))}
+                            </div>
+                          </motion.div>
+                        )}
                       </div>
                     )}
                   </div>
