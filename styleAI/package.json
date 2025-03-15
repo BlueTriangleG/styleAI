@@ -30,8 +30,10 @@
     "ogl": "^1.0.11",
     "ora": "^5.4.1",
     "pg": "^8.14.0",
+    "postprocessing": "^6.37.1",
     "react": "^19.0.0",
     "react-dom": "^19.0.0",
+    "three": "^0.174.0",
     "zustand": "^5.0.3"
   },
   "devDependencies": {
