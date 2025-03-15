@@ -6,6 +6,7 @@ import Image from 'next/image';
 import { RecommendationHeader } from '@/components/recommendation/Header';
 import { motion, useScroll, useTransform, MotionValue } from 'framer-motion';
 import LiquidChrome from '@/components/background/LiquidChrome';
+import StyleRecommendations from '@/components/recommendation/StyleRecommendations';
 
 export default function Step2() {
   const [userImage, setUserImage] = useState<string | null>(null);
@@ -65,6 +66,12 @@ export default function Step2() {
       title: 'Smart Casual',
       description:
         'For a more relaxed yet polished look, smart casual options would work well with your features. Consider premium t-shirts, chinos, and casual jackets.',
+      examples: ['Style Example 1', 'Style Example 2', 'Style Example 3'],
+    },
+    {
+      title: 'Formal Wear',
+      description:
+        'For special occasions, your features would be enhanced by well-tailored suits in navy or charcoal. Consider slim-fit designs with subtle patterns.',
       examples: ['Style Example 1', 'Style Example 2', 'Style Example 3'],
     },
     {
@@ -290,14 +297,14 @@ export default function Step2() {
           }}
           transition={{ duration: 0.5 }}>
           {/* 流动背景 */}
-          <div className="absolute inset-0 z-0 overflow-hidden">
+          <div className="absolute inset-0 z-0 overflow-hidden pointer-events-auto">
             <LiquidChrome
               baseColor={[0.9, 0.9, 0.9]}
               speed={0.2}
               amplitude={0.5}
               frequencyX={3}
               frequencyY={2}
-              interactive={false}
+              interactive={true}
             />
             <div className="absolute inset-0 bg-white/10 pointer-events-none"></div>
           </div>
@@ -419,132 +426,12 @@ export default function Step2() {
         </motion.div>
 
         {/* 第二部分：风格推荐 */}
-        <div ref={recommendationsRef} className="min-h-screen bg-white pt-20">
-          <div className="container mx-auto px-4 py-8">
-            <h1 className="text-3xl font-bold mb-8 text-center font-playfair text-gray-800">
-              Your Style Recommendations
-            </h1>
-
-            <div className="max-w-6xl mx-auto">
-              {userImage ? (
-                <div className="flex flex-col md:flex-row gap-8">
-                  <div className="w-full md:w-1/3">
-                    <div className="sticky top-24">
-                      <div className="relative w-full aspect-[3/4] mb-4 shadow-lg rounded-lg overflow-hidden">
-                        <Image
-                          src={userImage}
-                          alt="Your uploaded image"
-                          fill
-                          className="object-contain rounded-md"
-                        />
-                      </div>
-                      <div className="bg-white/60 backdrop-blur-xs p-4 rounded-lg shadow-md">
-                        <h3 className="font-bold text-lg mb-2 font-playfair text-gray-800">
-                          Your Analysis
-                        </h3>
-                        <ul className="space-y-2 font-inter">
-                          <li className="flex justify-between">
-                            <span className="text-gray-600">Face Shape:</span>
-                            <span className="font-medium">
-                              {analysisResults.faceShape}
-                            </span>
-                          </li>
-                          <li className="flex justify-between">
-                            <span className="text-gray-600">Skin Tone:</span>
-                            <span className="font-medium">
-                              {analysisResults.skinTone}
-                            </span>
-                          </li>
-                          <li className="flex justify-between">
-                            <span className="text-gray-600">Body Type:</span>
-                            <span className="font-medium">
-                              {analysisResults.bodyType}
-                            </span>
-                          </li>
-                          <li className="flex justify-between">
-                            <span className="text-gray-600">Style Match:</span>
-                            <span className="font-medium">
-                              {analysisResults.styleMatch}
-                            </span>
-                          </li>
-                        </ul>
-                      </div>
-                    </div>
-                  </div>
-
-                  <div className="w-full md:w-2/3">
-                    <div className="bg-white/60 backdrop-blur-xs border border-white/20 rounded-lg p-6 mb-8 shadow-md">
-                      <h2 className="text-2xl font-bold mb-4 font-playfair text-gray-800">
-                        Recommended Styles
-                      </h2>
-
-                      <div className="space-y-8">
-                        {styleRecommendations.map((style, index) => (
-                          <div
-                            key={index}
-                            className="border-b pb-6 last:border-b-0">
-                            <h3 className="text-xl font-semibold mb-3 font-playfair text-gray-800">
-                              {style.title}
-                            </h3>
-                            <p className="text-gray-700 mb-4 font-inter">
-                              {style.description}
-                            </p>
-                            <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
-                              {style.examples.map((example, i) => (
-                                <div
-                                  key={i}
-                                  className="bg-gray-100 h-40 rounded-md flex items-center justify-center">
-                                  <span className="text-gray-500 font-inter">
-                                    {example}
-                                  </span>
-                                </div>
-                              ))}
-                            </div>
-                          </div>
-                        ))}
-                      </div>
-                    </div>
-
-                    <div className="flex justify-between">
-                      <button
-                        onClick={() =>
-                          window.scrollTo({ top: 0, behavior: 'smooth' })
-                        }
-                        className="px-6 py-3 bg-gray-200 hover:bg-gray-300 text-gray-800 font-medium rounded-md transition-colors font-inter">
-                        Back to Analysis
-                      </button>
-                      <button
-                        onClick={() => router.push('/dashboard')}
-                        className="px-6 py-3 bg-[#84a59d] hover:bg-[#6b8c85] text-white font-medium rounded-md transition-colors shadow-md font-inter">
-                        Save Recommendations
-                      </button>
-                    </div>
-                  </div>
-                </div>
-              ) : (
-                <div className="flex justify-center items-center h-64">
-                  <div className="flex flex-col items-center">
-                    <svg
-                      className="w-12 h-12 text-[#84a59d] animate-spin-slow mb-4"
-                      viewBox="0 0 24 24">
-                      <path
-                        fill="currentColor"
-                        d="M12,1A11,11,0,1,0,23,12,11,11,0,0,0,12,1Zm0,19a8,8,0,1,1,8-8A8,8,0,0,1,12,20Z"
-                        opacity="0.25"
-                      />
-                      <path
-                        fill="currentColor"
-                        d="M12,4a8,8,0,0,1,7.89,6.7A1.53,1.53,0,0,0,21.38,12h0a1.5,1.5,0,0,0,1.48-1.75,11,11,0,0,0-21.72,0A1.5,1.5,0,0,0,2.62,12h0a1.53,1.53,0,0,0,1.49-1.3A8,8,0,0,1,12,4Z"
-                      />
-                    </svg>
-                    <p className="text-gray-500 font-inter">
-                      Loading your recommendations...
-                    </p>
-                  </div>
-                </div>
-              )}
-            </div>
-          </div>
+        <div ref={recommendationsRef}>
+          <StyleRecommendations
+            userImage={userImage}
+            styleRecommendations={styleRecommendations}
+            analysisResults={analysisResults}
+          />
         </div>
       </div>
     </>
