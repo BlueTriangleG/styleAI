@@ -4,6 +4,7 @@ import Image from 'next/image';
 import { useRouter } from 'next/navigation';
 import CircularGallery from '@/components/ui/CircularGallery';
 import BounceCards from '@/components/ui/BounceCards';
+import LiquidChrome from '@/components/background/LiquidChrome';
 
 const images = [
   process.env.NEXT_PUBLIC_BASE_PATH + '/gallery/outfit1.png',
@@ -73,8 +74,21 @@ export function Hero() {
       ref={containerRef}
       className="w-screen h-screen overflow-y-auto scroll-smooth snap-y snap-mandatory no-scrollbar"
     >
+      {/* Flowing background */}
+      <div className="fixed inset-0 z-0 overflow-hidden pointer-events-auto">
+        <LiquidChrome
+          baseColor={[0.9, 0.9, 0.9]}
+          speed={0.2}
+          amplitude={0.5}
+          frequencyX={3}
+          frequencyY={2}
+          interactive={true}
+        />
+        <div className="absolute inset-0 bg-white/10 pointer-events-none"></div>
+      </div>
+      
       {/* Hero Section - First Screen */}
-      <section className="w-screen h-screen pt-20 flex justify-center items-center snap-start">
+      <section className="w-screen h-screen pt-20 flex justify-center items-center snap-start relative z-10">
         <div className="w-[80%] h-[100%] flex flex-col justify-between">
           {/* Title */}
           <div className="w-[100%] h-[30%]">
@@ -122,7 +136,7 @@ export function Hero() {
       {/* Usecase Section - Second Screen */}
       <section
         ref={usecaseRef}
-        className="w-screen h-screen pt-20 flex justify-center items-center snap-start"
+        className="w-screen h-screen pt-20 flex justify-center items-center snap-start relative z-10"
       >
         <div className="w-[80%] h-[100%] flex flex-col justify-between">
           {/* Title */}
