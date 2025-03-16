@@ -11,7 +11,7 @@ const images = [
   process.env.NEXT_PUBLIC_BASE_PATH + '/gallery/outfit2.png',
   process.env.NEXT_PUBLIC_BASE_PATH + '/gallery/outfit3.png',
   process.env.NEXT_PUBLIC_BASE_PATH + '/gallery/outfit4.png',
-  process.env.NEXT_PUBLIC_BASE_PATH + '/gallery/outfit1.png',
+  process.env.NEXT_PUBLIC_BASE_PATH + '/gallery/outfit5.png',
 ];
 
 const transformStyles = [
@@ -24,20 +24,20 @@ const transformStyles = [
 
 const galleryItems = [
   {
-    video: process.env.NEXT_PUBLIC_BASE_PATH + "/gallery/test.mp4",
+    video: process.env.NEXT_PUBLIC_BASE_PATH + "/gallery/model1.mp4",
     text: 'Video 1',
   },
   {
-    video: process.env.NEXT_PUBLIC_BASE_PATH + "/gallery/test.mp4",
-    text: 'Video 1',
+    video: process.env.NEXT_PUBLIC_BASE_PATH + "/gallery/model2.mp4",
+    text: 'Video 2',
   },
   {
-    video: process.env.NEXT_PUBLIC_BASE_PATH + "/gallery/test.mp4",
-    text: 'Video 1',
+    video: process.env.NEXT_PUBLIC_BASE_PATH + "/gallery/model3.mp4",
+    text: 'Video 3',
   },
   {
-    video: process.env.NEXT_PUBLIC_BASE_PATH + "/gallery/test.mp4",
-    text: 'Video 1',
+    video: process.env.NEXT_PUBLIC_BASE_PATH + "/gallery/model4.mp4",
+    text: 'Video 4',
   }
 ];
 
@@ -163,7 +163,7 @@ export function Hero() {
           <div className="w-[100%] h-[10%] flex justify-center items-center mb-5">
             <button
               onClick={handleStartClick}
-              className="w-20 h-10 bg-black rounded-md hover:bg-gray-800 cursor-pointer transition-colors text-white font-medium">
+              className="w-25 h-10 bg-[#2D4B37] rounded-md hover:bg-gray-800 cursor-pointer transition-colors text-white font-medium">
               Start
             </button>
           </div>
