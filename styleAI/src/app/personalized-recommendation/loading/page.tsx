@@ -35,6 +35,30 @@ export default function LoadingPage() {
       sessionStorage.setItem('analysisData', JSON.stringify(data));
       console.log('分析数据已存储到sessionStorage');
 
+      // 调用wear-suit-pictures接口
+      console.log('正在调用wear-suit-pictures接口...');
+      try {
+        const suitPicturesResult = await apiService.getWearSuitPictures(jobId);
+        console.log('成功获取穿着建议图片:', suitPicturesResult);
+
+        // 如果成功获取穿着建议图片，则获取最佳匹配图片
+        console.log('正在获取最佳匹配图片...');
+        try {
+          const bestFitResult = await apiService.getBestFitImage(jobId);
+          console.log('成功获取最佳匹配图片:', bestFitResult);
+
+          // 将最佳匹配图片存储在sessionStorage中
+          if (bestFitResult && bestFitResult.imageData) {
+            sessionStorage.setItem('bestFitImage', bestFitResult.imageData);
+            console.log('最佳匹配图片已存储到sessionStorage');
+          }
+        } catch (bestFitError) {
+          console.error('获取最佳匹配图片失败:', bestFitError);
+        }
+      } catch (suitPicturesError) {
+        console.error('获取穿着建议图片失败:', suitPicturesError);
+      }
+
       // 标记数据已准备好
       setIsDataReady(true);
       dataFetchedRef.current = true;

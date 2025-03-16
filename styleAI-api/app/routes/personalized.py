@@ -624,7 +624,19 @@ def wear_suit_pictures():
                                 try:
                                     # 修正参数顺序：第一个参数是模特图片(model_image_url)，第二个参数是服装图片(garment_image_url)
                                     # 在这里，模特图片是用户上传的图片(image_path)，服装图片是匹配的服装图片(model_image_url)
-                                    output_path = change_ootd.main(image_path, model_image_url)
+                                    
+                                    # 将本地图片转换为base64编码
+                                    def encode_image_to_base64(image_path):
+                                        import base64
+                                        with open(image_path, "rb") as image_file:
+                                            return "data:image/jpeg;base64," + base64.b64encode(image_file.read()).decode()
+                                    
+                                    # 使用base64编码图片
+                                    model_image_base64 = encode_image_to_base64(image_path)
+                                    garment_image_base64 = encode_image_to_base64(model_image_url)
+                                    
+                                    # 使用base64编码的图片调用change_ootd.main
+                                    output_path = change_ootd.main(model_image_base64, garment_image_base64)
                                     
                                     if not output_path or not os.path.exists(output_path):
                                         logger.warning("change_ootd未返回有效结果，使用模拟数据")
@@ -971,15 +983,18 @@ def generate_best_fit():
                         try:
                             # 修正参数顺序：第一个参数是模特图片(model_image_url)，第二个参数是服装图片(garment_image_url)
                             # 在这里，模特图片是用户上传的图片(image_path)，服装图片是匹配的服装图片(model_image_url)
+                            
+                            # 将本地图片转换为base64编码
                             def encode_image_to_base64(image_path):
                                 import base64
                                 with open(image_path, "rb") as image_file:
                                     return "data:image/jpeg;base64," + base64.b64encode(image_file.read()).decode()
-                            # 使用本地图片时（取消注释下面两行）
+                            
+                            # 使用base64编码图片
                             model_image_base64 = encode_image_to_base64(image_path)
                             garment_image_base64 = encode_image_to_base64(model_image_url)
-
-                                                            
+                            
+                            # 使用base64编码的图片调用change_ootd.main
                             output_path = change_ootd.main(model_image_base64, garment_image_base64)
                             
                             if not output_path or not os.path.exists(output_path):
