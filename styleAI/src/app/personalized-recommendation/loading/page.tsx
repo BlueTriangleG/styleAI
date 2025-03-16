@@ -326,10 +326,10 @@ export default function LoadingPage() {
             variants={containerVariants}>
             <motion.div className="mb-8 text-center" variants={itemVariants}>
               <h1 className="text-3xl font-bold mb-2 font-playfair text-gray-800">
-                分析您的风格
+                Analysing your style
               </h1>
               <p className="text-lg text-gray-600 font-inter">
-                我们正在处理您的照片，为您创建个性化推荐
+                We are processing your photo to create personalized recommendations
               </p>
             </motion.div>
 
@@ -369,13 +369,13 @@ export default function LoadingPage() {
                 className="text-center space-y-2"
                 variants={itemVariants}>
                 <p className="text-gray-700 font-inter">
-                  请稍等片刻，我们正在：
+                  Please wait a moment, we are:
                 </p>
                 <ul className="text-gray-600 space-y-1 font-inter">
-                  <li>✓ 分析您的面部特征</li>
-                  <li>✓ 确定您的风格偏好</li>
-                  <li>{progress >= 50 ? '✓' : '⋯'} 识别您的风格特点</li>
-                  <li>{progress >= 75 ? '✓' : '⋯'} 生成个性化推荐</li>
+                  <li>✓ Analyzing your facial features</li>
+                  <li>✓ Determining your style preferences</li>
+                  <li>{progress >= 50 ? '✓' : '⋯'} Identifying your style characteristics</li>
+                  <li>{progress >= 75 ? '✓' : '⋯'} Generating personalized recommendations</li>
                 </ul>
               </motion.div>
             </motion.div>
