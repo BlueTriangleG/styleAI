@@ -45,6 +45,7 @@ export default function Step2() {
   const [analysisData, setAnalysisData] = useState<AnalysisData | null>(null);
   const [isLoadingAnalysis, setIsLoadingAnalysis] = useState(false);
   const [analysisError, setAnalysisError] = useState<string | null>(null);
+  const [overallDescription, setOverallDescription] = useState<string>(''); // 存储整体描述
   const router = useRouter();
   const scrollRef = useRef<HTMLDivElement>(null);
   const recommendationsRef = useRef<HTMLDivElement>(null);
@@ -120,6 +121,95 @@ export default function Step2() {
     styleMatch: 'Business Casual',
   };
 
+  // 辅助函数：从原始JSON字符串中提取有效的JSON内容
+  const extractJsonFromString = (jsonString: string): any => {
+    console.log('提取JSON，原始字符串长度:', jsonString.length);
+
+    try {
+      // 首先检查是否是有效的JSON对象
+      if (typeof jsonString === 'object' && jsonString !== null) {
+        console.log('输入已经是对象，直接返回');
+        return jsonString;
+      }
+
+      // 确保输入是字符串
+      if (typeof jsonString !== 'string') {
+        console.log('输入不是字符串，尝试转换为字符串');
+        jsonString = String(jsonString);
+      }
+
+      // 首先尝试直接解析，看是否已经是有效的JSON字符串
+      try {
+        const directParsed = JSON.parse(jsonString);
+        console.log('直接解析成功，返回对象');
+        return directParsed;
+      } catch (e) {
+        console.log('直接解析失败，尝试提取JSON代码块');
+      }
+
+      // 检查是否包含```json标记
+      if (jsonString.includes('```json')) {
+        console.log('检测到```json标记，尝试提取JSON内容');
+
+        // 提取JSON部分 - 使用更精确的方法
+        const startMarker = '```json\n';
+        const endMarker = '\n```';
+
+        const startIndex = jsonString.indexOf(startMarker);
+        if (startIndex !== -1) {
+          const contentStartIndex = startIndex + startMarker.length;
+          const endIndex = jsonString.indexOf(endMarker, contentStartIndex);
+
+          if (endIndex !== -1) {
+            const jsonContent = jsonString.substring(
+              contentStartIndex,
+              endIndex
+            );
+            console.log('提取的JSON内容长度:', jsonContent.length);
+            console.log('JSON内容前20个字符:', jsonContent.substring(0, 20));
+
+            // 解析JSON
+            try {
+              const parsed = JSON.parse(jsonContent);
+              console.log('JSON解析成功，返回对象');
+              return parsed;
+            } catch (parseError) {
+              console.error('解析提取的JSON内容失败:', parseError);
+              // 继续尝试其他方法
+            }
+          }
+        }
+      }
+
+      // 如果上述方法都失败，尝试移除所有Markdown标记
+      console.log('尝试移除所有Markdown标记');
+      const cleanedJson = jsonString
+        .replace(/```json\n/g, '')
+        .replace(/\n```/g, '')
+        .trim();
+
+      console.log('清理后的JSON长度:', cleanedJson.length);
+      console.log('清理后的JSON前20个字符:', cleanedJson.substring(0, 20));
+
+      // 解析清理后的JSON
+      try {
+        const parsed = JSON.parse(cleanedJson);
+        console.log('清理后的JSON解析成功，返回对象');
+        return parsed;
+      } catch (parseError) {
+        console.error('解析清理后的JSON失败:', parseError);
+        // 继续尝试其他方法
+      }
+
+      // 如果所有方法都失败，返回一个空对象
+      console.log('所有解析方法都失败，返回空对象');
+      return {};
+    } catch (error) {
+      console.error('提取JSON过程中出错:', error);
+      return {};
+    }
+  };
+
   // 获取个性化分析数据
   const fetchAnalysisData = async (jobId: string) => {
     setIsLoadingAnalysis(true);
@@ -149,16 +239,331 @@ export default function Step2() {
       }
 
       // 解析存储的数据
-      const data = JSON.parse(storedData);
-      console.log('成功获取分析数据:', data);
+      let parsedData;
+      try {
+        // 尝试解析数据
+        console.log('原始存储的数据长度:', storedData.length);
 
-      // 打印分析数据的详细信息
-      console.log('分析特征:', data.features);
-      console.log('推荐颜色:', data.colors);
-      console.log('推荐风格:', data.styles);
+        // 使用辅助函数提取JSON
+        parsedData = extractJsonFromString(storedData);
+        console.log('成功解析的数据结构:', Object.keys(parsedData));
 
-      setAnalysisData(data);
-      return data;
+        // 提取并设置整体描述
+        if (parsedData && parsedData['Your Overall Description']) {
+          const description = parsedData['Your Overall Description'];
+          console.log('提取到的整体描述:', description);
+          setOverallDescription(description);
+        } else {
+          console.log('未找到整体描述');
+          setOverallDescription('未找到整体描述');
+        }
+
+        // 检查parsedData是否为有效对象
+        if (!parsedData || typeof parsedData !== 'object') {
+          console.error('解析后的数据不是有效对象:', parsedData);
+          throw new Error('解析后的数据不是有效对象');
+        }
+
+        // 从结构化数据中提取特征、颜色和风格
+        const extractedFeatures: AnalysisPoint[] = [];
+        const extractedColors: { name: string; hex: string }[] = [];
+        const extractedStyles: string[] = [];
+
+        console.log('开始提取特征数据');
+
+        // 提取结构化特征
+        if (parsedData['Structural Features']) {
+          console.log('提取Structural Features');
+          try {
+            // 提取身体特征
+            if (parsedData['Structural Features']['Body Features']) {
+              const bodyFeatures =
+                parsedData['Structural Features']['Body Features'];
+              console.log('Body Features类型:', typeof bodyFeatures);
+
+              if (typeof bodyFeatures === 'object' && bodyFeatures !== null) {
+                for (const [key, value] of Object.entries(bodyFeatures)) {
+                  if (typeof value === 'string') {
+                    extractedFeatures.push({
+                      title: key,
+                      content: value,
+                    });
+                  } else if (value && typeof value === 'object') {
+                    // 处理嵌套对象，如Body Hair Characteristics
+                    for (const [nestedKey, nestedValue] of Object.entries(
+                      value
+                    )) {
+                      if (typeof nestedValue === 'string') {
+                        extractedFeatures.push({
+                          title: `${key} - ${nestedKey}`,
+                          content: nestedValue,
+                        });
+                      }
+                    }
+                  }
+                }
+              }
+            }
+
+            // 提取面部特征
+            if (parsedData['Structural Features']['Facial Features']) {
+              const facialFeatures =
+                parsedData['Structural Features']['Facial Features'];
+              console.log('Facial Features类型:', typeof facialFeatures);
+
+              if (
+                typeof facialFeatures === 'object' &&
+                facialFeatures !== null
+              ) {
+                for (const [key, value] of Object.entries(facialFeatures)) {
+                  if (typeof value === 'string') {
+                    extractedFeatures.push({
+                      title: key,
+                      content: value,
+                    });
+                  }
+                }
+              }
+            }
+          } catch (e) {
+            console.error('处理Structural Features时出错:', e);
+          }
+        }
+
+        // 提取颜色特征
+        if (parsedData['Color Features']) {
+          const colorFeatures = parsedData['Color Features'];
+          console.log('Color Features类型:', typeof colorFeatures);
+
+          try {
+            // 添加肤色
+            if (colorFeatures['Skin Tone and Visual Characteristics']) {
+              const skinTone =
+                colorFeatures['Skin Tone and Visual Characteristics'];
+              console.log('提取肤色:', skinTone);
+              extractedColors.push({
+                name: 'Skin Tone',
+                hex: '#FFE0BD', // 默认肤色
+              });
+            }
+
+            // 添加发色
+            if (colorFeatures['Hair Color and Saturation']) {
+              const hairColor = colorFeatures['Hair Color and Saturation'];
+              console.log('提取发色:', hairColor);
+              extractedColors.push({
+                name: 'Hair Color',
+                hex: '#4A4A4A', // 默认发色
+              });
+            }
+
+            // 添加服装颜色建议
+            if (colorFeatures['Clothing Color Optimization Suggestions']) {
+              // 从建议中提取颜色名称
+              const suggestion =
+                colorFeatures['Clothing Color Optimization Suggestions'];
+              console.log('提取服装颜色建议:', suggestion);
+              const colorRegex =
+                /(black|white|red|green|blue|yellow|purple|pink|orange|brown|gray|navy|burgundy|forest green|charcoal|pastel|neutral)/gi;
+              const matches = suggestion.match(colorRegex);
+              console.log('匹配到的颜色:', matches);
+
+              if (matches) {
+                // 为匹配到的颜色添加默认hex值
+                const colorMap = {
+                  black: '#000000',
+                  white: '#FFFFFF',
+                  red: '#FF0000',
+                  green: '#008000',
+                  blue: '#0000FF',
+                  yellow: '#FFFF00',
+                  purple: '#800080',
+                  pink: '#FFC0CB',
+                  orange: '#FFA500',
+                  brown: '#A52A2A',
+                  gray: '#808080',
+                  navy: '#000080',
+                  burgundy: '#800020',
+                  'forest green': '#228B22',
+                  charcoal: '#36454F',
+                  pastel: '#FFB6C1',
+                  neutral: '#F5F5DC',
+                };
+
+                // 添加唯一的颜色
+                const addedColors = new Set<string>();
+                matches.forEach((color: string) => {
+                  const normalizedColor = color.toLowerCase();
+                  if (
+                    !addedColors.has(normalizedColor) &&
+                    colorMap[normalizedColor as keyof typeof colorMap]
+                  ) {
+                    extractedColors.push({
+                      name: color,
+                      hex: colorMap[normalizedColor as keyof typeof colorMap],
+                    });
+                    addedColors.add(normalizedColor);
+                  }
+                });
+              }
+            }
+          } catch (e) {
+            console.error('处理Color Features时出错:', e);
+          }
+        }
+
+        // 如果没有提取到足够的颜色，添加一些默认颜色
+        if (extractedColors.length < 3) {
+          console.log('提取的颜色不足3个，添加默认颜色');
+          const defaultColors = [
+            { name: 'Navy Blue', hex: '#000080' },
+            { name: 'Burgundy', hex: '#800020' },
+            { name: 'Forest Green', hex: '#228B22' },
+            { name: 'Charcoal Gray', hex: '#36454F' },
+          ];
+
+          for (
+            let i = 0;
+            i < defaultColors.length && extractedColors.length < 4;
+            i++
+          ) {
+            extractedColors.push(defaultColors[i]);
+          }
+        }
+
+        // 提取风格特征
+        if (
+          parsedData['Semantic Features'] &&
+          parsedData['Semantic Features']['Temperament Features']
+        ) {
+          const temperamentFeatures =
+            parsedData['Semantic Features']['Temperament Features'];
+          console.log('Temperament Features类型:', typeof temperamentFeatures);
+
+          try {
+            // 从整体风格印象中提取风格关键词
+            if (temperamentFeatures['Overall Style First Impression']) {
+              const impression =
+                temperamentFeatures['Overall Style First Impression'];
+              console.log('整体风格印象:', impression);
+              const styleRegex =
+                /(energetic|youthful|playful|artistic|elegant|sophisticated|classic|professional|casual|formal|sporty|creative|dynamic|vibrant)/gi;
+              const matches = impression.match(styleRegex);
+              console.log('从整体风格印象中匹配到的风格:', matches);
+
+              if (matches) {
+                matches.forEach((style: string) => {
+                  if (!extractedStyles.includes(style)) {
+                    extractedStyles.push(style);
+                  }
+                });
+              }
+            }
+
+            // 从风格优化建议中提取风格关键词
+            if (
+              temperamentFeatures[
+                'Style Optimization and Temperament Enhancement Suggestions'
+              ]
+            ) {
+              const suggestion =
+                temperamentFeatures[
+                  'Style Optimization and Temperament Enhancement Suggestions'
+                ];
+              console.log('风格优化建议:', suggestion);
+              const styleRegex =
+                /(casual|playful|graphic tees|skirts|youthful|artistic|elegant|sophisticated|classic|professional|formal|sporty|creative|dynamic|vibrant)/gi;
+              const matches = suggestion.match(styleRegex);
+              console.log('从风格优化建议中匹配到的风格:', matches);
+
+              if (matches) {
+                matches.forEach((style: string) => {
+                  if (!extractedStyles.includes(style)) {
+                    extractedStyles.push(style);
+                  }
+                });
+              }
+            }
+          } catch (e) {
+            console.error('处理Temperament Features时出错:', e);
+          }
+        }
+
+        // 如果没有提取到足够的风格，添加一些默认风格
+        if (extractedStyles.length < 3) {
+          console.log('提取的风格不足3个，添加默认风格');
+          const defaultStyles = [
+            'Classic',
+            'Professional',
+            'Elegant',
+            'Sophisticated',
+          ];
+          for (
+            let i = 0;
+            i < defaultStyles.length && extractedStyles.length < 4;
+            i++
+          ) {
+            if (!extractedStyles.includes(defaultStyles[i])) {
+              extractedStyles.push(defaultStyles[i]);
+            }
+          }
+        }
+
+        // 如果features为空，添加整体描述作为一个特征
+        if (
+          extractedFeatures.length === 0 &&
+          parsedData['Your Overall Description']
+        ) {
+          console.log('提取的特征为空，添加整体描述作为特征');
+          try {
+            const overallDescription = parsedData['Your Overall Description'];
+            console.log('整体描述:', overallDescription);
+            extractedFeatures.push({
+              title: 'Overall Description',
+              content: overallDescription,
+            });
+          } catch (e) {
+            console.error('处理整体描述时出错:', e);
+          }
+        }
+
+        console.log('提取完成，构建处理后的数据');
+        console.log('提取的特征数量:', extractedFeatures.length);
+        console.log('提取的颜色数量:', extractedColors.length);
+        console.log('提取的风格数量:', extractedStyles.length);
+
+        // 构建处理后的数据
+        const processedData = {
+          features:
+            extractedFeatures.length > 0
+              ? extractedFeatures
+              : defaultAnalysisPoints,
+          colors:
+            extractedColors.length > 0
+              ? extractedColors
+              : [
+                  { name: 'Navy Blue', hex: '#000080' },
+                  { name: 'Burgundy', hex: '#800020' },
+                  { name: 'Forest Green', hex: '#228B22' },
+                  { name: 'Charcoal Gray', hex: '#36454F' },
+                ],
+          styles:
+            extractedStyles.length > 0
+              ? extractedStyles
+              : ['Classic', 'Professional', 'Elegant', 'Sophisticated'],
+        };
+
+        // 打印分析数据的详细信息
+        console.log('提取的特征:', processedData.features);
+        console.log('提取的颜色:', processedData.colors);
+        console.log('提取的风格:', processedData.styles);
+
+        setAnalysisData(processedData);
+        return processedData;
+      } catch (parseError) {
+        console.error('解析数据时出错:', parseError);
+        throw parseError;
+      }
     } catch (error) {
       console.error('获取分析数据失败:', error);
       setAnalysisError('无法获取分析数据，使用默认数据');
@@ -257,11 +662,37 @@ export default function Step2() {
         if (storedAnalysisData) {
           console.log('在sessionStorage中找到分析数据');
           try {
-            const parsedData = JSON.parse(storedAnalysisData);
-            console.log('解析的分析数据:', parsedData);
+            // 使用辅助函数提取JSON
+            console.log('尝试解析sessionStorage中的分析数据');
+            const parsedAnalysisData =
+              extractJsonFromString(storedAnalysisData);
+            console.log('解析的分析数据结构:', Object.keys(parsedAnalysisData));
 
-            // 直接设置分析数据，避免重复调用API
-            setAnalysisData(parsedData);
+            // 不直接设置分析数据，而是调用fetchAnalysisData来处理
+            // 这样可以确保数据被正确处理
+            console.log('调用fetchAnalysisData处理解析后的数据');
+            fetchAnalysisData('')
+              .then(() => {
+                // 数据加载完成后，设置页面加载状态为false
+                setIsPageLoading(false);
+                console.log('页面加载完成，isPageLoading设置为false');
+
+                // Delay enabling scroll effects to ensure page content is displayed first
+                const scrollEffectsTimer = setTimeout(() => {
+                  setEnableScrollEffects(true);
+                  console.log('启用滚动效果');
+                }, 1500);
+
+                return () => {
+                  console.log('Step2组件卸载，清除timer');
+                  clearTimeout(scrollEffectsTimer);
+                };
+              })
+              .catch((error) => {
+                console.error('fetchAnalysisData处理失败:', error);
+                // 如果处理失败，仍然设置页面加载状态为false
+                setIsPageLoading(false);
+              });
 
             // 获取jobId
             const storedJobId = sessionStorage.getItem('currentJobId');
@@ -270,20 +701,7 @@ export default function Step2() {
               console.log(`从sessionStorage获取的jobId: ${storedJobId}`);
             }
 
-            // 数据加载完成后，设置页面加载状态为false
-            setIsPageLoading(false);
-            console.log('页面加载完成，isPageLoading设置为false');
-
-            // Delay enabling scroll effects to ensure page content is displayed first
-            const scrollEffectsTimer = setTimeout(() => {
-              setEnableScrollEffects(true);
-              console.log('启用滚动效果');
-            }, 1500);
-
-            return () => {
-              console.log('Step2组件卸载，清除timer');
-              clearTimeout(scrollEffectsTimer);
-            };
+            return;
           } catch (e) {
             console.error('解析分析数据时出错:', e);
             // 如果解析出错，则继续使用getJobIdAndFetchData
@@ -320,6 +738,27 @@ export default function Step2() {
   useEffect(() => {
     if (isPageLoading || !analysisData) return;
 
+    // 确保features存在且是数组
+    if (!analysisData.features || !Array.isArray(analysisData.features)) {
+      console.error('分析数据中的features不存在或不是数组:', analysisData);
+      // 使用默认数据
+      setAnalysisData({
+        ...analysisData,
+        features: defaultAnalysisPoints,
+      });
+      return;
+    }
+
+    // 如果有整体描述，直接设置typingComplete为最大值，跳过分析点的动画
+    if (overallDescription) {
+      setTypingComplete(analysisData.features.length);
+      // 直接显示滚动指示器
+      setTimeout(() => {
+        setShowScrollIndicator(true);
+      }, 1000);
+      return;
+    }
+
     const typingTimer = setInterval(() => {
       setTypingComplete((prev) => {
         if (prev < analysisData.features.length) {
@@ -334,7 +773,7 @@ export default function Step2() {
     }, 1000); // Show one analysis point per second
 
     return () => clearInterval(typingTimer);
-  }, [isPageLoading, analysisData]);
+  }, [isPageLoading, analysisData, overallDescription]);
 
   // Scroll to recommendations section
   const scrollToRecommendations = () => {
@@ -582,30 +1021,57 @@ export default function Step2() {
                           {jobId ? `API (JobID: ${jobId})` : '本地存储'}
                         </div>
 
-                        {analysisPoints.map((point, index) => (
-                          <motion.div
-                            key={index}
-                            initial="initial"
-                            animate={
-                              typingComplete > index ? 'animate' : 'initial'
-                            }
-                            variants={textRevealVariants}
-                            className={`transition-opacity duration-500 ${
-                              typingComplete > index
-                                ? 'opacity-100'
-                                : 'opacity-0'
-                            }`}>
-                            <h3 className="text-lg font-bold font-playfair text-gray-800 mb-2">
-                              {index + 1}. {point.title}
+                        {/* 显示整体描述 */}
+                        {overallDescription ? (
+                          <div className="bg-[#84a59d]/10 p-6 rounded-lg mb-6 shadow-sm">
+                            <h3 className="text-xl font-bold font-playfair text-gray-800 mb-4 border-b border-[#84a59d]/20 pb-2">
+                              您的整体风格描述
                             </h3>
-                            <p className="text-gray-700 font-inter">
-                              {point.content}
+                            <p className="text-gray-700 font-inter leading-relaxed">
+                              {overallDescription}
                             </p>
-                          </motion.div>
-                        ))}
+                          </div>
+                        ) : (
+                          <div className="bg-yellow-50 p-6 rounded-lg mb-6 shadow-sm">
+                            <h3 className="text-xl font-bold font-playfair text-gray-800 mb-4 border-b border-yellow-200 pb-2">
+                              未找到整体描述
+                            </h3>
+                            <p className="text-gray-700 font-inter leading-relaxed">
+                              系统未能找到您的整体描述，请尝试重新上传图片或联系客服。
+                            </p>
+                          </div>
+                        )}
+
+                        {/* 隐藏其他分析点，只在没有整体描述时显示 */}
+                        {!overallDescription &&
+                          Array.isArray(analysisPoints) &&
+                          analysisPoints.map((point, index) => (
+                            <motion.div
+                              key={index}
+                              initial="initial"
+                              animate={
+                                typingComplete > index ? 'animate' : 'initial'
+                              }
+                              variants={textRevealVariants}
+                              className={`transition-opacity duration-500 ${
+                                typingComplete > index
+                                  ? 'opacity-100'
+                                  : 'opacity-0'
+                              }`}>
+                              <h3 className="text-lg font-bold font-playfair text-gray-800 mb-2">
+                                {index + 1}. {point.title}
+                              </h3>
+                              <p className="text-gray-700 font-inter">
+                                {point.content}
+                              </p>
+                            </motion.div>
+                          ))}
 
                         {/* 显示推荐颜色 */}
-                        {typingComplete >= analysisPoints.length && (
+                        {typingComplete >=
+                          (Array.isArray(analysisPoints)
+                            ? analysisPoints.length
+                            : 0) && (
                           <motion.div
                             initial="initial"
                             animate="animate"
@@ -615,26 +1081,30 @@ export default function Step2() {
                               推荐颜色
                             </h3>
                             <div className="flex flex-wrap gap-3">
-                              {recommendedColors.map((color, index) => (
-                                <div
-                                  key={index}
-                                  className="flex flex-col items-center">
+                              {Array.isArray(recommendedColors) &&
+                                recommendedColors.map((color, index) => (
                                   <div
-                                    className="w-12 h-12 rounded-full shadow-md mb-1"
-                                    style={{
-                                      backgroundColor: color.hex,
-                                    }}></div>
-                                  <span className="text-xs text-gray-700">
-                                    {color.name}
-                                  </span>
-                                </div>
-                              ))}
+                                    key={index}
+                                    className="flex flex-col items-center">
+                                    <div
+                                      className="w-12 h-12 rounded-full shadow-md mb-1"
+                                      style={{
+                                        backgroundColor: color.hex,
+                                      }}></div>
+                                    <span className="text-xs text-gray-700">
+                                      {color.name}
+                                    </span>
+                                  </div>
+                                ))}
                             </div>
                           </motion.div>
                         )}
 
                         {/* 显示推荐风格 */}
-                        {typingComplete >= analysisPoints.length && (
+                        {typingComplete >=
+                          (Array.isArray(analysisPoints)
+                            ? analysisPoints.length
+                            : 0) && (
                           <motion.div
                             initial="initial"
                             animate="animate"
@@ -644,13 +1114,14 @@ export default function Step2() {
                               推荐风格
                             </h3>
                             <div className="flex flex-wrap gap-2">
-                              {recommendedStyles.map((style, index) => (
-                                <span
-                                  key={index}
-                                  className="px-3 py-1 bg-[#84a59d]/10 text-[#84a59d] rounded-full text-sm">
-                                  {style}
-                                </span>
-                              ))}
+                              {Array.isArray(recommendedStyles) &&
+                                recommendedStyles.map((style, index) => (
+                                  <span
+                                    key={index}
+                                    className="px-3 py-1 bg-[#84a59d]/10 text-[#84a59d] rounded-full text-sm">
+                                    {style}
+                                  </span>
+                                ))}
                             </div>
                           </motion.div>
                         )}

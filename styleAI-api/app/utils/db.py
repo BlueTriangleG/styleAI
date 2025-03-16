@@ -96,3 +96,44 @@ def update_job_description(job_id, description_data):
     except Exception as e:
         logger.error(f"更新job target_description失败: {e}")
         return False 
+
+def update_job_best_fit(job_id, image_data):
+    """
+    更新数据库中job记录的best_fit字段
+    
+    Args:
+        job_id (str): 要更新的job ID
+        image_data (bytes): 要保存的图片二进制数据
+        
+    Returns:
+        bool: 更新成功返回True，失败返回False
+    """
+    try:
+        conn = get_db_connection()
+        cur = conn.cursor()
+        
+        # 更新job记录
+        cur.execute(
+            "UPDATE jobs SET best_fit = %s WHERE id = %s",
+            (psycopg2.Binary(image_data), job_id)
+        )
+        
+        # 提交事务
+        conn.commit()
+        
+        # 检查是否有行被更新
+        rows_affected = cur.rowcount
+        
+        cur.close()
+        conn.close()
+        
+        if rows_affected > 0:
+            logger.info(f"成功更新job {job_id}的best_fit")
+            return True
+        else:
+            logger.warning(f"未找到job {job_id}，无法更新best_fit")
+            return False
+            
+    except Exception as e:
+        logger.error(f"更新job best_fit失败: {e}")
+        return False 

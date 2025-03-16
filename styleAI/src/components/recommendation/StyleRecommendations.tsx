@@ -2,6 +2,8 @@
 
 import { useRouter } from 'next/navigation';
 import Image from 'next/image';
+import { useEffect, useState } from 'react';
+import { apiService } from '@/lib/api/ApiService';
 
 interface StyleRecommendation {
   title: string;
@@ -28,9 +30,49 @@ export default function StyleRecommendations({
   analysisResults,
 }: StyleRecommendationsProps) {
   const router = useRouter();
+  const [bestFitImage, setBestFitImage] = useState<string | null>(null);
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   // 获取第一个推荐作为最佳推荐
   const bestRecommendation = styleRecommendations[0];
+
+  // 从sessionStorage获取jobId
+  useEffect(() => {
+    const fetchBestFitImage = async () => {
+      try {
+        setIsLoading(true);
+        setError(null);
+
+        // 从sessionStorage获取jobId
+        const jobId = sessionStorage.getItem('jobId');
+
+        if (!jobId) {
+          setError('未找到任务ID，无法获取最佳匹配图片');
+          setIsLoading(false);
+          return;
+        }
+
+        // 调用API获取best-fit图片
+        const response = await apiService.getBestFitImage(jobId);
+
+        if (response && response.data) {
+          // 将二进制数据转换为base64
+          const base64Image = `data:image/jpeg;base64,${response.data}`;
+          setBestFitImage(base64Image);
+        } else {
+          setError('获取最佳匹配图片失败');
+        }
+      } catch (err) {
+        console.error('获取最佳匹配图片时出错:', err);
+        setError('获取最佳匹配图片时出错');
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    fetchBestFitImage();
+  }, []);
 
   return (
     <div className="min-h-screen bg-white pt-20">
@@ -48,14 +90,23 @@ export default function StyleRecommendations({
               </h2>
 
               <div className="flex flex-col md:flex-row gap-8">
-                {/* 左侧图片 */}
+                {/* 左侧图片 - 用户上传的图片 */}
                 <div className="w-full md:w-1/3 relative">
-                  <div className="bg-gray-200 aspect-[3/4] rounded-lg overflow-hidden shadow-md">
-                    <div className="w-full h-full flex items-center justify-center">
-                      <span className="text-gray-500 font-inter">
-                        Style Example
-                      </span>
-                    </div>
+                  <div className="aspect-[3/4] rounded-lg overflow-hidden shadow-md">
+                    {userImage ? (
+                      <Image
+                        src={userImage}
+                        alt="Your uploaded image"
+                        fill
+                        className="object-cover"
+                      />
+                    ) : (
+                      <div className="w-full h-full bg-gray-200 flex items-center justify-center">
+                        <span className="text-gray-500 font-inter">
+                          Your Image
+                        </span>
+                      </div>
+                    )}
                   </div>
 
                   {/* 箭头 - 移到右侧 */}
@@ -77,14 +128,67 @@ export default function StyleRecommendations({
                   </div>
                 </div>
 
-                {/* 中间图片 */}
+                {/* 中间图片 - 最佳匹配图片 */}
                 <div className="w-full md:w-1/3 relative">
-                  <div className="bg-gray-200 aspect-[3/4] h-[50vh] rounded-lg overflow-hidden border-2 border-blue-400 shadow-lg">
-                    <div className="w-full h-full flex items-center justify-center">
-                      <span className="text-gray-500 font-inter">
-                        Style Example
-                      </span>
-                    </div>
+                  <div className="aspect-[3/4] h-[50vh] rounded-lg overflow-hidden border-2 border-blue-400 shadow-lg">
+                    {isLoading ? (
+                      <div className="w-full h-full bg-gray-100 flex items-center justify-center">
+                        <div className="flex flex-col items-center">
+                          <svg
+                            className="w-12 h-12 text-[#84a59d] animate-spin-slow mb-4"
+                            viewBox="0 0 24 24">
+                            <path
+                              fill="currentColor"
+                              d="M12,1A11,11,0,1,0,23,12,11,11,0,0,0,12,1Zm0,19a8,8,0,1,1,8-8A8,8,0,0,1,12,20Z"
+                              opacity="0.25"
+                            />
+                            <path
+                              fill="currentColor"
+                              d="M12,4a8,8,0,0,1,7.89,6.7A1.53,1.53,0,0,0,21.38,12h0a1.5,1.5,0,0,0,1.48-1.75,11,11,0,0,0-21.72,0A1.5,1.5,0,0,0,2.62,12h0a1.53,1.53,0,0,0,1.49-1.3A8,8,0,0,1,12,4Z"
+                            />
+                          </svg>
+                          <span className="text-gray-500 font-inter">
+                            加载中...
+                          </span>
+                        </div>
+                      </div>
+                    ) : error ? (
+                      <div className="w-full h-full bg-gray-100 flex items-center justify-center">
+                        <div className="flex flex-col items-center p-4 text-center">
+                          <svg
+                            xmlns="http://www.w3.org/2000/svg"
+                            width="48"
+                            height="48"
+                            viewBox="0 0 24 24"
+                            fill="none"
+                            stroke="currentColor"
+                            strokeWidth="2"
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            className="text-red-500 mb-4">
+                            <circle cx="12" cy="12" r="10" />
+                            <line x1="12" y1="8" x2="12" y2="12" />
+                            <line x1="12" y1="16" x2="12.01" y2="16" />
+                          </svg>
+                          <span className="text-red-500 font-inter">
+                            {error}
+                          </span>
+                        </div>
+                      </div>
+                    ) : bestFitImage ? (
+                      <Image
+                        src={bestFitImage}
+                        alt="Best fit style"
+                        fill
+                        className="object-cover"
+                      />
+                    ) : (
+                      <div className="w-full h-full bg-gray-200 flex items-center justify-center">
+                        <span className="text-gray-500 font-inter">
+                          Style Example
+                        </span>
+                      </div>
+                    )}
                   </div>
                 </div>
 

@@ -1,12 +1,6 @@
 import change_ootd, embedding_match, input_analyse
 
-# Please prepare the embedding model and tokenizer and device in advance, as shown below:
-# model_name = "distilbert-base-uncased"
-# device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-# tokenizer = AutoTokenizer.from_pretrained(model_name)
-# model = AutoModel.from_pretrained(model_name).to(device)
-
-# Run the whole process from here
+# 使用预加载的模型和tokenizer
 def styleAi(user_input_url, db_url, tokenizer, model, device):
     # Step 1: Analyze user input
     user_text = input_analyse.main(user_input_url)

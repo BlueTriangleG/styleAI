@@ -15,6 +15,7 @@ HEADERS = {
     "Authorization": f"Bearer {API_KEY}"
 }
 
+
 def submit_prediction(model_image_url, garment_image_url, category="one-pieces", mode="quality", num_samples=1):
     input_data = {
         "model_image": model_image_url,
@@ -78,19 +79,19 @@ def download_images(image_urls, save_dir="outputs"):
     return output_path
 
 # entry
-def main(user_input_url, model_image_url, category="one-pieces", mode="quality", num_samples=1):
+def main(model_image_url, garment_image_url, category="one-pieces", mode="quality", num_samples=1):
     """
     Generate a new outfit image using the StyleAI API.
     Parameters:
-        user_input_url (str): URL of the user input image.
-        model_image_url (str): URL of the model image.
+        model_image_url (str): URL of the model image (person wearing clothes).
+        garment_image_url (str): URL of the garment image (clothes to try on).
         category (str): Category of the garment to generate ("tops", "bottoms", "one-pieces").
         mode (str): Quality mode ("performance", "balanced", "quality").
         num_samples (int): Number of samples to generate.
     Returns:
         str: File path of the downloaded.
     """
-    prediction_id = submit_prediction(user_input_url, model_image_url, category, mode, num_samples)
+    prediction_id = submit_prediction(model_image_url, garment_image_url, category, mode, num_samples)
     if not prediction_id:
         return None
 
@@ -131,7 +132,7 @@ def generate_outfit_images(user_image_path, model=None, categories=None):
                 # Use a sample model image from the dataset
                 # In a real implementation, this would be selected based on user characteristics
                 model_dir = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))), 
-                                        "utils", "algorithms", "men_fashion_filtered")
+                                        "utils", "algorithms", "ALL_images")
                 
                 # Find a suitable model image
                 model_images = []
@@ -153,7 +154,7 @@ def generate_outfit_images(user_image_path, model=None, categories=None):
                 
                 # Generate outfit image
                 logger.info(f"Generating {category} outfit using model image: {model_image_url}")
-                output_path = main(user_image_path, model_image_url, category=category)
+                output_path = main(model_image_url, user_image_path, category=category)
                 
                 if output_path:
                     # Create a unique ID for this outfit
