@@ -44,8 +44,22 @@ export default function StyleRecommendations({
         setIsLoading(true);
         setError(null);
 
+        // 先尝试从sessionStorage获取最佳匹配图片
+        const storedBestFitImage = sessionStorage.getItem('bestFitImage');
+        if (storedBestFitImage) {
+          console.log('从sessionStorage获取到最佳匹配图片');
+          // 检查是否已经包含data:image前缀
+          if (storedBestFitImage.startsWith('data:image')) {
+            setBestFitImage(storedBestFitImage);
+          } else {
+            setBestFitImage(`data:image/jpeg;base64,${storedBestFitImage}`);
+          }
+          setIsLoading(false);
+          return;
+        }
+
         // 从sessionStorage获取jobId
-        const jobId = sessionStorage.getItem('jobId');
+        const jobId = sessionStorage.getItem('currentJobId');
 
         if (!jobId) {
           setError('未找到任务ID，无法获取最佳匹配图片');
@@ -53,14 +67,38 @@ export default function StyleRecommendations({
           return;
         }
 
-        // 调用API获取best-fit图片
-        const response = await apiService.getBestFitImage(jobId);
+        // 直接从前端API获取best_fit图片数据
+        console.log('正在从数据库获取最佳匹配图片...');
+        try {
+          const response = await fetch('/styleai/api/jobs/getBestFit', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ jobId }),
+          });
 
-        if (response && response.data) {
-          // 将二进制数据转换为base64
-          const base64Image = `data:image/jpeg;base64,${response.data}`;
-          setBestFitImage(base64Image);
-        } else {
+          if (!response.ok) {
+            const errorData = await response.json();
+            throw new Error(errorData.error || `API error: ${response.status}`);
+          }
+
+          const result = await response.json();
+          console.log('成功获取最佳匹配图片:', result);
+
+          if (result.status === 'success' && result.imageData) {
+            // 将base64数据转换为图片URL
+            const base64Image = `data:image/jpeg;base64,${result.imageData}`;
+            setBestFitImage(base64Image);
+
+            // 存储到sessionStorage
+            sessionStorage.setItem('bestFitImage', base64Image);
+            console.log('最佳匹配图片已存储到sessionStorage');
+          } else {
+            throw new Error(result.error || '获取最佳匹配图片失败');
+          }
+        } catch (error) {
+          console.error('从数据库获取最佳匹配图片失败:', error);
           setError('获取最佳匹配图片失败');
         }
       } catch (err) {
@@ -173,6 +211,11 @@ export default function StyleRecommendations({
                           <span className="text-red-500 font-inter">
                             {error}
                           </span>
+                          <button
+                            onClick={() => window.location.reload()}
+                            className="mt-4 px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600 transition-colors">
+                            重试
+                          </button>
                         </div>
                       </div>
                     ) : bestFitImage ? (
@@ -185,7 +228,7 @@ export default function StyleRecommendations({
                     ) : (
                       <div className="w-full h-full bg-gray-200 flex items-center justify-center">
                         <span className="text-gray-500 font-inter">
-                          Style Example
+                          正在生成最佳匹配图片...
                         </span>
                       </div>
                     )}

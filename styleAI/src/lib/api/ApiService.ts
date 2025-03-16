@@ -197,6 +197,41 @@ class ApiService {
   }
 
   /**
+   * Generate best fit image
+   * @param jobId The job ID for generating the best fit image
+   * @returns Result of the generation process
+   */
+  async generateBestFit(jobId: string): Promise<any> {
+    try {
+      console.log(`正在生成最佳匹配图片，jobId: ${jobId}`);
+      const response = await fetch(
+        `${this.baseUrl}${API_ENDPOINTS.GENERATE_BEST_FIT}`,
+        {
+          method: 'POST',
+          headers: DEFAULT_HEADERS,
+          body: JSON.stringify({ jobId }),
+        }
+      );
+
+      if (!response.ok) {
+        throw new Error(`API error: ${response.status}`);
+      }
+
+      const result = await response.json();
+      console.log('生成最佳匹配图片结果:', result);
+
+      if (result.status === 'success') {
+        return result;
+      } else {
+        throw new Error(result.error || '生成最佳匹配图片失败');
+      }
+    } catch (error) {
+      console.error('生成最佳匹配图片时出错:', error);
+      throw error;
+    }
+  }
+
+  /**
    * 创建新的job记录
    * @param uploadedImage 上传的图片数据（可选）
    * @returns 创建的job ID

@@ -43,72 +43,63 @@ export default function LoadingPage() {
 
         // 如果成功获取穿着建议图片，则获取最佳匹配图片
         console.log('正在获取最佳匹配图片...');
+        let bestFitImageObtained = false;
         try {
           const bestFitResult = await apiService.getBestFitImage(jobId);
           console.log('成功获取最佳匹配图片:', bestFitResult);
 
           // 将最佳匹配图片存储在sessionStorage中
           if (bestFitResult && bestFitResult.imageData) {
-            sessionStorage.setItem('bestFitImage', bestFitResult.imageData);
+            const base64Image = `data:image/jpeg;base64,${bestFitResult.imageData}`;
+            sessionStorage.setItem('bestFitImage', base64Image);
             console.log('最佳匹配图片已存储到sessionStorage');
+            bestFitImageObtained = true;
           }
         } catch (bestFitError) {
           console.error('获取最佳匹配图片失败:', bestFitError);
+          // 尝试生成最佳匹配图片
+          try {
+            console.log('尝试生成最佳匹配图片...');
+            const generateResult = await apiService.generateBestFit(jobId);
+            console.log('生成最佳匹配图片结果:', generateResult);
+
+            if (generateResult && generateResult.status === 'success') {
+              // 再次尝试获取最佳匹配图片
+              console.log('再次尝试获取最佳匹配图片...');
+              const retryResult = await apiService.getBestFitImage(jobId);
+
+              if (retryResult && retryResult.imageData) {
+                const base64Image = `data:image/jpeg;base64,${retryResult.imageData}`;
+                sessionStorage.setItem('bestFitImage', base64Image);
+                console.log('最佳匹配图片已存储到sessionStorage');
+                bestFitImageObtained = true;
+              }
+            }
+          } catch (generateError) {
+            console.error('生成最佳匹配图片失败:', generateError);
+          }
         }
+
+        // 标记数据已准备好
+        setIsDataReady(true);
+        dataFetchedRef.current = true;
+
+        // 即使没有获取到最佳匹配图片，也继续流程
+        // 在step2页面会再次尝试获取
+        return data;
       } catch (suitPicturesError) {
         console.error('获取穿着建议图片失败:', suitPicturesError);
+        // 标记数据已准备好，继续流程
+        setIsDataReady(true);
+        dataFetchedRef.current = true;
+        return data;
       }
-
-      // 标记数据已准备好
-      setIsDataReady(true);
-      dataFetchedRef.current = true;
-
-      return data;
     } catch (error) {
       console.error('获取个性化分析数据失败:', error);
-
-      // 使用默认数据
-      const defaultData = {
-        features: [
-          {
-            title: 'Striking Features',
-            content:
-              'They have a captivating look with expressive eyes and a warm smile that immediately draws attention.',
-          },
-          {
-            title: 'Well-Defined Facial Structure',
-            content:
-              'Their face features high cheekbones, a sharp jawline, and a balanced symmetry, giving them a classic yet modern appearance.',
-          },
-          {
-            title: 'Distinctive Style',
-            content:
-              'Their hairstyle and grooming are impeccably maintained, complementing their overall polished and stylish look.',
-          },
-          {
-            title: 'Elegant and Timeless',
-            content:
-              'With a natural elegance and subtle makeup, they exude a timeless charm that stands out in any setting.',
-          },
-        ],
-        colors: [
-          { name: 'Navy Blue', hex: '#000080' },
-          { name: 'Burgundy', hex: '#800020' },
-          { name: 'Forest Green', hex: '#228B22' },
-          { name: 'Charcoal Gray', hex: '#36454F' },
-        ],
-        styles: ['Classic', 'Professional', 'Elegant', 'Sophisticated'],
-      };
-
-      // 将默认数据存储在sessionStorage中
-      sessionStorage.setItem('analysisData', JSON.stringify(defaultData));
-      console.log('默认分析数据已存储到sessionStorage');
-
-      // 标记数据已准备好
+      // 标记数据已准备好，继续流程
       setIsDataReady(true);
       dataFetchedRef.current = true;
-
-      return defaultData;
+      return null;
     }
   };
 

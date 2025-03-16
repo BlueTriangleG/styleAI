@@ -595,6 +595,32 @@ export default function Step2() {
       if (storedJobId) {
         console.log(`从sessionStorage获取到jobId: ${storedJobId}`);
         setJobId(storedJobId);
+
+        // 获取最佳匹配图片
+        try {
+          console.log('正在从API获取最佳匹配图片...');
+          const bestFitResult = await apiService.getBestFitImage(storedJobId);
+          console.log('成功获取最佳匹配图片:', bestFitResult);
+
+          if (bestFitResult && bestFitResult.imageData) {
+            // 将base64数据转换为图片URL
+            const base64Image = `data:image/jpeg;base64,${bestFitResult.imageData}`;
+            setBestFitImage(base64Image);
+            console.log('最佳匹配图片已设置');
+
+            // 存储到sessionStorage
+            sessionStorage.setItem('bestFitImage', base64Image);
+          }
+        } catch (error) {
+          console.error('获取最佳匹配图片时出错:', error);
+
+          // 尝试从sessionStorage获取
+          const storedBestFitImage = sessionStorage.getItem('bestFitImage');
+          if (storedBestFitImage) {
+            console.log('从sessionStorage获取到最佳匹配图片');
+            setBestFitImage(storedBestFitImage);
+          }
+        }
       } else {
         console.log('未找到jobId，使用默认值');
       }
@@ -632,15 +658,6 @@ export default function Step2() {
           ],
           styles: ['Classic', 'Professional', 'Elegant', 'Sophisticated'],
         });
-      }
-
-      // 从sessionStorage获取最佳匹配图片
-      const storedBestFitImage = sessionStorage.getItem('bestFitImage');
-      if (storedBestFitImage) {
-        console.log('从sessionStorage获取到最佳匹配图片');
-        setBestFitImage(storedBestFitImage);
-      } else {
-        console.log('未找到最佳匹配图片');
       }
     } catch (error) {
       console.error('获取数据时出错:', error);
@@ -1030,7 +1047,7 @@ export default function Step2() {
                     )}
 
                     {/* 最佳匹配图片 */}
-                    {bestFitImage && (
+                    {bestFitImage ? (
                       <div className="relative w-full max-w-[150px]">
                         <div className="aspect-[3/4] relative rounded-lg overflow-hidden shadow-lg">
                           <Image
@@ -1045,15 +1062,34 @@ export default function Step2() {
                           最佳匹配效果
                         </div>
                       </div>
+                    ) : (
+                      <div className="relative w-full max-w-[150px]">
+                        <div className="aspect-[3/4] relative rounded-lg overflow-hidden shadow-lg bg-gray-100 flex items-center justify-center">
+                          <div className="flex flex-col items-center p-4">
+                            <svg
+                              className="w-8 h-8 text-[#84a59d] animate-spin-slow mb-2"
+                              viewBox="0 0 24 24">
+                              <path
+                                fill="currentColor"
+                                d="M12,1A11,11,0,1,0,23,12,11,11,0,0,0,12,1Zm0,19a8,8,0,1,1,8-8A8,8,0,0,1,12,20Z"
+                                opacity="0.25"
+                              />
+                              <path
+                                fill="currentColor"
+                                d="M12,4a8,8,0,0,1,7.89,6.7A1.53,1.53,0,0,0,21.38,12h0a1.5,1.5,0,0,0,1.48-1.75,11,11,0,0,0-21.72,0A1.5,1.5,0,0,0,2.62,12h0a1.53,1.53,0,0,0,1.49-1.3A8,8,0,0,1,12,4Z"
+                              />
+                            </svg>
+                            <span className="text-gray-500 text-xs text-center">
+                              加载中...
+                            </span>
+                          </div>
+                        </div>
+                        <div className="mt-2 text-center text-sm text-gray-600">
+                          最佳匹配效果
+                        </div>
+                      </div>
                     )}
                   </div>
-
-                  {/* 如果没有最佳匹配图片，显示提示信息 */}
-                  {!bestFitImage && (
-                    <div className="text-center text-gray-600 mt-4 p-4 bg-gray-100 rounded-lg">
-                      <p>最佳匹配图片正在生成中，请稍后查看</p>
-                    </div>
-                  )}
                 </div>
 
                 {/* Right side - Analysis report */}
