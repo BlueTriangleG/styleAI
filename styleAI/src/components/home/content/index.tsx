@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation';
 import CircularGallery from '@/components/ui/CircularGallery';
 import BounceCards from '@/components/ui/BounceCards';
 import Background from '@/components/background';
+import LiquidChrome from '@/components/background/LiquidChrome';
 
 const images = [
   'gallery/outfit1.png',
@@ -72,9 +73,8 @@ export function Hero() {
   return (
     <div
       ref={containerRef}
-      className="w-screen h-screen overflow-y-auto scroll-smooth snap-y snap-mandatory no-scrollbar"
+      className="w-screen h-screen overflow-y-auto scroll-smooth snap-y snap-mandatory no-scrollbar bg-gray-400"
     >
-      <Background />
       {/* Hero Section - First Screen */}
       <section className="w-screen h-screen flex justify-center items-center snap-start">
         <div className="w-[80%] h-[80%] flex flex-col justify-around translate-y-[5%] bg-white/20 rounded-xl"> 
