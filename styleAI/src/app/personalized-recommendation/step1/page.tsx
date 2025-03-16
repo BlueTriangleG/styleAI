@@ -3,7 +3,7 @@
 import { useState, useRef, useEffect } from 'react';
 import Image from 'next/image';
 import { useRouter } from 'next/navigation';
-import { RecommendationHeader } from '@/components/recommendation/Header';
+import { Header } from '@/components/home/header';
 import { motion } from 'framer-motion';
 import LiquidChrome from '@/components/background/LiquidChrome';
 import {
@@ -200,7 +200,6 @@ export default function Step1() {
 
   // Open camera
   const handleCameraClick = async (e?: React.MouseEvent) => {
-    // 阻止事件冒泡，防止触发文件上传
     if (e) {
       e.stopPropagation();
     }
@@ -395,7 +394,7 @@ export default function Step1() {
 
   return (
     <>
-      <RecommendationHeader />
+      <Header />
       <motion.div
         className="min-h-screen pt-20 relative"
         initial="initial"

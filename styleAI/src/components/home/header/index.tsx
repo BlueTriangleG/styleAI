@@ -1,7 +1,5 @@
 'use client';
-
 import Link from 'next/link';
-import styles from './index.module.scss';
 import { useRouter } from 'next/navigation';
 import {
   UserButton,
@@ -19,8 +17,8 @@ export function Header() {
   };
 
   return (
-    <header className="fixed top-0 left-0 right-0 bg-white/90 backdrop-blur-sm shadow-sm z-50">
-      <div className="container mx-auto px-4 md:px-8 py-4 flex items-center justify-between">
+    <header className="w-screen h-16 fixed top-0 left-0 bg-white/90 backdrop-blur-sm shadow-sm z-50">
+      <div className="w-[100%] h-[100%] flex items-center justify-between px-10">
         {/* Left side - Logo */}
         <div className="flex items-center">
           <Link
@@ -36,7 +34,7 @@ export function Header() {
             {/* Only shown when user is signed in */}
             <button
               onClick={handleStartClick}
-              className="bg-[#2D4B37] text-white px-6 py-2.5 rounded-md font-medium hover:bg-[#1F3526] transition-colors shadow-sm text-base">
+              className="bg-[#2D4B37] text-white px-4 py-2 rounded-md font-medium hover:bg-[#1F3526] transition-colors shadow-sm text-base">
               Start
             </button>
             <div className="ml-3">
@@ -54,12 +52,12 @@ export function Header() {
           <SignedOut>
             {/* Only shown when user is signed out */}
             <SignInButton mode="modal">
-              <button className="bg-[#2D4B37] text-white px-6 py-2.5 rounded-md font-medium hover:bg-[#1F3526] transition-colors shadow-sm text-base">
+              <button className="bg-[#2D4B37] text-white border border-[#2D4B37] px-4 py-2 rounded-md font-medium hover:bg-[#1F3526]">
                 Sign In
               </button>
             </SignInButton>
             <SignUpButton mode="modal">
-              <button className="bg-white text-[#2D4B37] border border-[#2D4B37] px-6 py-2.5 rounded-md font-medium hover:bg-gray-50 transition-colors shadow-sm text-base">
+              <button className="bg-white text-[#2D4B37] border border-[#2D4B37] px-4 py-2 rounded-md font-medium hover:bg-gray-50">
                 Sign Up
               </button>
             </SignUpButton>
