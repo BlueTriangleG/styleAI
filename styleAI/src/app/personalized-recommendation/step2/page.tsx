@@ -46,6 +46,7 @@ export default function Step2() {
   const [isLoadingAnalysis, setIsLoadingAnalysis] = useState(false);
   const [analysisError, setAnalysisError] = useState<string | null>(null);
   const [overallDescription, setOverallDescription] = useState<string>(''); // 存储整体描述
+  const [bestFitImage, setBestFitImage] = useState<string | null>(null); // 存储最佳匹配图片
   const router = useRouter();
   const scrollRef = useRef<HTMLDivElement>(null);
   const recommendationsRef = useRef<HTMLDivElement>(null);
@@ -587,24 +588,63 @@ export default function Step2() {
 
   // 从sessionStorage获取jobId并获取分析数据
   const getJobIdAndFetchData = async () => {
+    console.log('正在获取jobId和分析数据...');
     try {
       // 从sessionStorage获取jobId
       const storedJobId = sessionStorage.getItem('currentJobId');
-
-      // 设置jobId（如果存在）
       if (storedJobId) {
-        console.log(`从sessionStorage获取的jobId: ${storedJobId}`);
+        console.log(`从sessionStorage获取到jobId: ${storedJobId}`);
         setJobId(storedJobId);
       } else {
-        console.log('未找到jobId，将使用空字符串');
+        console.log('未找到jobId，使用默认值');
       }
 
-      // 获取个性化分析数据
-      return await fetchAnalysisData(storedJobId || '');
+      // 从sessionStorage获取用户图像
+      const storedUserImage = sessionStorage.getItem('userImage');
+      if (storedUserImage) {
+        console.log('从sessionStorage获取到用户图像');
+        setUserImage(storedUserImage);
+      } else {
+        console.log('未找到用户图像');
+      }
+
+      // 从sessionStorage获取分析数据
+      const storedAnalysisData = sessionStorage.getItem('analysisData');
+      if (storedAnalysisData) {
+        console.log('从sessionStorage获取到分析数据');
+        try {
+          const parsedData = extractJsonFromString(storedAnalysisData);
+          setAnalysisData(parsedData);
+        } catch (error) {
+          console.error('解析分析数据失败:', error);
+          setAnalysisError('解析分析数据失败');
+        }
+      } else {
+        console.log('未找到分析数据，使用默认数据');
+        setAnalysisError('未找到分析数据，使用默认数据');
+        setAnalysisData({
+          features: defaultAnalysisPoints,
+          colors: [
+            { name: 'Navy Blue', hex: '#000080' },
+            { name: 'Burgundy', hex: '#800020' },
+            { name: 'Forest Green', hex: '#228B22' },
+            { name: 'Charcoal Gray', hex: '#36454F' },
+          ],
+          styles: ['Classic', 'Professional', 'Elegant', 'Sophisticated'],
+        });
+      }
+
+      // 从sessionStorage获取最佳匹配图片
+      const storedBestFitImage = sessionStorage.getItem('bestFitImage');
+      if (storedBestFitImage) {
+        console.log('从sessionStorage获取到最佳匹配图片');
+        setBestFitImage(storedBestFitImage);
+      } else {
+        console.log('未找到最佳匹配图片');
+      }
     } catch (error) {
-      console.error('获取jobId或分析数据失败:', error);
-      // 直接获取分析数据
-      return await fetchAnalysisData('');
+      console.error('获取数据时出错:', error);
+      setAnalysisError('获取数据时出错');
     }
   };
 
@@ -949,11 +989,11 @@ export default function Step2() {
           <div className="absolute inset-0 z-0 overflow-hidden pointer-events-auto">
             <LiquidChrome
               baseColor={[0.9, 0.9, 0.9]}
-              speed={0.2}
-              amplitude={0.5}
-              frequencyX={3}
-              frequencyY={2}
-              interactive={true}
+              speed={0.3}
+              amplitude={0.7}
+              frequencyX={4}
+              frequencyY={3}
+              interactive={false}
             />
             <div className="absolute inset-0 bg-white/10 pointer-events-none"></div>
           </div>
