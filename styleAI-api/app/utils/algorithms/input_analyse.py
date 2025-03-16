@@ -11,7 +11,7 @@ logger = logging.getLogger(__name__)
 
 # Dify API
 BASE_URL = "https://api.dify.ai/v1"
-API_KEY = "app-BvILNfUXjLBgMGZ6IFWt4jlC"
+API_KEY = "app-uh7Oz9FNxyZ7J65Z4pvFTW4j"
 HEADERS = {"Authorization": f"Bearer {API_KEY}"}
 USER_ID = "difyuser"
 
@@ -138,6 +138,16 @@ def process_single_image(save_path: str) -> str:
         print("Failed to retrieve valid description text.")
         return None
 
+def clean_markdown_json(md_str: str) -> str:
+    """
+    移除 JSON 字符串中的 Markdown 代码块标记（例如 ```json 和 ```）。
+    """
+    if md_str.startswith("```json"):
+        md_str = md_str[len("```json"):].strip()
+    if md_str.endswith("```"):
+        md_str = md_str[:-3].strip()
+    return md_str
+
 # entry
 def main(user_image_url):
     """
@@ -187,9 +197,11 @@ def main(user_image_url):
     # 处理图像
     logger.info("开始处理图像...")
     user_text = process_single_image(save_path)
+        
     if not user_text:
         logger.error("获取用户描述失败，退出")
         return None
-    
+    else:
+        user_text = user_text.strip("```json").strip("```")
     logger.info(f"成功获取分析结果: {user_text[:100]}...")
     return user_text

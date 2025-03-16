@@ -26,6 +26,9 @@ COPY requirements.txt .
 # Install Python dependencies
 RUN pip install --no-cache-dir -r requirements.txt
 
+# Explicitly install scikit-learn
+RUN pip install scikit-learn==1.3.0
+
 # Final stage
 FROM dependencies AS final
 
@@ -43,6 +46,10 @@ COPY app/mock_data.py app/
 # Copy tool modules
 COPY app/utils/*.py app/utils/
 COPY app/utils/algorithms/*.py app/utils/algorithms/
+
+# Copy ALL_images directory and ALL_final_merged.json file
+COPY app/utils/algorithms/ALL_images/ app/utils/algorithms/ALL_images/
+COPY app/utils/algorithms/ALL_final_merged.json app/utils/algorithms/ALL_final_merged.json
 
 # Copy route modules
 COPY app/routes/*.py app/routes/

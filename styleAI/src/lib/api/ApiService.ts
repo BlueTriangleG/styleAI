@@ -162,6 +162,41 @@ class ApiService {
   }
 
   /**
+   * Get best fit image from the API
+   * @param jobId The job ID for the best fit image
+   * @returns Best fit image data in base64 format
+   */
+  async getBestFitImage(jobId: string): Promise<any> {
+    try {
+      console.log(`正在获取最佳匹配图片，jobId: ${jobId}`);
+      const response = await fetch(
+        `${this.baseUrl}${API_ENDPOINTS.BEST_FIT_IMAGE}`,
+        {
+          method: 'POST',
+          headers: DEFAULT_HEADERS,
+          body: JSON.stringify({ jobId }),
+        }
+      );
+
+      if (!response.ok) {
+        throw new Error(`API error: ${response.status}`);
+      }
+
+      const result = await response.json();
+      console.log('获取到的最佳匹配图片:', result);
+
+      if (result.status === 'success') {
+        return result;
+      } else {
+        throw new Error(result.error || '获取最佳匹配图片失败');
+      }
+    } catch (error) {
+      console.error('获取最佳匹配图片时出错:', error);
+      throw error;
+    }
+  }
+
+  /**
    * 创建新的job记录
    * @param uploadedImage 上传的图片数据（可选）
    * @returns 创建的job ID
