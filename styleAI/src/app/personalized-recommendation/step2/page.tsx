@@ -1005,23 +1005,56 @@ export default function Step2() {
               您的个性化分析
             </motion.h1>
 
-            {userImage ? (
-              <motion.div
-                className="flex flex-col md:flex-row gap-8 max-w-6xl mx-auto"
-                variants={containerVariants}>
-                {/* Left side - User photo */}
-                <motion.div
-                  className="w-full md:w-1/2 flex justify-center"
-                  variants={itemVariants}>
-                  <div className="relative w-full max-w-md aspect-[3/4] shadow-lg rounded-lg overflow-hidden">
-                    <Image
-                      src={userImage}
-                      alt="Your uploaded image"
-                      fill
-                      className="object-contain rounded-md"
-                    />
+            <div className="container max-w-4xl mx-auto">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-8 items-center">
+                {/* 左侧：用户图像和最佳匹配图片 */}
+                <div className="flex flex-col items-center space-y-4">
+                  {/* 用户图像和最佳匹配图片并排显示 */}
+                  <div className="flex flex-col md:flex-row gap-4 w-full justify-center">
+                    {/* 用户图像 */}
+                    {userImage && (
+                      <div className="relative w-full max-w-[150px]">
+                        <div className="aspect-[3/4] relative rounded-lg overflow-hidden shadow-lg">
+                          <Image
+                            src={userImage}
+                            alt="您的照片"
+                            fill
+                            style={{ objectFit: 'cover' }}
+                            className="rounded-lg"
+                          />
+                        </div>
+                        <div className="mt-2 text-center text-sm text-gray-600">
+                          您的照片
+                        </div>
+                      </div>
+                    )}
+
+                    {/* 最佳匹配图片 */}
+                    {bestFitImage && (
+                      <div className="relative w-full max-w-[150px]">
+                        <div className="aspect-[3/4] relative rounded-lg overflow-hidden shadow-lg">
+                          <Image
+                            src={bestFitImage}
+                            alt="最佳匹配效果"
+                            fill
+                            style={{ objectFit: 'cover' }}
+                            className="rounded-lg"
+                          />
+                        </div>
+                        <div className="mt-2 text-center text-sm text-gray-600">
+                          最佳匹配效果
+                        </div>
+                      </div>
+                    )}
                   </div>
-                </motion.div>
+
+                  {/* 如果没有最佳匹配图片，显示提示信息 */}
+                  {!bestFitImage && (
+                    <div className="text-center text-gray-600 mt-4 p-4 bg-gray-100 rounded-lg">
+                      <p>最佳匹配图片正在生成中，请稍后查看</p>
+                    </div>
+                  )}
+                </div>
 
                 {/* Right side - Analysis report */}
                 <motion.div className="w-full md:w-1/2" variants={itemVariants}>
@@ -1169,31 +1202,8 @@ export default function Step2() {
                     )}
                   </div>
                 </motion.div>
-              </motion.div>
-            ) : (
-              <motion.div
-                className="flex justify-center items-center h-64"
-                variants={itemVariants}>
-                <div className="flex flex-col items-center">
-                  <svg
-                    className="w-12 h-12 text-[#84a59d] animate-spin-slow mb-4"
-                    viewBox="0 0 24 24">
-                    <path
-                      fill="currentColor"
-                      d="M12,1A11,11,0,1,0,23,12,11,11,0,0,0,12,1Zm0,19a8,8,0,1,1,8-8A8,8,0,0,1,12,20Z"
-                      opacity="0.25"
-                    />
-                    <path
-                      fill="currentColor"
-                      d="M12,4a8,8,0,0,1,7.89,6.7A1.53,1.53,0,0,0,21.38,12h0a1.5,1.5,0,0,0,1.48-1.75,11,11,0,0,0-21.72,0A1.5,1.5,0,0,0,2.62,12h0a1.53,1.53,0,0,0,1.49-1.3A8,8,0,0,1,12,4Z"
-                    />
-                  </svg>
-                  <p className="text-gray-500 font-inter">
-                    正在加载您的图像...
-                  </p>
-                </div>
-              </motion.div>
-            )}
+              </div>
+            </div>
 
             {/* Scroll indicator - Centered below content block */}
             {showScrollIndicator && userImage && (

@@ -14,6 +14,7 @@ export const API_ENDPOINTS = {
   PERSONALIZED_ANALYSIS: '/api/personalized/analysis',
   WEAR_SUIT_PICTURES: '/api/personalized/wear-suit-pictures',
   BEST_FIT_IMAGE: '/api/personalized/best-fit-image',
+  GENERATE_BEST_FIT: '/api/personalized/generate-best-fit',
 };
 
 // API Timeout (ms)
