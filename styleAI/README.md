@@ -67,6 +67,6 @@ Make sure to set the following environment variables in your deployment environm
 - `CLERK_SECRET_KEY`: Your Clerk secret key
 - `NEXT_PUBLIC_CLERK_SIGN_IN_URL`: The sign-in URL (default: `/login`)
 - `NEXT_PUBLIC_CLERK_SIGN_UP_URL`: The sign-up URL (default: `/signup`)
-- `NEXT_PUBLIC_CLERK_AFTER_SIGN_IN_URL`: The URL to redirect to after sign-in (default: `/dashboard`)
-- `NEXT_PUBLIC_CLERK_AFTER_SIGN_UP_URL`: The URL to redirect to after sign-up (default: `/dashboard`)
+- `NEXT_PUBLIC_CLERK_AFTER_SIGN_IN_URL`: The URL to redirect to after sign-in (default: `/styleai`)
+- `NEXT_PUBLIC_CLERK_AFTER_SIGN_UP_URL`: The URL to redirect to after sign-up (default: `/styleai`)
 - `NEXT_PUBLIC_BASE_PATH`: The base path for the application (default: `/styleai`)
