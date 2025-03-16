@@ -2,6 +2,7 @@
 
 import { useRouter } from 'next/navigation';
 import Image from 'next/image';
+import { useState, useEffect } from 'react';
 
 interface StyleRecommendation {
   title: string;
@@ -28,9 +29,26 @@ export default function StyleRecommendations({
   analysisResults,
 }: StyleRecommendationsProps) {
   const router = useRouter();
+  const [loadingImages, setLoadingImages] = useState<{ [key: string]: boolean }>({});
+  const [isUserImageLoading, setIsUserImageLoading] = useState(true);
+  const [isMainStyleImageLoading, setIsMainStyleImageLoading] = useState(true);
+
+  // Reset loading states when recommendations change
+  useEffect(() => {
+    setLoadingImages({});
+    setIsUserImageLoading(true);
+    setIsMainStyleImageLoading(true);
+  }, [styleRecommendations]);
 
   // 获取第一个推荐作为最佳推荐
   const bestRecommendation = styleRecommendations[0];
+
+  const handleImageLoad = (index: number) => {
+    setLoadingImages(prev => ({
+      ...prev,
+      [index]: false
+    }));
+  };
 
   return (
     <div className="min-h-screen bg-white pt-20">
@@ -51,14 +69,24 @@ export default function StyleRecommendations({
                 {/* 左侧图片 */}
                 <div className="w-full md:w-1/3 relative">
                   <div className="bg-gray-200 aspect-[3/4] rounded-lg overflow-hidden shadow-md relative">
+                    {isUserImageLoading && (
+                      <div className="absolute inset-0 flex items-center justify-center bg-gray-100">
+                        <div className="relative w-12 h-12">
+                          <div className="absolute inset-0 border-3 border-gray-200 rounded-full"></div>
+                          <div className="absolute inset-0 border-3 border-[#84a59d] rounded-full animate-spin-slow border-t-transparent"></div>
+                        </div>
+                      </div>
+                    )}
                     {userImage && (
                       <Image
+                        key={userImage}
                         src={userImage}
                         alt="Your uploaded image"
                         fill
                         className="object-cover"
                         unoptimized={true}
                         priority={true}
+                        onLoadingComplete={() => setIsUserImageLoading(false)}
                       />
                     )}
                   </div>
@@ -85,14 +113,24 @@ export default function StyleRecommendations({
                 {/* 中间图片 */}
                 <div className="w-full md:w-1/3 relative">
                   <div className="bg-gray-200 aspect-[3/4] rounded-lg overflow-hidden shadow-md relative">
-                    {bestRecommendation.examples && bestRecommendation.examples[0] && (
+                    {isMainStyleImageLoading && bestRecommendation?.examples?.[0] && (
+                      <div className="absolute inset-0 flex items-center justify-center bg-gray-100">
+                        <div className="relative w-12 h-12">
+                          <div className="absolute inset-0 border-3 border-gray-200 rounded-full"></div>
+                          <div className="absolute inset-0 border-3 border-[#84a59d] rounded-full animate-spin-slow border-t-transparent"></div>
+                        </div>
+                      </div>
+                    )}
+                    {bestRecommendation?.examples?.[0] && (
                       <Image
+                        key={bestRecommendation.examples[0]}
                         src={bestRecommendation.examples[0]}
                         alt="Style recommendation"
                         fill
                         className="object-cover"
                         unoptimized={true}
                         priority={true}
+                        onLoadingComplete={() => setIsMainStyleImageLoading(false)}
                       />
                     )}
                   </div>
@@ -101,7 +139,7 @@ export default function StyleRecommendations({
                 {/* 右侧描述 */}
                 <div className="w-full md:w-1/3">
                   <p className="text-gray-800 font-inter mb-4">
-                    {bestRecommendation.description}
+                    {bestRecommendation?.description}
                   </p>
                 </div>
               </div>
@@ -123,14 +161,34 @@ export default function StyleRecommendations({
 
                 <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                   {styleRecommendations.map((style, index) => (
-                    <div key={index} className="bg-gray-200 rounded-lg p-4">
+                    <div key={`${style.title}-${index}`} className="bg-gray-200 rounded-lg p-4">
                       <h4 className="text-lg font-medium mb-2 text-center font-playfair text-gray-800">
                         {style.title}
                       </h4>
-                      <div className="aspect-[3/4] bg-gray-300 rounded-md flex items-center justify-center">
-                        <span className="text-gray-500 font-inter">
-                          Style Example
-                        </span>
+                      <div className="aspect-[3/4] bg-gray-300 rounded-md relative overflow-hidden">
+                        {loadingImages[index] !== false && style.examples?.[0] && (
+                          <div className="absolute inset-0 flex items-center justify-center bg-gray-100">
+                            <div className="relative w-12 h-12">
+                              <div className="absolute inset-0 border-3 border-gray-200 rounded-full"></div>
+                              <div className="absolute inset-0 border-3 border-[#84a59d] rounded-full animate-spin-slow border-t-transparent"></div>
+                            </div>
+                          </div>
+                        )}
+                        {style.examples?.[0] ? (
+                          <Image
+                            key={`${style.examples[0]}-${index}`}
+                            src={style.examples[0]}
+                            alt={`${style.title} example`}
+                            fill
+                            className="object-cover"
+                            unoptimized={true}
+                            onLoadingComplete={() => handleImageLoad(index)}
+                          />
+                        ) : (
+                          <div className="w-full h-full flex items-center justify-center">
+                            <span className="text-gray-500 font-inter">No Example</span>
+                          </div>
+                        )}
                       </div>
                     </div>
                   ))}
