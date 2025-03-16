@@ -151,12 +151,12 @@ export default function StyleRecommendations({
             {/* 不同场合的推荐 */}
             <div>
               <h2 className="text-2xl font-bold mb-8 font-playfair text-gray-800">
-                Recommendation suits for different environment
+                Recommendations for different environments
               </h2>
 
               <div className="bg-gray-100 rounded-lg p-8">
                 <h3 className="text-xl font-bold mb-6 text-center font-playfair text-gray-800">
-                  Recommend style
+                  Recommended styles
                 </h3>
 
                 <div className="grid grid-cols-2 md:grid-cols-4 gap-4">

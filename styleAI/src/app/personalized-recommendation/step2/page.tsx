@@ -126,14 +126,14 @@ export default function Step2() {
     setAnalysisError(null);
 
     try {
-      console.log('正在从sessionStorage获取分析数据...');
+      console.log('Retrieving analysis data from sessionStorage...');
       // 从sessionStorage获取分析数据
       const storedData = sessionStorage.getItem('analysisData');
       const storedRecommendations = sessionStorage.getItem('styleRecommendations');
 
       if (!storedData || !storedRecommendations) {
-        console.error('未找到分析数据，使用默认数据');
-        setAnalysisError('未找到分析数据，使用默认数据');
+        console.error('Analysis data not found, using default data');
+        setAnalysisError('Analysis data not found, using default data');
         // 使用默认数据
         const defaultData = {
           features: defaultAnalysisPoints,
@@ -152,20 +152,20 @@ export default function Step2() {
       // 解析存储的数据
       const data = JSON.parse(storedData);
       const recommendations = JSON.parse(storedRecommendations);
-      console.log('成功获取分析数据:', data);
-      console.log('成功获取风格推荐:', recommendations);
+      console.log('Successfully retrieved analysis data:', data);
+      console.log('Successfully retrieved style recommendations:', recommendations);
 
       // 打印分析数据的详细信息
-      console.log('分析特征:', data.features);
-      console.log('推荐颜色:', data.colors);
-      console.log('推荐风格:', data.styles);
+      console.log('Analysis features:', data.features);
+      console.log('Recommended colors:', data.colors);
+      console.log('Recommended styles:', data.styles);
 
       setAnalysisData(data);
       setStyleRecommendations(recommendations);
       return data;
     } catch (error) {
-      console.error('获取分析数据失败:', error);
-      setAnalysisError('无法获取分析数据，使用默认数据');
+      console.error('Failed to retrieve analysis data:', error);
+      setAnalysisError('Failed to retrieve analysis data, using default data');
       // 使用默认数据
       const defaultData = {
         features: defaultAnalysisPoints,
@@ -193,16 +193,16 @@ export default function Step2() {
 
       // 设置jobId（如果存在）
       if (storedJobId) {
-        console.log(`从sessionStorage获取的jobId: ${storedJobId}`);
+        console.log(`Retrieved jobId from sessionStorage: ${storedJobId}`);
         setJobId(storedJobId);
       } else {
-        console.log('未找到jobId，将使用空字符串');
+        console.log('No jobId found, will use empty string');
       }
 
       // 获取个性化分析数据
       return await fetchAnalysisData(storedJobId || '');
     } catch (error) {
-      console.error('获取jobId或分析数据失败:', error);
+      console.error('Failed to get jobId or analysis data:', error);
       // 直接获取分析数据
       return await fetchAnalysisData('');
     }
@@ -238,32 +238,32 @@ export default function Step2() {
   useEffect(() => {
     // Only access sessionStorage in browser environment
     if (typeof window !== 'undefined') {
-      console.log('Step2页面加载，检查sessionStorage');
+      console.log('Step2 page loading, checking sessionStorage');
       try {
         // Retrieve the image from session storage
         const storedImage = sessionStorage.getItem('userImage');
         console.log(
-          '从sessionStorage获取的图像:',
-          storedImage ? '存在' : '不存在'
+          'Image from sessionStorage:',
+          storedImage ? 'exists' : 'does not exist'
         );
 
         if (!storedImage) {
           // If no image is found, redirect back to step1
-          console.log('未找到用户图像，重定向到step1');
+          console.log('No user image found, redirecting to step1');
           router.replace('/personalized-recommendation/step1');
           return;
         }
 
         setUserImage(storedImage);
-        console.log('成功设置用户图像');
+        console.log('Successfully set user image');
 
         // 检查分析数据是否已存在于sessionStorage中
         const storedAnalysisData = sessionStorage.getItem('analysisData');
         if (storedAnalysisData) {
-          console.log('在sessionStorage中找到分析数据');
+          console.log('Analysis data found in sessionStorage');
           try {
             const parsedData = JSON.parse(storedAnalysisData);
-            console.log('解析的分析数据:', parsedData);
+            console.log('Parsed analysis data:', parsedData);
 
             // 直接设置分析数据，避免重复调用API
             setAnalysisData(parsedData);
@@ -272,50 +272,50 @@ export default function Step2() {
             const storedJobId = sessionStorage.getItem('currentJobId');
             if (storedJobId) {
               setJobId(storedJobId);
-              console.log(`从sessionStorage获取的jobId: ${storedJobId}`);
+              console.log(`Retrieved jobId from sessionStorage: ${storedJobId}`);
             }
 
             // 数据加载完成后，设置页面加载状态为false
             setIsPageLoading(false);
-            console.log('页面加载完成，isPageLoading设置为false');
+            console.log('Page loading complete, isPageLoading set to false');
 
             // Delay enabling scroll effects to ensure page content is displayed first
             const scrollEffectsTimer = setTimeout(() => {
               setEnableScrollEffects(true);
-              console.log('启用滚动效果');
+              console.log('Scroll effects enabled');
             }, 1500);
 
             return () => {
-              console.log('Step2组件卸载，清除timer');
+              console.log('Step2 component unmounting, clearing timer');
               clearTimeout(scrollEffectsTimer);
             };
           } catch (e) {
-            console.error('解析分析数据时出错:', e);
+            console.error('Error parsing analysis data:', e);
             // 如果解析出错，则继续使用getJobIdAndFetchData
           }
         } else {
-          console.log('在sessionStorage中未找到分析数据');
+          console.log('No analysis data found in sessionStorage');
         }
 
         // 如果没有找到分析数据或解析出错，则使用getJobIdAndFetchData
         getJobIdAndFetchData().then(() => {
           // 数据加载完成后，设置页面加载状态为false
           setIsPageLoading(false);
-          console.log('页面加载完成，isPageLoading设置为false');
+          console.log('Page loading complete, isPageLoading set to false');
 
           // Delay enabling scroll effects to ensure page content is displayed first
           const scrollEffectsTimer = setTimeout(() => {
             setEnableScrollEffects(true);
-            console.log('启用滚动效果');
+            console.log('Scroll effects enabled');
           }, 1500);
 
           return () => {
-            console.log('Step2组件卸载，清除timer');
+            console.log('Step2 component unmounting, clearing timer');
             clearTimeout(scrollEffectsTimer);
           };
         });
       } catch (error) {
-        console.error('访问sessionStorage时出错:', error);
+        console.error('Error accessing sessionStorage:', error);
         router.replace('/personalized-recommendation/step1');
       }
     }
@@ -531,7 +531,7 @@ export default function Step2() {
             <motion.h1
               className="text-3xl font-bold mb-8 text-center font-playfair text-gray-800"
               variants={itemVariants}>
-              您的个性化分析
+              Your Personalized Analysis
             </motion.h1>
 
             {userImage ? (
@@ -556,7 +556,7 @@ export default function Step2() {
                 <motion.div className="w-full md:w-1/2" variants={itemVariants}>
                   <div className="bg-white/60 backdrop-blur-xs p-6 rounded-lg shadow-md h-full">
                     <h2 className="text-2xl font-bold mb-6 font-playfair text-gray-800 border-b border-gray-200 pb-2">
-                      您的风格分析
+                      Your Style Analysis
                     </h2>
 
                     {isLoadingAnalysis ? (
@@ -576,7 +576,7 @@ export default function Step2() {
                             />
                           </svg>
                           <p className="text-gray-500 font-inter">
-                            正在加载分析结果...
+                            Loading analysis results...
                           </p>
                         </div>
                       </div>
@@ -586,8 +586,8 @@ export default function Step2() {
                       <div className="space-y-6 mb-8">
                         {/* 显示数据来源 */}
                         <div className="text-sm text-gray-500 mb-4">
-                          数据来源:{' '}
-                          {jobId ? `API (JobID: ${jobId})` : '本地存储'}
+                          Data source:{' '}
+                          {jobId ? `API (JobID: ${jobId})` : 'Local storage'}
                         </div>
 
                         {analysisPoints.map((point, index) => (
@@ -620,7 +620,7 @@ export default function Step2() {
                             variants={textRevealVariants}
                             className="mt-8">
                             <h3 className="text-lg font-bold font-playfair text-gray-800 mb-3">
-                              推荐颜色
+                              Recommended Colors
                             </h3>
                             <div className="flex flex-wrap gap-3">
                               {recommendedColors.map((color, index) => (
@@ -649,7 +649,7 @@ export default function Step2() {
                             variants={textRevealVariants}
                             className="mt-4">
                             <h3 className="text-lg font-bold font-playfair text-gray-800 mb-3">
-                              推荐风格
+                              Recommended Styles
                             </h3>
                             <div className="flex flex-wrap gap-2">
                               {recommendedStyles.map((style, index) => (
@@ -686,7 +686,7 @@ export default function Step2() {
                     />
                   </svg>
                   <p className="text-gray-500 font-inter">
-                    正在加载您的图像...
+                    Loading your image...
                   </p>
                 </div>
               </motion.div>
@@ -700,7 +700,7 @@ export default function Step2() {
                 animate={{ opacity: 1 }}
                 transition={{ duration: 0.5, delay: 0.5 }}>
                 <p className="text-gray-600 font-inter mb-2 text-center">
-                  向下滚动查看您的风格推荐
+                  Scroll down to see your style recommendations
                 </p>
                 <motion.div
                   variants={scrollIndicatorVariants}
