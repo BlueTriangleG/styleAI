@@ -50,12 +50,17 @@ export default function StyleRecommendations({
               <div className="flex flex-col md:flex-row gap-8">
                 {/* 左侧图片 */}
                 <div className="w-full md:w-1/3 relative">
-                  <div className="bg-gray-200 aspect-[3/4] rounded-lg overflow-hidden shadow-md">
-                    <div className="w-full h-full flex items-center justify-center">
-                      <span className="text-gray-500 font-inter">
-                        Style Example
-                      </span>
-                    </div>
+                  <div className="bg-gray-200 aspect-[3/4] rounded-lg overflow-hidden shadow-md relative">
+                    {userImage && (
+                      <Image
+                        src={userImage}
+                        alt="Your uploaded image"
+                        fill
+                        className="object-cover"
+                        unoptimized={true}
+                        priority={true}
+                      />
+                    )}
                   </div>
 
                   {/* 箭头 - 移到右侧 */}
@@ -79,12 +84,17 @@ export default function StyleRecommendations({
 
                 {/* 中间图片 */}
                 <div className="w-full md:w-1/3 relative">
-                  <div className="bg-gray-200 aspect-[3/4] h-[50vh] rounded-lg overflow-hidden border-2 border-blue-400 shadow-lg">
-                    <div className="w-full h-full flex items-center justify-center">
-                      <span className="text-gray-500 font-inter">
-                        Style Example
-                      </span>
-                    </div>
+                  <div className="bg-gray-200 aspect-[3/4] rounded-lg overflow-hidden shadow-md relative">
+                    {bestRecommendation.examples && bestRecommendation.examples[0] && (
+                      <Image
+                        src={bestRecommendation.examples[0]}
+                        alt="Style recommendation"
+                        fill
+                        className="object-cover"
+                        unoptimized={true}
+                        priority={true}
+                      />
+                    )}
                   </div>
                 </div>
 
