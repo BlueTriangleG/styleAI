@@ -4,6 +4,7 @@ import Image from 'next/image';
 import { useRouter } from 'next/navigation';
 import CircularGallery from '@/components/ui/CircularGallery';
 import BounceCards from '@/components/ui/BounceCards';
+import Background from '@/components/background';
 
 const images = [
   'gallery/outfit1.png',
@@ -73,12 +74,13 @@ export function Hero() {
       ref={containerRef}
       className="w-screen h-screen overflow-y-auto scroll-smooth snap-y snap-mandatory no-scrollbar"
     >
+      <Background />
       {/* Hero Section - First Screen */}
-      <section className="w-screen h-screen pt-20 flex justify-center items-center snap-start">
-        <div className="w-[80%] h-[100%] flex flex-col justify-between">
+      <section className="w-screen h-screen flex justify-center items-center snap-start">
+        <div className="w-[80%] h-[80%] flex flex-col justify-around translate-y-[5%] bg-white/20 rounded-xl"> 
           {/* Title */}
           <div className="w-[100%] h-[30%]">
-            <h1 className="p-5 text-center text-5xl font-bold text-[#2D4B37] leading-tight">
+            <h1 className="text-center text-5xl font-bold text-[#2D4B37] leading-tight">
               Generate your outfits
               <br />
               Using <span className="text-[#FF9999]">STYLE-AI</span>
@@ -99,13 +101,13 @@ export function Hero() {
             />
           </div>
           {/* Scroll Down Button */}
-          <div className="w-[100%] h-[15%] mb-5 flex justify-center">
+          <div className="w-[100%] h-[15%] flex justify-center">
             <div 
-              className="flex flex-col justify-center items-center cursor-pointer group"
+              className="flex flex-col justify-around items-center cursor-pointer group"
               onClick={scrollToUsecase}
             >
               <p className="text-[#2D4B37] font-medium transition-all group-hover:text-[#FF9999]">Explore More</p>
-              <div className="mt-2 animate-bounce transition-transform group-hover:scale-110">
+              <div className="animate-bounce transition-transform group-hover:scale-110">
                 <Image 
                   src="/doubledown.svg" 
                   alt="Scroll Down" 
@@ -124,7 +126,7 @@ export function Hero() {
         ref={usecaseRef}
         className="w-screen h-screen flex justify-center items-center snap-start"
       >
-        <div className="w-[80%] h-[100%] pt-20 flex flex-col justify-between bg-gray-200/50">
+        <div className="w-[80%] h-[80%] flex flex-col justify-around translate-y-[5%] bg-white/20 rounded-md">
           {/* Title */}
           <div className="w-[100%] h-[30%]">
             <h2 className="p-5 text-center text-5xl font-bold text-[#2D4B37]">
