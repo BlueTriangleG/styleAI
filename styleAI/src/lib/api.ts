@@ -1,4 +1,4 @@
-import { getAuthToken } from './auth';
+import { getToken } from './auth';
 
 interface RequestOptions extends RequestInit {
   token?: string;
@@ -26,7 +26,7 @@ async function request<T>(
   headers.set('Content-Type', 'application/json');
 
   // Add token to request headers if provided or available from auth module
-  const authToken = token || getAuthToken();
+  const authToken = token || getToken();
   if (authToken) {
     headers.set('Authorization', `Bearer ${authToken}`);
   }

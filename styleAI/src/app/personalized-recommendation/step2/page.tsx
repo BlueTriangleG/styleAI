@@ -129,8 +129,9 @@ export default function Step2() {
       console.log('正在从sessionStorage获取分析数据...');
       // 从sessionStorage获取分析数据
       const storedData = sessionStorage.getItem('analysisData');
+      const storedRecommendations = sessionStorage.getItem('styleRecommendations');
 
-      if (!storedData) {
+      if (!storedData || !storedRecommendations) {
         console.error('未找到分析数据，使用默认数据');
         setAnalysisError('未找到分析数据，使用默认数据');
         // 使用默认数据
@@ -150,7 +151,9 @@ export default function Step2() {
 
       // 解析存储的数据
       const data = JSON.parse(storedData);
+      const recommendations = JSON.parse(storedRecommendations);
       console.log('成功获取分析数据:', data);
+      console.log('成功获取风格推荐:', recommendations);
 
       // 打印分析数据的详细信息
       console.log('分析特征:', data.features);
@@ -158,6 +161,7 @@ export default function Step2() {
       console.log('推荐风格:', data.styles);
 
       setAnalysisData(data);
+      setStyleRecommendations(recommendations);
       return data;
     } catch (error) {
       console.error('获取分析数据失败:', error);
@@ -174,6 +178,7 @@ export default function Step2() {
         styles: ['Classic', 'Professional', 'Elegant', 'Sophisticated'],
       };
       setAnalysisData(defaultData);
+      setStyleRecommendations(defaultStyleRecommendations);
       return defaultData;
     } finally {
       setIsLoadingAnalysis(false);
@@ -455,6 +460,9 @@ export default function Step2() {
         : defaultAnalysisResults.styleMatch,
   };
 
+  // Add state for style recommendations
+  const [currentStyleRecommendations, setStyleRecommendations] = useState<StyleRecommendation[]>(defaultStyleRecommendations);
+
   return (
     <>
       <style jsx global>{`
@@ -723,7 +731,7 @@ export default function Step2() {
         <div ref={recommendationsRef}>
           <StyleRecommendations
             userImage={userImage}
-            styleRecommendations={styleRecommendations}
+            styleRecommendations={currentStyleRecommendations}
             analysisResults={analysisResults}
           />
         </div>
