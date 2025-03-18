@@ -1,4 +1,8 @@
 import { API_SERVER_URL, API_ENDPOINTS, DEFAULT_HEADERS } from './config';
+import {
+  createJob as createJobAction,
+  getBestFitImage as getBestFitImageAction,
+} from '@/app/actions/jobActions';
 
 /**
  * API Service for connecting to the Flask backend
@@ -116,7 +120,7 @@ class ApiService {
       console.log('获取到的个性化分析数据:', result);
 
       if (result.status === 'success') {
-        return result.analysis;
+        return { analysis: result.analysis, status: result.status };
       } else {
         throw new Error(result.error || '获取个性化分析失败');
       }
@@ -162,34 +166,19 @@ class ApiService {
   }
 
   /**
-   * Get best fit image from the API
-   * @param jobId The job ID for the best fit image
-   * @returns Best fit image data in base64 format
+   * 获取最佳匹配图片
+   * @param jobId The job ID
+   * @returns Best fit image data
    */
   async getBestFitImage(jobId: string): Promise<any> {
     try {
       console.log(`正在获取最佳匹配图片，jobId: ${jobId}`);
-      const response = await fetch(
-        `${this.baseUrl}${API_ENDPOINTS.BEST_FIT_IMAGE}`,
-        {
-          method: 'POST',
-          headers: DEFAULT_HEADERS,
-          body: JSON.stringify({ jobId }),
-        }
-      );
 
-      if (!response.ok) {
-        throw new Error(`API error: ${response.status}`);
-      }
+      // 使用Server Action获取图片
+      const result = await getBestFitImageAction(jobId);
+      console.log('获取到的最佳匹配图片结果:', result);
 
-      const result = await response.json();
-      console.log('获取到的最佳匹配图片:', result);
-
-      if (result.status === 'success') {
-        return result;
-      } else {
-        throw new Error(result.error || '获取最佳匹配图片失败');
-      }
+      return result;
     } catch (error) {
       console.error('获取最佳匹配图片时出错:', error);
       throw error;
@@ -203,7 +192,7 @@ class ApiService {
    */
   async generateBestFit(jobId: string): Promise<any> {
     try {
-      console.log(`正在生成最佳匹配图片，jobId: ${jobId}`);
+      console.log(`正在获取穿着建议图片，jobId: ${jobId}`);
       const response = await fetch(
         `${this.baseUrl}${API_ENDPOINTS.GENERATE_BEST_FIT}`,
         {
@@ -218,15 +207,15 @@ class ApiService {
       }
 
       const result = await response.json();
-      console.log('生成最佳匹配图片结果:', result);
+      console.log('获取到的穿着建议图片:', result);
 
       if (result.status === 'success') {
-        return result;
+        return result.data;
       } else {
-        throw new Error(result.error || '生成最佳匹配图片失败');
+        throw new Error(result.error || '获取穿着建议图片失败');
       }
     } catch (error) {
-      console.error('生成最佳匹配图片时出错:', error);
+      console.error('获取穿着建议图片时出错:', error);
       throw error;
     }
   }

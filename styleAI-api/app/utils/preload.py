@@ -232,5 +232,13 @@ def init():
     # 预加载模型
     preload_models()
 
+# initialize函数作为init函数的别名
+def initialize():
+    """
+    初始化预加载模块(init函数的别名)
+    这个函数是为了兼容app/__init__.py中的调用
+    """
+    return init()
+
 # 在模块导入时自动初始化
 init() 

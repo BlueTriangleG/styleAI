@@ -8,6 +8,7 @@ import importlib.util
 import json
 from app.utils.db import get_job_by_id, update_job_description, update_job_best_fit
 from app.utils.image_utils import save_image_from_buffer, buffer_to_base64, cleanup_temp_files
+from app.utils.style_matching import find_best_match_image, generate_outfit_image
 from app.mock_data import MOCK_ANALYSIS_DATA
 
 # 添加算法目录到Python路径
@@ -477,220 +478,121 @@ def wear_suit_pictures():
                 # 获取预加载的资源
                 resources = preload.get_model_resources()
                 
-                # 检查算法模块是否可用
-                embedding_match_spec = importlib.util.find_spec('embedding_match')
-                change_ootd_spec = importlib.util.find_spec('change_ootd')
-                
-                if embedding_match_spec and change_ootd_spec and resources.get('model') and resources.get('tokenizer'):
-                    # 导入算法模块
-                    import embedding_match
-                    import change_ootd
+                # 获取用户上传的图像数据
+                image_data = job.get('uploaded_image')
+                if image_data:
+                    # 保存图像到临时文件
+                    temp_filename = f"uploaded_{job_id}.jpg"
+                    image_path = save_image_from_buffer(image_data, temp_filename)
                     
-                    # 获取用户上传的图像数据
-                    image_data = job.get('uploaded_image')
-                    if image_data:
-                        # 保存图像到临时文件
-                        temp_filename = f"uploaded_{job_id}.jpg"
-                        image_path = save_image_from_buffer(image_data, temp_filename)
+                    if image_path:
+                        logger.info(f"已保存用户上传图像到临时文件: {image_path}")
                         
-                        if image_path:
-                            logger.info(f"已保存用户上传图像到临时文件: {image_path}")
-                            
-                            # 步骤1: 使用embedding_match算法分析用户图像
-                            logger.info(f"开始使用embedding_match分析用户图像: {image_path}")
-                            analysis_data = job.get('target_description')
-                            if not analysis_data:
-                                logger.warning("未找到分析结果，使用模拟数据")
-                                is_mock_data = True
-                                return jsonify({
-                                    "jobId": job_id,
-                                    "timestamp": int(time.time()),
-                                    "status": "error",
-                                    "error": "No analysis result found. Using mock data.",
-                                    "debug_info": "No analysis result found. Using mock data."
-                                }), 400
-
-                            # 处理target_description，确保它是JSON字符串
-                            try:
-                                if isinstance(analysis_data, dict):
-                                    # 如果已经是dict，则转换为JSON字符串
-                                    analysis_data = convert_nested_objects_to_string(analysis_data)
-                                    analysis_json_str = json.dumps(analysis_data)
-                                    logger.info("已将target_description从dict转换为JSON字符串")
-                                elif isinstance(analysis_data, str):
-                                    # 如果已经是字符串，则验证它是有效的JSON
-                                    json.loads(analysis_data)  # 只是验证，不使用返回值
-                                    analysis_json_str = analysis_data
-                                    logger.info("target_description已经是有效的JSON字符串")
-                                else:
-                                    logger.error(f"无法处理的target_description类型: {type(analysis_data)}")
-                                    return jsonify({
-                                        "status": "error",
-                                        "jobId": job_id,
-                                        "error": "target_description类型无效",
-                                        "debug_info": f"类型为 {type(analysis_data)}"
-                                    }), 500
-                            except Exception as e:
-                                logger.error(f"处理target_description失败: {e}", exc_info=True)
-                                return jsonify({
-                                    "status": "error",
-                                    "jobId": job_id,
-                                    "error": "target_description不是有效的JSON格式",
-                                    "debug_info": str(e)
-                                }), 500
-
-                            # 步骤2: 使用embedding_match找到最佳匹配的图片
-                            model = resources.get('model')
-                            tokenizer = resources.get('tokenizer')
-                            device = resources.get('device')
-
-                            # 直接传递处理后的JSON字符串给embedding_match
-                            best_image_name = embedding_match.main(
-                                analysis_json_str,  # 使用处理后的JSON字符串
-                                tokenizer, 
-                                model, 
-                                device
-                            )
-                            
-                            # 解析分析结果
-                            try:
-                                # 步骤2: 使用embedding_match找到最佳匹配的图片
-                                model = resources.get('model')
-                                tokenizer = resources.get('tokenizer')
-                                device = resources.get('device')
-                                
-                                # 调用embedding_match算法
-                                best_image_name = embedding_match.main(
-                                    analysis_json_str,  # 使用处理后的JSON字符串
-                                    tokenizer, 
-                                    model, 
-                                    device
-                                )
-                                
-                                if not best_image_name:
-                                    logger.warning("embedding_match未返回有效结果")
-                                    return jsonify({
-                                        "status": "error",
-                                        "jobId": job_id,
-                                        "error": "无法找到匹配的服装图片"
-                                    }), 500
-                                
-                                # 构建模型图片URL
-                                men_fashion_dir = os.path.join(ALGORITHMS_PATH, "ALL_images")
-                                if not os.path.exists(men_fashion_dir):
-                                    logger.warning(f"ALL_images目录不存在: {men_fashion_dir}")
-                                    # 尝试创建目录
-                                    try:
-                                        os.makedirs(men_fashion_dir, exist_ok=True)
-                                        logger.info(f"已创建ALL_images目录: {men_fashion_dir}")
-                                    except Exception as e:
-                                        logger.error(f"创建ALL_images目录失败: {str(e)}")
-                                        return jsonify({
-                                            "status": "error",
-                                            "jobId": job_id,
-                                            "error": f"ALL_images目录不存在且无法创建: {str(e)}"
-                                        }), 500
-                                
-                                # 将匹配的图片复制到match目录
-                                try:
-                                    # 默认使用示例图片作为模型图片
-                                    model_image_url = os.path.join(men_fashion_dir, "example.jpg")
-                                    
-                                    # 检查best_image_name是否有效
-                                    if best_image_name and not isinstance(best_image_name, tuple):
-                                        # 如果best_image_name是完整路径，则直接使用
-                                        if os.path.isabs(best_image_name):
-                                            source_image_path = best_image_name
-                                        else:
-                                            # 否则，假设它是相对于ALL_images的路径
-                                            source_image_path = os.path.join(men_fashion_dir, best_image_name)
-                                        
-                                        # 检查源图片是否存在
-                                        if os.path.exists(source_image_path):
-                                            # 直接使用原始图片路径，不复制
-                                            logger.info(f"使用原始图片路径: {source_image_path}")
-                                            model_image_url = source_image_path
-                                        else:
-                                            logger.warning(f"匹配的图片不存在: {source_image_path}")
-                                    else:
-                                        logger.warning(f"无效的best_image_name: {best_image_name}")
-                                except Exception as e:
-                                    logger.error(f"处理图片路径时出错: {str(e)}")
-                                
-                                logger.info(f"使用模型图片: {model_image_url}")
-                                
-                                # 步骤3: 使用change_ootd生成穿着建议图片
-                                logger.info(f"开始使用change_ootd生成穿着建议图片")
-                                try:
-                                    # 修正参数顺序：第一个参数是模特图片(model_image_url)，第二个参数是服装图片(garment_image_url)
-                                    # 在这里，模特图片是用户上传的图片(image_path)，服装图片是匹配的服装图片(model_image_url)
-                                    
-                                    # 将本地图片转换为base64编码
-                                    def encode_image_to_base64(image_path):
-                                        import base64
-                                        with open(image_path, "rb") as image_file:
-                                            return "data:image/jpeg;base64," + base64.b64encode(image_file.read()).decode()
-                                    
-                                    # 使用base64编码图片
-                                    model_image_base64 = encode_image_to_base64(image_path)
-                                    garment_image_base64 = encode_image_to_base64(model_image_url)
-                                    
-                                    # 使用base64编码的图片调用change_ootd.main
-                                    output_path = change_ootd.main(model_image_base64, garment_image_base64)
-                                    
-                                    if not output_path or not os.path.exists(output_path):
-                                        logger.warning("change_ootd未返回有效结果，使用模拟数据")
-                                        # 使用模拟数据
-                                        # 读取示例图片作为模拟数据
-                                        sample_image_path = os.path.join(ALGORITHMS_PATH, "main.py")
-                                        with open(sample_image_path, 'rb') as f:
-                                            output_image_data = f.read()
-                                    else:
-                                        # 读取生成的图片
-                                        with open(output_path, 'rb') as f:
-                                            output_image_data = f.read()
-                                        
-                                        # 清理临时文件
-                                        cleanup_temp_files(file_paths=[output_path])
-                                except Exception as e:
-                                    logger.error(f"使用change_ootd生成穿着建议图片时出错: {str(e)}")
-                                    # 使用模拟数据
-                                    # 读取示例图片作为模拟数据
-                                    sample_image_path = os.path.join(ALGORITHMS_PATH, "main.py")
-                                    with open(sample_image_path, 'rb') as f:
-                                        output_image_data = f.read()
-                                
-                                # 更新数据库中的best_fit字段
-                                update_success = update_job_best_fit(job_id, output_image_data)
-                                
-                                if not update_success:
-                                    logger.warning(f"更新job {job_id}的best_fit字段失败")
-                                    return jsonify({
-                                        "status": "error",
-                                        "jobId": job_id,
-                                        "error": "更新数据库失败"
-                                    }), 500
-                                
-                                # 清理临时文件
-                                cleanup_temp_files(file_paths=[image_path])
-                                
-                                return jsonify({
-                                    "status": "success",
-                                    "jobId": job_id,
-                                    "message": "成功生成最佳穿着建议图片"
-                                }), 200
-                                
-                            except Exception as e:
-                                logger.error(f"处理分析结果时出错: {str(e)}", exc_info=True)
-                                is_mock_data = True
-                        else:
-                            logger.warning("保存图像失败，使用模拟数据")
+                        # 获取分析结果
+                        analysis_data = job.get('target_description')
+                        if not analysis_data:
+                            logger.warning("未找到分析结果，使用模拟数据")
                             is_mock_data = True
+                            return jsonify({
+                                "jobId": job_id,
+                                "timestamp": int(time.time()),
+                                "status": "error",
+                                "error": "No analysis result found. Using mock data.",
+                                "debug_info": "No analysis result found. Using mock data."
+                            }), 400
+
+                        # 处理target_description，确保它是有效的格式
+                        try:
+                            if isinstance(analysis_data, dict):
+                                # 如果已经是dict，则转换为JSON字符串
+                                analysis_data = convert_nested_objects_to_string(analysis_data)
+                                analysis_json_str = json.dumps(analysis_data)
+                                logger.info("已将target_description从dict转换为JSON字符串")
+                            elif isinstance(analysis_data, str):
+                                # 如果已经是字符串，则验证它是有效的JSON
+                                json.loads(analysis_data)  # 只是验证，不使用返回值
+                                analysis_json_str = analysis_data
+                                logger.info("target_description已经是有效的JSON字符串")
+                            else:
+                                logger.error(f"无法处理的target_description类型: {type(analysis_data)}")
+                                return jsonify({
+                                    "status": "error",
+                                    "jobId": job_id,
+                                    "error": "target_description类型无效",
+                                    "debug_info": f"类型为 {type(analysis_data)}"
+                                }), 500
+                        except Exception as e:
+                            logger.error(f"处理target_description失败: {e}", exc_info=True)
+                            return jsonify({
+                                "status": "error",
+                                "jobId": job_id,
+                                "error": "target_description不是有效的JSON格式",
+                                "debug_info": str(e)
+                            }), 500
+
+                        # 获取模型和tokenizer
+                        model = resources.get('model')
+                        tokenizer = resources.get('tokenizer')
+                        device = resources.get('device')
+                        
+                        # 步骤1: 使用embedding_match找到最佳匹配的图片
+                        success, message, best_image_path = find_best_match_image(
+                            analysis_json_str,  # 使用处理后的JSON字符串
+                            tokenizer, 
+                            model, 
+                            device
+                        )
+                        
+                        if not success:
+                            logger.warning(f"查找最佳匹配图片失败: {message}")
+                            return jsonify({
+                                "status": "error",
+                                "jobId": job_id,
+                                "error": message
+                            }), 500
+                        
+                        logger.info(f"成功找到最佳匹配图片: {best_image_path}")
+                        
+                        # 步骤2: 使用change_ootd生成穿着建议图片
+                        success, message, output_image_data = generate_outfit_image(
+                            image_path, 
+                            best_image_path
+                        )
+                        
+                        if not success:
+                            logger.warning(f"生成穿着建议图片失败: {message}")
+                            return jsonify({
+                                "status": "error",
+                                "jobId": job_id,
+                                "error": message
+                            }), 500
+                        
+                        logger.info(f"成功生成穿着建议图片: {message}")
+                        
+                        # 更新数据库中的best_fit字段
+                        update_success = update_job_best_fit(job_id, output_image_data)
+                        
+                        if not update_success:
+                            logger.warning(f"更新job {job_id}的best_fit字段失败")
+                            return jsonify({
+                                "status": "error",
+                                "jobId": job_id,
+                                "error": "更新数据库失败"
+                            }), 500
+                        
+                        # 清理临时文件
+                        cleanup_temp_files(file_paths=[image_path])
+                        
+                        return jsonify({
+                            "status": "success",
+                            "jobId": job_id,
+                            "message": "成功生成最佳穿着建议图片"
+                        }), 200
                     else:
-                        logger.warning("没有上传的图像数据，使用模拟数据")
+                        logger.warning("保存图像失败，使用模拟数据")
                         is_mock_data = True
                 else:
-                    logger.warning("算法模块或预加载模型不可用，使用模拟数据")
+                    logger.warning("没有上传的图像数据，使用模拟数据")
                     is_mock_data = True
             else:
                 logger.warning("预加载模块不可用，使用模拟数据")
@@ -858,29 +760,15 @@ def generate_best_fit():
                     analysis_data = convert_nested_objects_to_string(analysis_data)
             except Exception as e:
                 logger.error(f"解析target_description时出错: {str(e)}")
-        
-        if not analysis_data:
+        else:
             logger.warning(f"未找到分析结果，将先进行分析，jobId: {job_id}")
-            # 使用input_analyse进行分析
-            try:
-                # 导入input_analyse模块
-                import input_analyse
-                
-                # 分析图像
-                logger.info(f"开始分析图像: {image_path}")
-                analysis_data = input_analyse.main(image_path)
-                
-                if analysis_data:
-                    # 保存分析结果到数据库
-                    update_success = update_job_description(job_id, analysis_data)
-                    if update_success:
-                        logger.info(f"成功将分析结果保存到数据库，jobId: {job_id}")
-                    else:
-                        logger.warning(f"无法将分析结果保存到数据库，jobId: {job_id}")
-                else:
-                    logger.warning(f"分析图像失败，未返回有效结果，jobId: {job_id}")
-            except Exception as e:
-                logger.error(f"分析图像时出错: {str(e)}")
+            # Return error
+            return jsonify({
+                "status": "error",
+                "jobId": job_id,
+                "error": "未找到分析结果"
+            }), 400
+        
         
         # 尝试使用算法生成最佳穿着建议图片
         try:
@@ -892,166 +780,72 @@ def generate_best_fit():
                 # 获取预加载的资源
                 resources = preload.get_model_resources()
                 
-                # 检查算法模块是否可用
-                embedding_match_spec = importlib.util.find_spec('embedding_match')
-                change_ootd_spec = importlib.util.find_spec('change_ootd')
+                # 获取模型和tokenizer
+                model = resources.get('model')
+                tokenizer = resources.get('tokenizer')
+                device = resources.get('device')
                 
-                if embedding_match_spec and change_ootd_spec:
-                    # 导入算法模块
-                    import embedding_match
-                    import change_ootd
+                if analysis_data:
+                    # 步骤1: 使用embedding_match找到最佳匹配的图片
+                    success, message, best_image_path = find_best_match_image(
+                        analysis_data, 
+                        tokenizer, 
+                        model, 
+                        device
+                    )
                     
-                    # 获取模型和tokenizer
-                    model = resources.get('model')
-                    tokenizer = resources.get('tokenizer')
-                    device = resources.get('device')
-                    
-                    if not model or not tokenizer or not device:
-                        logger.error("预加载的模型资源不可用")
+                    if not success:
+                        logger.warning(f"查找最佳匹配图片失败: {message}")
                         return jsonify({
                             "status": "error",
                             "jobId": job_id,
-                            "error": "预加载的模型资源不可用"
+                            "error": message
                         }), 500
                     
-                    if analysis_data:
-                        # 步骤1: 使用embedding_match找到最佳匹配的图片
-                        logger.info(f"开始使用embedding_match分析用户图像: {image_path}")
-                        logger.info(f"分析数据: {analysis_data}")
-                        # 调用embedding_match算法，使用预加载的模型和tokenizer
-                        best_image_name = embedding_match.main(
-                            analysis_data, 
-                            tokenizer, 
-                            model, 
-                            device
-                        )
-                        
-                        if not best_image_name:
-                            logger.warning("embedding_match未返回有效结果")
-                            return jsonify({
-                                "status": "error",
-                                "jobId": job_id,
-                                "error": "无法找到匹配的服装图片"
-                            }), 500
-                        
-                        # 构建模型图片URL
-                        men_fashion_dir = os.path.join(ALGORITHMS_PATH, "ALL_images")
-                        if not os.path.exists(men_fashion_dir):
-                            logger.warning(f"ALL_images目录不存在: {men_fashion_dir}")
-                            # 尝试创建目录
-                            try:
-                                os.makedirs(men_fashion_dir, exist_ok=True)
-                                logger.info(f"已创建ALL_images目录: {men_fashion_dir}")
-                            except Exception as e:
-                                logger.error(f"创建ALL_images目录失败: {str(e)}")
-                                return jsonify({
-                                    "status": "error",
-                                    "jobId": job_id,
-                                    "error": f"ALL_images目录不存在且无法创建: {str(e)}"
-                                }), 500
-                        
-                        # 将匹配的图片复制到match目录
-                        try:
-                            # 默认使用示例图片作为模型图片
-                            model_image_url = os.path.join(men_fashion_dir, "example.jpg")
-                            
-                            # 检查best_image_name是否有效
-                            if best_image_name and not isinstance(best_image_name, tuple):
-                                # 如果best_image_name是完整路径，则直接使用
-                                if os.path.isabs(best_image_name):
-                                    source_image_path = best_image_name
-                                else:
-                                    # 否则，假设它是相对于ALL_images的路径
-                                    source_image_path = os.path.join(men_fashion_dir, best_image_name)
-                                
-                                # 检查源图片是否存在
-                                if os.path.exists(source_image_path):
-                                    # 直接使用原始图片路径，不复制
-                                    logger.info(f"使用原始图片路径: {source_image_path}")
-                                    model_image_url = source_image_path
-                                else:
-                                    logger.warning(f"匹配的图片不存在: {source_image_path}")
-                            else:
-                                logger.warning(f"无效的best_image_name: {best_image_name}")
-                        except Exception as e:
-                            logger.error(f"处理图片路径时出错: {str(e)}")
-                        
-                        logger.info(f"使用模型图片: {model_image_url}")
-                        
-                        # 步骤2: 使用change_ootd生成穿着建议图片
-                        logger.info(f"开始使用change_ootd生成穿着建议图片")
-                        try:
-                            # 修正参数顺序：第一个参数是模特图片(model_image_url)，第二个参数是服装图片(garment_image_url)
-                            # 在这里，模特图片是用户上传的图片(image_path)，服装图片是匹配的服装图片(model_image_url)
-                            
-                            # 将本地图片转换为base64编码
-                            def encode_image_to_base64(image_path):
-                                import base64
-                                with open(image_path, "rb") as image_file:
-                                    return "data:image/jpeg;base64," + base64.b64encode(image_file.read()).decode()
-                            
-                            # 使用base64编码图片
-                            model_image_base64 = encode_image_to_base64(image_path)
-                            garment_image_base64 = encode_image_to_base64(model_image_url)
-                            
-                            # 使用base64编码的图片调用change_ootd.main
-                            output_path = change_ootd.main(model_image_base64, garment_image_base64)
-                            
-                            if not output_path or not os.path.exists(output_path):
-                                logger.warning("change_ootd未返回有效结果，使用模拟数据")
-                                # 使用模拟数据
-                                # 读取示例图片作为模拟数据
-                                sample_image_path = os.path.join(ALGORITHMS_PATH, "main.py")
-                                with open(sample_image_path, 'rb') as f:
-                                    output_image_data = f.read()
-                            else:
-                                # 读取生成的图片
-                                with open(output_path, 'rb') as f:
-                                    output_image_data = f.read()
-                                
-                                # 清理临时文件
-                                cleanup_temp_files(file_paths=[output_path])
-                        except Exception as e:
-                            logger.error(f"使用change_ootd生成穿着建议图片时出错: {str(e)}")
-                            # 使用模拟数据
-                            # 读取示例图片作为模拟数据
-                            sample_image_path = os.path.join(ALGORITHMS_PATH, "main.py")
-                            with open(sample_image_path, 'rb') as f:
-                                output_image_data = f.read()
-                        
-                        # 更新数据库中的best_fit字段
-                        update_success = update_job_best_fit(job_id, output_image_data)
-                        
-                        if not update_success:
-                            logger.warning(f"更新job {job_id}的best_fit字段失败")
-                            return jsonify({
-                                "status": "error",
-                                "jobId": job_id,
-                                "error": "更新数据库失败"
-                            }), 500
-                        
-                        # 清理临时文件
-                        cleanup_temp_files(file_paths=[image_path])
-                        
-                        return jsonify({
-                            "status": "success",
-                            "jobId": job_id,
-                            "message": "成功生成最佳穿着建议图片"
-                        }), 200
-                    else:
-                        logger.warning("缺少分析数据，无法生成穿着建议图片")
+                    logger.info(f"成功找到最佳匹配图片: {best_image_path}")
+                    
+                    # 步骤2: 使用change_ootd生成穿着建议图片
+                    success, message, output_image_data = generate_outfit_image(
+                        image_path, 
+                        best_image_path
+                    )
+                    
+                    if not success:
+                        logger.warning(f"生成穿着建议图片失败: {message}")
                         return jsonify({
                             "status": "error",
                             "jobId": job_id,
-                            "error": "缺少分析数据"
-                        }), 400
+                            "error": message
+                        }), 500
+                    
+                    logger.info(f"成功生成穿着建议图片: {message}")
+                    
+                    # 更新数据库中的best_fit字段
+                    update_success = update_job_best_fit(job_id, output_image_data)
+                    
+                    if not update_success:
+                        logger.warning(f"更新job {job_id}的best_fit字段失败")
+                        return jsonify({
+                            "status": "error",
+                            "jobId": job_id,
+                            "error": "更新数据库失败"
+                        }), 500
+                    
+                    # 清理临时文件
+                    cleanup_temp_files(file_paths=[image_path])
+                    
+                    return jsonify({
+                        "status": "success",
+                        "jobId": job_id,
+                        "message": "成功生成最佳穿着建议图片"
+                    }), 200
                 else:
-                    logger.warning("算法模块或资源不可用")
+                    logger.warning("缺少分析数据，无法生成穿着建议图片")
                     return jsonify({
                         "status": "error",
                         "jobId": job_id,
-                        "error": "算法模块或资源不可用"
-                    }), 500
+                        "error": "缺少分析数据"
+                    }), 400
             else:
                 logger.warning("预加载模块不可用")
                 return jsonify({

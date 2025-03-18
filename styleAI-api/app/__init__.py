@@ -41,10 +41,8 @@ def create_app():
     threading.Thread(target=preload_resources, daemon=True).start()
     
     # Register blueprints
-    from app.routes.image_processing import image_bp
     from app.routes.personalized import personalized_bp
     
-    app.register_blueprint(image_bp)
     app.register_blueprint(personalized_bp)
     
     @app.route('/health')

@@ -7,7 +7,6 @@ import { RecommendationHeader } from '@/components/recommendation/Header';
 import { motion, useScroll, useTransform } from 'framer-motion';
 import LiquidChrome from '@/components/background/LiquidChrome';
 import StyleRecommendations from '@/components/recommendation/StyleRecommendations';
-import { apiService } from '@/lib/api/ApiService';
 
 // 定义分析数据的类型
 interface AnalysisPoint {
@@ -62,7 +61,7 @@ export default function Step2() {
   const opacityTransform = useTransform(scrollYProgress, [0, 0.3], [1, 0]);
   const scaleTransform = useTransform(scrollYProgress, [0, 0.3], [1, 0.95]);
 
-  // 默认分析结果，当API调用失败时使用
+  // 默认分析结果，当未找到数据时使用
   const defaultAnalysisPoints: AnalysisPoint[] = [
     {
       title: 'Striking Features',
@@ -86,7 +85,7 @@ export default function Step2() {
     },
   ];
 
-  // 默认风格推荐，当API调用失败时使用
+  // 默认风格推荐，当未找到数据时使用
   const defaultStyleRecommendations: StyleRecommendation[] = [
     {
       title: 'Business Casual',
@@ -122,103 +121,15 @@ export default function Step2() {
     styleMatch: 'Business Casual',
   };
 
-  // 辅助函数：从原始JSON字符串中提取有效的JSON内容
-  const extractJsonFromString = (jsonString: string): any => {
-    console.log('提取JSON，原始字符串长度:', jsonString.length);
-
-    try {
-      // 首先检查是否是有效的JSON对象
-      if (typeof jsonString === 'object' && jsonString !== null) {
-        console.log('输入已经是对象，直接返回');
-        return jsonString;
-      }
-
-      // 确保输入是字符串
-      if (typeof jsonString !== 'string') {
-        console.log('输入不是字符串，尝试转换为字符串');
-        jsonString = String(jsonString);
-      }
-
-      // 首先尝试直接解析，看是否已经是有效的JSON字符串
-      try {
-        const directParsed = JSON.parse(jsonString);
-        console.log('直接解析成功，返回对象');
-        return directParsed;
-      } catch (e) {
-        console.log('直接解析失败，尝试提取JSON代码块');
-      }
-
-      // 检查是否包含```json标记
-      if (jsonString.includes('```json')) {
-        console.log('检测到```json标记，尝试提取JSON内容');
-
-        // 提取JSON部分 - 使用更精确的方法
-        const startMarker = '```json\n';
-        const endMarker = '\n```';
-
-        const startIndex = jsonString.indexOf(startMarker);
-        if (startIndex !== -1) {
-          const contentStartIndex = startIndex + startMarker.length;
-          const endIndex = jsonString.indexOf(endMarker, contentStartIndex);
-
-          if (endIndex !== -1) {
-            const jsonContent = jsonString.substring(
-              contentStartIndex,
-              endIndex
-            );
-            console.log('提取的JSON内容长度:', jsonContent.length);
-            console.log('JSON内容前20个字符:', jsonContent.substring(0, 20));
-
-            // 解析JSON
-            try {
-              const parsed = JSON.parse(jsonContent);
-              console.log('JSON解析成功，返回对象');
-              return parsed;
-            } catch (parseError) {
-              console.error('解析提取的JSON内容失败:', parseError);
-              // 继续尝试其他方法
-            }
-          }
-        }
-      }
-
-      // 如果上述方法都失败，尝试移除所有Markdown标记
-      console.log('尝试移除所有Markdown标记');
-      const cleanedJson = jsonString
-        .replace(/```json\n/g, '')
-        .replace(/\n```/g, '')
-        .trim();
-
-      console.log('清理后的JSON长度:', cleanedJson.length);
-      console.log('清理后的JSON前20个字符:', cleanedJson.substring(0, 20));
-
-      // 解析清理后的JSON
-      try {
-        const parsed = JSON.parse(cleanedJson);
-        console.log('清理后的JSON解析成功，返回对象');
-        return parsed;
-      } catch (parseError) {
-        console.error('解析清理后的JSON失败:', parseError);
-        // 继续尝试其他方法
-      }
-
-      // 如果所有方法都失败，返回一个空对象
-      console.log('所有解析方法都失败，返回空对象');
-      return {};
-    } catch (error) {
-      console.error('提取JSON过程中出错:', error);
-      return {};
-    }
-  };
-
-  // 获取个性化分析数据
-  const fetchAnalysisData = async (jobId: string) => {
+  // 从 sessionStorage 读取数据并处理分析数据
+  const processAnalysisData = async () => {
     setIsLoadingAnalysis(true);
     setAnalysisError(null);
 
     try {
-      console.log('正在从sessionStorage获取分析数据...');
-      // 从sessionStorage获取分析数据
+      console.log('正在从 sessionStorage 获取分析数据...');
+
+      // 从 sessionStorage 获取分析数据
       const storedData = sessionStorage.getItem('analysisData');
 
       if (!storedData) {
@@ -244,9 +155,7 @@ export default function Step2() {
       try {
         // 尝试解析数据
         console.log('原始存储的数据长度:', storedData.length);
-
-        // 使用辅助函数提取JSON
-        parsedData = extractJsonFromString(storedData);
+        parsedData = JSON.parse(storedData);
         console.log('成功解析的数据结构:', Object.keys(parsedData));
 
         // 提取并设置整体描述
@@ -413,25 +322,6 @@ export default function Step2() {
           }
         }
 
-        // 如果没有提取到足够的颜色，添加一些默认颜色
-        if (extractedColors.length < 3) {
-          console.log('提取的颜色不足3个，添加默认颜色');
-          const defaultColors = [
-            { name: 'Navy Blue', hex: '#000080' },
-            { name: 'Burgundy', hex: '#800020' },
-            { name: 'Forest Green', hex: '#228B22' },
-            { name: 'Charcoal Gray', hex: '#36454F' },
-          ];
-
-          for (
-            let i = 0;
-            i < defaultColors.length && extractedColors.length < 4;
-            i++
-          ) {
-            extractedColors.push(defaultColors[i]);
-          }
-        }
-
         // 提取风格特征
         if (
           parsedData['Semantic Features'] &&
@@ -490,44 +380,6 @@ export default function Step2() {
           }
         }
 
-        // 如果没有提取到足够的风格，添加一些默认风格
-        if (extractedStyles.length < 3) {
-          console.log('提取的风格不足3个，添加默认风格');
-          const defaultStyles = [
-            'Classic',
-            'Professional',
-            'Elegant',
-            'Sophisticated',
-          ];
-          for (
-            let i = 0;
-            i < defaultStyles.length && extractedStyles.length < 4;
-            i++
-          ) {
-            if (!extractedStyles.includes(defaultStyles[i])) {
-              extractedStyles.push(defaultStyles[i]);
-            }
-          }
-        }
-
-        // 如果features为空，添加整体描述作为一个特征
-        if (
-          extractedFeatures.length === 0 &&
-          parsedData['Your Overall Description']
-        ) {
-          console.log('提取的特征为空，添加整体描述作为特征');
-          try {
-            const overallDescription = parsedData['Your Overall Description'];
-            console.log('整体描述:', overallDescription);
-            extractedFeatures.push({
-              title: 'Overall Description',
-              content: overallDescription,
-            });
-          } catch (e) {
-            console.error('处理整体描述时出错:', e);
-          }
-        }
-
         console.log('提取完成，构建处理后的数据');
         console.log('提取的特征数量:', extractedFeatures.length);
         console.log('提取的颜色数量:', extractedColors.length);
@@ -566,8 +418,8 @@ export default function Step2() {
         throw parseError;
       }
     } catch (error) {
-      console.error('获取分析数据失败:', error);
-      setAnalysisError('无法获取分析数据，使用默认数据');
+      console.error('处理分析数据失败:', error);
+      setAnalysisError('无法处理分析数据，使用默认数据');
       // 使用默认数据
       const defaultData = {
         features: defaultAnalysisPoints,
@@ -583,85 +435,6 @@ export default function Step2() {
       return defaultData;
     } finally {
       setIsLoadingAnalysis(false);
-    }
-  };
-
-  // 从sessionStorage获取jobId并获取分析数据
-  const getJobIdAndFetchData = async () => {
-    console.log('正在获取jobId和分析数据...');
-    try {
-      // 从sessionStorage获取jobId
-      const storedJobId = sessionStorage.getItem('currentJobId');
-      if (storedJobId) {
-        console.log(`从sessionStorage获取到jobId: ${storedJobId}`);
-        setJobId(storedJobId);
-
-        // 获取最佳匹配图片
-        try {
-          console.log('正在从API获取最佳匹配图片...');
-          const bestFitResult = await apiService.getBestFitImage(storedJobId);
-          console.log('成功获取最佳匹配图片:', bestFitResult);
-
-          if (bestFitResult && bestFitResult.imageData) {
-            // 将base64数据转换为图片URL
-            const base64Image = `data:image/jpeg;base64,${bestFitResult.imageData}`;
-            setBestFitImage(base64Image);
-            console.log('最佳匹配图片已设置');
-
-            // 存储到sessionStorage
-            sessionStorage.setItem('bestFitImage', base64Image);
-          }
-        } catch (error) {
-          console.error('获取最佳匹配图片时出错:', error);
-
-          // 尝试从sessionStorage获取
-          const storedBestFitImage = sessionStorage.getItem('bestFitImage');
-          if (storedBestFitImage) {
-            console.log('从sessionStorage获取到最佳匹配图片');
-            setBestFitImage(storedBestFitImage);
-          }
-        }
-      } else {
-        console.log('未找到jobId，使用默认值');
-      }
-
-      // 从sessionStorage获取用户图像
-      const storedUserImage = sessionStorage.getItem('userImage');
-      if (storedUserImage) {
-        console.log('从sessionStorage获取到用户图像');
-        setUserImage(storedUserImage);
-      } else {
-        console.log('未找到用户图像');
-      }
-
-      // 从sessionStorage获取分析数据
-      const storedAnalysisData = sessionStorage.getItem('analysisData');
-      if (storedAnalysisData) {
-        console.log('从sessionStorage获取到分析数据');
-        try {
-          const parsedData = extractJsonFromString(storedAnalysisData);
-          setAnalysisData(parsedData);
-        } catch (error) {
-          console.error('解析分析数据失败:', error);
-          setAnalysisError('解析分析数据失败');
-        }
-      } else {
-        console.log('未找到分析数据，使用默认数据');
-        setAnalysisError('未找到分析数据，使用默认数据');
-        setAnalysisData({
-          features: defaultAnalysisPoints,
-          colors: [
-            { name: 'Navy Blue', hex: '#000080' },
-            { name: 'Burgundy', hex: '#800020' },
-            { name: 'Forest Green', hex: '#228B22' },
-            { name: 'Charcoal Gray', hex: '#36454F' },
-          ],
-          styles: ['Classic', 'Professional', 'Elegant', 'Sophisticated'],
-        });
-      }
-    } catch (error) {
-      console.error('获取数据时出错:', error);
-      setAnalysisError('获取数据时出错');
     }
   };
 
@@ -692,95 +465,50 @@ export default function Step2() {
     };
   }, [allowScroll]);
 
+  // 初始化数据
   useEffect(() => {
-    // Only access sessionStorage in browser environment
+    // 只在浏览器环境中执行
     if (typeof window !== 'undefined') {
-      console.log('Step2页面加载，检查sessionStorage');
-      try {
-        // Retrieve the image from session storage
-        const storedImage = sessionStorage.getItem('userImage');
-        console.log(
-          '从sessionStorage获取的图像:',
-          storedImage ? '存在' : '不存在'
-        );
+      console.log('Step2页面加载，获取sessionStorage中的数据');
 
-        if (!storedImage) {
-          // If no image is found, redirect back to step1
+      try {
+        // 从sessionStorage获取用户图像
+        const userImageFromStorage = sessionStorage.getItem('userImage');
+        if (!userImageFromStorage) {
           console.log('未找到用户图像，重定向到step1');
           router.replace('/personalized-recommendation/step1');
           return;
         }
-
-        setUserImage(storedImage);
+        setUserImage(userImageFromStorage);
         console.log('成功设置用户图像');
 
-        // 检查分析数据是否已存在于sessionStorage中
-        const storedAnalysisData = sessionStorage.getItem('analysisData');
-        if (storedAnalysisData) {
-          console.log('在sessionStorage中找到分析数据');
-          try {
-            // 使用辅助函数提取JSON
-            console.log('尝试解析sessionStorage中的分析数据');
-            const parsedAnalysisData =
-              extractJsonFromString(storedAnalysisData);
-            console.log('解析的分析数据结构:', Object.keys(parsedAnalysisData));
-
-            // 不直接设置分析数据，而是调用fetchAnalysisData来处理
-            // 这样可以确保数据被正确处理
-            console.log('调用fetchAnalysisData处理解析后的数据');
-            fetchAnalysisData('')
-              .then(() => {
-                // 数据加载完成后，设置页面加载状态为false
-                setIsPageLoading(false);
-                console.log('页面加载完成，isPageLoading设置为false');
-
-                // Delay enabling scroll effects to ensure page content is displayed first
-                const scrollEffectsTimer = setTimeout(() => {
-                  setEnableScrollEffects(true);
-                  console.log('启用滚动效果');
-                }, 1500);
-
-                return () => {
-                  console.log('Step2组件卸载，清除timer');
-                  clearTimeout(scrollEffectsTimer);
-                };
-              })
-              .catch((error) => {
-                console.error('fetchAnalysisData处理失败:', error);
-                // 如果处理失败，仍然设置页面加载状态为false
-                setIsPageLoading(false);
-              });
-
-            // 获取jobId
-            const storedJobId = sessionStorage.getItem('currentJobId');
-            if (storedJobId) {
-              setJobId(storedJobId);
-              console.log(`从sessionStorage获取的jobId: ${storedJobId}`);
-            }
-
-            return;
-          } catch (e) {
-            console.error('解析分析数据时出错:', e);
-            // 如果解析出错，则继续使用getJobIdAndFetchData
-          }
-        } else {
-          console.log('在sessionStorage中未找到分析数据');
+        // 从sessionStorage获取jobId
+        const jobIdFromStorage = sessionStorage.getItem('currentJobId');
+        if (jobIdFromStorage) {
+          setJobId(jobIdFromStorage);
+          console.log(`从sessionStorage获取的jobId: ${jobIdFromStorage}`);
         }
 
-        // 如果没有找到分析数据或解析出错，则使用getJobIdAndFetchData
-        getJobIdAndFetchData().then(() => {
-          // 数据加载完成后，设置页面加载状态为false
+        // 从sessionStorage获取最佳匹配图片
+        const bestFitImageFromStorage = sessionStorage.getItem('bestFitImage');
+        if (bestFitImageFromStorage) {
+          setBestFitImage(bestFitImageFromStorage);
+          console.log('成功设置最佳匹配图片');
+        }
+
+        // 处理分析数据
+        processAnalysisData().then(() => {
+          // 数据加载完成
           setIsPageLoading(false);
           console.log('页面加载完成，isPageLoading设置为false');
 
-          // Delay enabling scroll effects to ensure page content is displayed first
+          // 延迟启用滚动效果
           const scrollEffectsTimer = setTimeout(() => {
             setEnableScrollEffects(true);
             console.log('启用滚动效果');
           }, 1500);
 
           return () => {
-            console.log('Step2组件卸载，清除timer');
             clearTimeout(scrollEffectsTimer);
           };
         });

@@ -1,0 +1,66 @@
+version: '3.8'
+
+services:
+  # 后端API服务
+  api:
+    build: ./styleAI-api
+    container_name: styleai-api
+    restart: unless-stopped
+    ports:
+      - '5001:5001'
+    environment:
+      - FLASK_APP=app.py
+      - FLASK_ENV=production
+      - FLASK_DEBUG=0
+      - PYTHONUNBUFFERED=1
+    volumes:
+      - ./styleAI-api/app:/app/app
+      - ./styleAI-api/app.py:/app/app.py
+      - ./styleAI-api/requirements.txt:/app/requirements.txt
+      - ./styleAI-api/temp:/app/temp
+    healthcheck:
+      test: ['CMD', 'curl', '-f', 'http://localhost:5001/health']
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 30s
+    networks:
+      - styleai-network
+
+  # 前端服务
+  frontend:
+    build: ./styleAI
+    container_name: styleai-frontend
+    restart: unless-stopped
+    ports:
+      - '3000:3000'
+    environment:
+      - NODE_ENV=production
+      - NEXT_PUBLIC_API_URL=http://api:5001
+    depends_on:
+      - api
+    networks:
+      - styleai-network
+    healthcheck:
+      test: ['CMD', 'wget', '--spider', '-q', 'http://localhost:3000']
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 10s
+
+  # Nginx服务 - 提供反向代理和静态文件服务
+  nginx:
+    build: ./styleAI-api/nginx
+    container_name: styleai-nginx
+    restart: unless-stopped
+    ports:
+      - '80:80'
+    depends_on:
+      - api
+      - frontend
+    networks:
+      - styleai-network
+
+networks:
+  styleai-network:
+    driver: bridge
