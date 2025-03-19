@@ -751,15 +751,20 @@ export default function Step2() {
             </motion.h1>
 
             <div className="container max-w-4xl mx-auto">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-8 items-center">
-                {/* 左侧：用户图像和最佳匹配图片 */}
-                <div className="flex flex-col items-center space-y-4">
-                  {/* 用户图像和最佳匹配图片并排显示 */}
-                  <div className="flex flex-col md:flex-row gap-4 w-full justify-center">
-                    {/* 用户图像 */}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-8 items-start">
+                {/* 左侧：用户图像和最佳匹配图片 - 调整样式使其占用整个左半部分 */}
+                <div className="flex flex-col items-center space-y-6 w-full">
+                  {/* 标题 */}
+                  <h2 className="text-2xl font-bold font-playfair text-gray-800 self-start">
+                    您的照片与匹配效果
+                  </h2>
+
+                  {/* 用户图像和最佳匹配图片垂直排列 */}
+                  <div className="flex flex-col gap-8 w-full">
+                    {/* 用户图像 - 调整大小使其更大且占满列宽 */}
                     {userImage && (
-                      <div className="relative w-full max-w-[150px]">
-                        <div className="aspect-[3/4] relative rounded-lg overflow-hidden shadow-lg">
+                      <div className="relative w-full">
+                        <div className="aspect-[3/4] relative rounded-lg overflow-hidden shadow-lg max-w-xs mx-auto">
                           <Image
                             src={userImage}
                             alt="您的照片"
@@ -768,16 +773,16 @@ export default function Step2() {
                             className="rounded-lg"
                           />
                         </div>
-                        <div className="mt-2 text-center text-sm text-gray-600">
+                        <div className="mt-3 text-center text-sm text-gray-600">
                           您的照片
                         </div>
                       </div>
                     )}
 
-                    {/* 最佳匹配图片 */}
+                    {/* 最佳匹配图片 - 调整大小使其更大且占满列宽 */}
                     {bestFitImage ? (
-                      <div className="relative w-full max-w-[150px]">
-                        <div className="aspect-[3/4] relative rounded-lg overflow-hidden shadow-lg">
+                      <div className="relative w-full">
+                        <div className="aspect-[3/4] relative rounded-lg overflow-hidden shadow-lg max-w-xs mx-auto">
                           <Image
                             src={bestFitImage}
                             alt="最佳匹配效果"
@@ -786,13 +791,13 @@ export default function Step2() {
                             className="rounded-lg"
                           />
                         </div>
-                        <div className="mt-2 text-center text-sm text-gray-600">
+                        <div className="mt-3 text-center text-sm text-gray-600">
                           最佳匹配效果
                         </div>
                       </div>
                     ) : (
-                      <div className="relative w-full max-w-[150px]">
-                        <div className="aspect-[3/4] relative rounded-lg overflow-hidden shadow-lg bg-gray-100 flex items-center justify-center">
+                      <div className="relative w-full">
+                        <div className="aspect-[3/4] relative rounded-lg overflow-hidden shadow-lg bg-gray-100 flex items-center justify-center max-w-xs mx-auto">
                           <div className="flex flex-col items-center p-4">
                             <svg
                               className="w-8 h-8 text-[#84a59d] animate-spin-slow mb-2"
@@ -812,7 +817,7 @@ export default function Step2() {
                             </span>
                           </div>
                         </div>
-                        <div className="mt-2 text-center text-sm text-gray-600">
+                        <div className="mt-3 text-center text-sm text-gray-600">
                           最佳匹配效果
                         </div>
                       </div>
@@ -820,8 +825,8 @@ export default function Step2() {
                   </div>
                 </div>
 
-                {/* Right side - Analysis report */}
-                <motion.div className="w-full md:w-1/2" variants={itemVariants}>
+                {/* Right side - Analysis report - 修改宽度为全宽 */}
+                <motion.div className="w-full" variants={itemVariants}>
                   <div className="bg-white/60 backdrop-blur-xs p-6 rounded-lg shadow-md h-full">
                     <h2 className="text-2xl font-bold mb-6 font-playfair text-gray-800 border-b border-gray-200 pb-2">
                       您的风格分析
@@ -858,52 +863,60 @@ export default function Step2() {
                           {jobId ? `API (JobID: ${jobId})` : '本地存储'}
                         </div>
 
-                        {/* 显示整体描述 */}
-                        {overallDescription ? (
-                          <div className="bg-[#84a59d]/10 p-6 rounded-lg mb-6 shadow-sm">
-                            <h3 className="text-xl font-bold font-playfair text-gray-800 mb-4 border-b border-[#84a59d]/20 pb-2">
-                              您的整体风格描述
-                            </h3>
-                            <p className="text-gray-700 font-inter leading-relaxed">
-                              {overallDescription}
-                            </p>
-                          </div>
-                        ) : (
-                          <div className="bg-yellow-50 p-6 rounded-lg mb-6 shadow-sm">
-                            <h3 className="text-xl font-bold font-playfair text-gray-800 mb-4 border-b border-yellow-200 pb-2">
-                              未找到整体描述
-                            </h3>
-                            <p className="text-gray-700 font-inter leading-relaxed">
-                              系统未能找到您的整体描述，请尝试重新上传图片或联系客服。
-                            </p>
-                          </div>
-                        )}
-
-                        {/* 隐藏其他分析点，只在没有整体描述时显示 */}
-                        {!overallDescription &&
-                          Array.isArray(analysisPoints) &&
-                          analysisPoints.map((point, index) => (
-                            <motion.div
-                              key={index}
-                              initial="initial"
-                              animate={
-                                typingComplete > index ? 'animate' : 'initial'
-                              }
-                              variants={textRevealVariants}
-                              className={`transition-opacity duration-500 ${
-                                typingComplete > index
-                                  ? 'opacity-100'
-                                  : 'opacity-0'
-                              }`}>
-                              <h3 className="text-lg font-bold font-playfair text-gray-800 mb-2">
-                                {index + 1}. {point.title}
+                        {/* 添加滚动容器，设置最大高度和滚动条样式，增加高度使内容更充分展示 */}
+                        <div className="max-h-[450px] overflow-y-auto pr-2 scrollbar-thin scrollbar-thumb-[#84a59d]/40 scrollbar-track-[#84a59d]/10">
+                          {/* 显示整体描述 */}
+                          {overallDescription ? (
+                            <div className="bg-[#84a59d]/10 p-6 rounded-lg mb-6 shadow-sm">
+                              <h3 className="text-xl font-bold font-playfair text-gray-800 mb-4 border-b border-[#84a59d]/20 pb-2">
+                                您的整体风格描述
                               </h3>
-                              <p className="text-gray-700 font-inter">
-                                {point.content}
+                              <p className="text-gray-700 font-inter leading-relaxed">
+                                {typeof overallDescription === 'object'
+                                  ? JSON.stringify(overallDescription)
+                                  : overallDescription}
                               </p>
-                            </motion.div>
-                          ))}
+                            </div>
+                          ) : (
+                            <div className="bg-yellow-50 p-6 rounded-lg mb-6 shadow-sm">
+                              <h3 className="text-xl font-bold font-playfair text-gray-800 mb-4 border-b border-yellow-200 pb-2">
+                                未找到整体描述
+                              </h3>
+                              <p className="text-gray-700 font-inter leading-relaxed">
+                                系统未能找到您的整体描述，请尝试重新上传图片或联系客服。
+                              </p>
+                            </div>
+                          )}
 
+                          {/* 隐藏其他分析点，只在没有整体描述时显示 */}
+                          {!overallDescription &&
+                            Array.isArray(analysisPoints) &&
+                            analysisPoints.map((point, index) => (
+                              <motion.div
+                                key={index}
+                                initial="initial"
+                                animate={
+                                  typingComplete > index ? 'animate' : 'initial'
+                                }
+                                variants={textRevealVariants}
+                                className={`transition-opacity duration-500 mb-6 ${
+                                  typingComplete > index
+                                    ? 'opacity-100'
+                                    : 'opacity-0'
+                                }`}>
+                                <h3 className="text-lg font-bold font-playfair text-gray-800 mb-2">
+                                  {index + 1}. {point.title}
+                                </h3>
+                                <p className="text-gray-700 font-inter">
+                                  {typeof point.content === 'object'
+                                    ? JSON.stringify(point.content)
+                                    : point.content}
+                                </p>
+                              </motion.div>
+                            ))}
+                        </div>
+
+                        {/* 推荐颜色和风格放在滚动容器外部，确保始终可见 */}
                         {/* 显示推荐颜色 */}
                         {typingComplete >=
                           (Array.isArray(analysisPoints)
