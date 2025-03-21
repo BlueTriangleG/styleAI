@@ -743,90 +743,96 @@ export default function Step2() {
             <div className="absolute inset-0 bg-white/10 pointer-events-none"></div>
           </div>
 
-          <div className="container mx-auto px-4 py-8 relative z-10">
+          <div className="container mx-auto px-4 py-8">
             <motion.h1
               className="text-3xl font-bold mb-8 text-center font-playfair text-gray-800"
               variants={itemVariants}>
               您的个性化分析
             </motion.h1>
 
-            <div className="container max-w-4xl mx-auto">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-8 items-start">
-                {/* 左侧：用户图像和最佳匹配图片 - 调整样式使其占用整个左半部分 */}
-                <div className="flex flex-col items-center space-y-6 w-full">
-                  {/* 标题 */}
-                  <h2 className="text-2xl font-bold font-playfair text-gray-800 self-start">
-                    您的照片与匹配效果
-                  </h2>
-
-                  {/* 用户图像和最佳匹配图片垂直排列 */}
-                  <div className="flex flex-col gap-8 w-full">
-                    {/* 用户图像 - 调整大小使其更大且占满列宽 */}
-                    {userImage && (
-                      <div className="relative w-full">
-                        <div className="aspect-[3/4] relative rounded-lg overflow-hidden shadow-lg max-w-xs mx-auto">
-                          <Image
-                            src={userImage}
-                            alt="您的照片"
-                            fill
-                            style={{ objectFit: 'cover' }}
-                            className="rounded-lg"
-                          />
-                        </div>
-                        <div className="mt-3 text-center text-sm text-gray-600">
-                          您的照片
-                        </div>
-                      </div>
-                    )}
-
-                    {/* 最佳匹配图片 - 调整大小使其更大且占满列宽 */}
-                    {bestFitImage ? (
-                      <div className="relative w-full">
-                        <div className="aspect-[3/4] relative rounded-lg overflow-hidden shadow-lg max-w-xs mx-auto">
-                          <Image
-                            src={bestFitImage}
-                            alt="最佳匹配效果"
-                            fill
-                            style={{ objectFit: 'cover' }}
-                            className="rounded-lg"
-                          />
-                        </div>
-                        <div className="mt-3 text-center text-sm text-gray-600">
-                          最佳匹配效果
-                        </div>
-                      </div>
+            <div className="max-w-6xl mx-auto">
+              <h2 className="text-2xl font-bold mb-6 font-playfair text-gray-800">
+                Your best fit recommendation
+              </h2>
+              <div className="flex flex-col md:flex-row gap-8">
+                {/* 左侧：用户图像和最佳匹配图片 - 以Figma设计为参考调整 */}
+                <div className="w-full h-1/2 md:w-1/3 relative">
+                  <div className="aspect-[3/4] rounded-lg overflow-hidden shadow-md">
+                    {userImage ? (
+                      <Image
+                        src={userImage}
+                        alt="Your uploaded image"
+                        fill
+                        className="object-cover"
+                      />
                     ) : (
-                      <div className="relative w-full">
-                        <div className="aspect-[3/4] relative rounded-lg overflow-hidden shadow-lg bg-gray-100 flex items-center justify-center max-w-xs mx-auto">
-                          <div className="flex flex-col items-center p-4">
-                            <svg
-                              className="w-8 h-8 text-[#84a59d] animate-spin-slow mb-2"
-                              viewBox="0 0 24 24">
-                              <path
-                                fill="currentColor"
-                                d="M12,1A11,11,0,1,0,23,12,11,11,0,0,0,12,1Zm0,19a8,8,0,1,1,8-8A8,8,0,0,1,12,20Z"
-                                opacity="0.25"
-                              />
-                              <path
-                                fill="currentColor"
-                                d="M12,4a8,8,0,0,1,7.89,6.7A1.53,1.53,0,0,0,21.38,12h0a1.5,1.5,0,0,0,1.48-1.75,11,11,0,0,0-21.72,0A1.5,1.5,0,0,0,2.62,12h0a1.53,1.53,0,0,0,1.49-1.3A8,8,0,0,1,12,4Z"
-                              />
-                            </svg>
-                            <span className="text-gray-500 text-xs text-center">
-                              加载中...
-                            </span>
-                          </div>
-                        </div>
-                        <div className="mt-3 text-center text-sm text-gray-600">
-                          最佳匹配效果
-                        </div>
+                      <div className="w-full h-full bg-gray-200 flex items-center justify-center">
+                        <span className="text-gray-500 font-inter">
+                          Your Image
+                        </span>
                       </div>
                     )}
                   </div>
                 </div>
-
-                {/* Right side - Analysis report - 修改宽度为全宽 */}
-                <motion.div className="w-full" variants={itemVariants}>
+                {/* 箭头 - 移到右侧 */}
+                <div className="hidden md:block absolute top-1/2 -right-8 transform -translate-y-1/2">
+                  <svg
+                    width="40"
+                    height="40"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    xmlns="http://www.w3.org/2000/svg">
+                    <path
+                      d="M5 12H19M19 12L12 5M19 12L12 19"
+                      stroke="black"
+                      strokeWidth="2"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                    />
+                  </svg>
+                </div>
+                {/* 中间图片 - 最佳匹配图片 */}
+                <div className="w-full h-1/2 md:w-1/3 relative">
+                  <div className="aspect-[3/4] h-[50vh] rounded-lg overflow-hidden border-2 border-blue-400 shadow-lg">
+                    {isPageLoading ? (
+                      <div className="w-full h-full bg-gray-100 flex items-center justify-center">
+                        <div className="flex flex-col items-center">
+                          <svg
+                            className="w-12 h-12 text-[#84a59d] animate-spin-slow mb-4"
+                            viewBox="0 0 24 24">
+                            <path
+                              fill="currentColor"
+                              d="M12,1A11,11,0,1,0,23,12,11,11,0,0,0,12,1Zm0,19a8,8,0,1,1,8-8A8,8,0,0,1,12,20Z"
+                              opacity="0.25"
+                            />
+                            <path
+                              fill="currentColor"
+                              d="M12,4a8,8,0,0,1,7.89,6.7A1.53,1.53,0,0,0,21.38,12h0a1.5,1.5,0,0,0,1.48-1.75,11,11,0,0,0-21.72,0A1.5,1.5,0,0,0,2.62,12h0a1.53,1.53,0,0,0,1.49-1.3A8,8,0,0,1,12,4Z"
+                            />
+                          </svg>
+                          <span className="text-gray-500 font-inter">
+                            加载中...
+                          </span>
+                        </div>
+                      </div>
+                    ) : bestFitImage ? (
+                      <Image
+                        src={bestFitImage}
+                        alt="Best fit style"
+                        fill
+                        className="object-cover"
+                      />
+                    ) : (
+                      <div className="w-full h-full bg-gray-200 flex items-center justify-center">
+                        <span className="text-gray-500 font-inter">
+                          正在生成最佳匹配图片...
+                        </span>
+                      </div>
+                    )}
+                  </div>
+                </div>
+                {/* 右侧 - 分析报告 */}
+                <motion.div className="w-full md:w-1/3" variants={itemVariants}>
                   <div className="bg-white/60 backdrop-blur-xs p-6 rounded-lg shadow-md h-full">
                     <h2 className="text-2xl font-bold mb-6 font-playfair text-gray-800 border-b border-gray-200 pb-2">
                       您的风格分析
@@ -917,38 +923,6 @@ export default function Step2() {
                         </div>
 
                         {/* 推荐颜色和风格放在滚动容器外部，确保始终可见 */}
-                        {/* 显示推荐颜色 */}
-                        {typingComplete >=
-                          (Array.isArray(analysisPoints)
-                            ? analysisPoints.length
-                            : 0) && (
-                          <motion.div
-                            initial="initial"
-                            animate="animate"
-                            variants={textRevealVariants}
-                            className="mt-8">
-                            <h3 className="text-lg font-bold font-playfair text-gray-800 mb-3">
-                              推荐颜色
-                            </h3>
-                            <div className="flex flex-wrap gap-3">
-                              {Array.isArray(recommendedColors) &&
-                                recommendedColors.map((color, index) => (
-                                  <div
-                                    key={index}
-                                    className="flex flex-col items-center">
-                                    <div
-                                      className="w-12 h-12 rounded-full shadow-md mb-1"
-                                      style={{
-                                        backgroundColor: color.hex,
-                                      }}></div>
-                                    <span className="text-xs text-gray-700">
-                                      {color.name}
-                                    </span>
-                                  </div>
-                                ))}
-                            </div>
-                          </motion.div>
-                        )}
 
                         {/* 显示推荐风格 */}
                         {typingComplete >=
