@@ -116,24 +116,26 @@ export async function getBestFitImage(jobId: string): Promise<{
 }
 
 /**
- * 生成最佳匹配图片
+ * 获取job的target_description数据
  * @param jobId Job ID
- * @returns 生成结果状态
+ * @returns job描述数据和状态
  */
-export async function generateBestFit(jobId: string): Promise<{
+export async function getJobDescription(jobId: string): Promise<{
   status: 'success' | 'error';
-  message?: string;
+  jobId: string;
+  description?: any;
   error?: string;
 }> {
   try {
     if (!jobId) {
       return {
         status: 'error',
+        jobId: '',
         error: '缺少必要参数: jobId',
       };
     }
 
-    console.log(`正在生成最佳匹配图片，jobId: ${jobId}`);
+    console.log(`正在获取job的target_description数据，jobId: ${jobId}`);
 
     // 从数据库获取job记录
     const job = await getJobById(jobId);
@@ -142,25 +144,56 @@ export async function generateBestFit(jobId: string): Promise<{
       console.log(`未找到job记录，jobId: ${jobId}`);
       return {
         status: 'error',
+        jobId,
         error: `未找到job记录: ${jobId}`,
       };
     }
 
-    // 这里应该是调用AI服务生成图片的逻辑
-    // 为了示例，我们假设已经成功生成了图片
+    // 检查是否有target_description数据
+    if (!job.target_description) {
+      console.log(`Job记录中没有target_description数据，jobId: ${jobId}`);
+      return {
+        status: 'error',
+        jobId,
+        error: '没有target_description数据',
+      };
+    }
 
-    // 在真实实现中，你需要调用实际的AI服务生成图片
-    // 然后更新job记录的best_fit字段
+    let parsedDescription;
 
+    // 尝试解析JSON数据
+    try {
+      // 如果数据以Buffer或字符串形式存储
+      if (Buffer.isBuffer(job.target_description)) {
+        parsedDescription = JSON.parse(job.target_description.toString('utf8'));
+      } else {
+        // 如果已经是字符串或对象
+        parsedDescription =
+          typeof job.target_description === 'string'
+            ? JSON.parse(job.target_description)
+            : job.target_description;
+      }
+    } catch (parseError) {
+      console.error('解析target_description JSON数据失败:', parseError);
+      return {
+        status: 'error',
+        jobId,
+        error: `解析description数据失败: ${(parseError as Error).message}`,
+      };
+    }
+
+    // 返回成功响应
     return {
       status: 'success',
-      message: '成功生成最佳匹配图片',
+      jobId,
+      description: parsedDescription,
     };
   } catch (error) {
-    console.error('生成最佳匹配图片失败:', error);
+    console.error('获取job的target_description数据失败:', error);
     return {
       status: 'error',
-      error: `生成最佳匹配图片失败: ${(error as Error).message}`,
+      jobId,
+      error: `获取description数据失败: ${(error as Error).message}`,
     };
   }
 }

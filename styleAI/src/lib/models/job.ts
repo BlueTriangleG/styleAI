@@ -12,6 +12,7 @@ export interface Job {
   professional_work?: Buffer;
   social_gathering?: Buffer;
   outdoor_sports?: Buffer;
+  target_description?: Buffer | string | any;
 }
 
 /**
