@@ -3,14 +3,19 @@
 import { useRouter } from 'next/navigation';
 import Image from 'next/image';
 import { useEffect, useState } from 'react';
-import { apiService } from '@/lib/api/ApiService';
 
+/**
+ * Interface for style recommendation items
+ */
 interface StyleRecommendation {
   title: string;
   description: string;
   examples: string[];
 }
 
+/**
+ * Interface for analysis results
+ */
 interface AnalysisResults {
   faceShape: string;
   skinTone: string;
@@ -18,99 +23,39 @@ interface AnalysisResults {
   styleMatch: string;
 }
 
+/**
+ * Props for the StyleRecommendations component
+ */
 interface StyleRecommendationsProps {
   userImage: string | null;
+  bestFitImage: string | null;
   styleRecommendations: StyleRecommendation[];
   analysisResults: AnalysisResults;
+  isLoadingBestFit?: boolean;
+  bestFitError?: string | null;
 }
 
+/**
+ * Style Recommendations Component
+ *
+ * Displays personalized style recommendations based on user image and analysis.
+ * Shows the best fit recommendation along with alternative style options.
+ *
+ * @param {StyleRecommendationsProps} props - Component properties
+ * @returns {JSX.Element} Rendered component
+ */
 export default function StyleRecommendations({
   userImage,
+  bestFitImage,
   styleRecommendations,
   analysisResults,
+  isLoadingBestFit = false,
+  bestFitError = null,
 }: StyleRecommendationsProps) {
   const router = useRouter();
-  const [bestFitImage, setBestFitImage] = useState<string | null>(null);
-  const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
 
-  // 获取第一个推荐作为最佳推荐
+  // Get the first recommendation as the best recommendation
   const bestRecommendation = styleRecommendations[0];
-
-  // 从sessionStorage获取jobId
-  useEffect(() => {
-    const fetchBestFitImage = async () => {
-      try {
-        setIsLoading(true);
-        setError(null);
-
-        // 先尝试从sessionStorage获取最佳匹配图片
-        const storedBestFitImage = sessionStorage.getItem('bestFitImage');
-        if (storedBestFitImage) {
-          console.log('从sessionStorage获取到最佳匹配图片');
-          // 检查是否已经包含data:image前缀
-          if (storedBestFitImage.startsWith('data:image')) {
-            setBestFitImage(storedBestFitImage);
-          } else {
-            setBestFitImage(`data:image/jpeg;base64,${storedBestFitImage}`);
-          }
-          setIsLoading(false);
-          return;
-        }
-
-        // 从sessionStorage获取jobId
-        const jobId = sessionStorage.getItem('currentJobId');
-
-        if (!jobId) {
-          setError('未找到任务ID，无法获取最佳匹配图片');
-          setIsLoading(false);
-          return;
-        }
-
-        // 直接从前端API获取best_fit图片数据
-        console.log('正在从数据库获取最佳匹配图片...');
-        try {
-          const response = await fetch('/styleai/api/jobs/getBestFit', {
-            method: 'POST',
-            headers: {
-              'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({ jobId }),
-          });
-
-          if (!response.ok) {
-            const errorData = await response.json();
-            throw new Error(errorData.error || `API error: ${response.status}`);
-          }
-
-          const result = await response.json();
-          console.log('成功获取最佳匹配图片:', result);
-
-          if (result.status === 'success' && result.imageData) {
-            // 将base64数据转换为图片URL
-            const base64Image = `data:image/jpeg;base64,${result.imageData}`;
-            setBestFitImage(base64Image);
-
-            // 存储到sessionStorage
-            sessionStorage.setItem('bestFitImage', base64Image);
-            console.log('最佳匹配图片已存储到sessionStorage');
-          } else {
-            throw new Error(result.error || '获取最佳匹配图片失败');
-          }
-        } catch (error) {
-          console.error('从数据库获取最佳匹配图片失败:', error);
-          setError('获取最佳匹配图片失败');
-        }
-      } catch (err) {
-        console.error('获取最佳匹配图片时出错:', err);
-        setError('获取最佳匹配图片时出错');
-      } finally {
-        setIsLoading(false);
-      }
-    };
-
-    fetchBestFitImage();
-  }, []);
 
   return (
     <div className="min-h-screen bg-white pt-20">
@@ -121,14 +66,14 @@ export default function StyleRecommendations({
 
         {userImage ? (
           <div className="max-w-6xl mx-auto">
-            {/* 最佳推荐部分 */}
+            {/* Best Recommendation Section */}
             <div className="mb-12">
               <h2 className="text-2xl font-bold mb-6 font-playfair text-gray-800">
                 Your best fit recommendation
               </h2>
 
               <div className="flex flex-col md:flex-row gap-8">
-                {/* 左侧图片 - 用户上传的图片 */}
+                {/* Left Image - User Uploaded Image */}
                 <div className="w-full md:w-1/3 relative">
                   <div className="aspect-[3/4] rounded-lg overflow-hidden shadow-md">
                     {userImage ? (
@@ -147,7 +92,7 @@ export default function StyleRecommendations({
                     )}
                   </div>
 
-                  {/* 箭头 - 移到右侧 */}
+                  {/* Arrow - On the right side */}
                   <div className="hidden md:block absolute top-1/2 -right-8 transform -translate-y-1/2">
                     <svg
                       width="40"
@@ -166,10 +111,10 @@ export default function StyleRecommendations({
                   </div>
                 </div>
 
-                {/* 中间图片 - 最佳匹配图片 */}
+                {/* Middle Image - Best Fit Image */}
                 <div className="w-full md:w-1/3 relative">
                   <div className="aspect-[3/4] h-[50vh] rounded-lg overflow-hidden border-2 border-blue-400 shadow-lg">
-                    {isLoading ? (
+                    {isLoadingBestFit ? (
                       <div className="w-full h-full bg-gray-100 flex items-center justify-center">
                         <div className="flex flex-col items-center">
                           <svg
@@ -186,11 +131,11 @@ export default function StyleRecommendations({
                             />
                           </svg>
                           <span className="text-gray-500 font-inter">
-                            加载中...
+                            Loading...
                           </span>
                         </div>
                       </div>
-                    ) : error ? (
+                    ) : bestFitError ? (
                       <div className="w-full h-full bg-gray-100 flex items-center justify-center">
                         <div className="flex flex-col items-center p-4 text-center">
                           <svg
@@ -209,12 +154,12 @@ export default function StyleRecommendations({
                             <line x1="12" y1="16" x2="12.01" y2="16" />
                           </svg>
                           <span className="text-red-500 font-inter">
-                            {error}
+                            {bestFitError}
                           </span>
                           <button
                             onClick={() => window.location.reload()}
                             className="mt-4 px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600 transition-colors">
-                            重试
+                            Retry
                           </button>
                         </div>
                       </div>
@@ -228,14 +173,14 @@ export default function StyleRecommendations({
                     ) : (
                       <div className="w-full h-full bg-gray-200 flex items-center justify-center">
                         <span className="text-gray-500 font-inter">
-                          正在生成最佳匹配图片...
+                          Generating best fit image...
                         </span>
                       </div>
                     )}
                   </div>
                 </div>
 
-                {/* 右侧描述 */}
+                {/* Right Description */}
                 <div className="w-full md:w-1/3">
                   <p className="text-gray-800 font-inter mb-4">
                     {bestRecommendation.description}
@@ -244,10 +189,10 @@ export default function StyleRecommendations({
               </div>
             </div>
 
-            {/* 分隔线 */}
+            {/* Divider */}
             <hr className="my-8 border-gray-200" />
 
-            {/* 不同场合的推荐 */}
+            {/* Recommendations for Different Occasions */}
             <div>
               <h2 className="text-2xl font-bold mb-8 font-playfair text-gray-800">
                 Recommendation suits for different environment
@@ -275,7 +220,7 @@ export default function StyleRecommendations({
               </div>
             </div>
 
-            {/* 分析结果 - 移到侧边栏或底部 */}
+            {/* Analysis Results - Hidden (Moved to sidebar or bottom) */}
             <div className="hidden">
               <h3 className="text-xl font-bold mb-4 font-playfair text-gray-800">
                 Your Analysis
