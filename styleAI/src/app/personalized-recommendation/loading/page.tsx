@@ -46,40 +46,6 @@ export default function LoadingPage() {
       console.log('API connection verified:', data);
 
       if (data.status === 'success') {
-        try {
-          // Verify suit pictures API
-          const suitPicturesResult = await apiService.getWearSuitPictures(
-            jobId
-          );
-          console.log(
-            'Suit pictures API verified:',
-            suitPicturesResult.status === 'success'
-          );
-
-          // Verify best fit image API
-          try {
-            const bestFitResult = await apiService.getBestFitImage(jobId);
-            console.log(
-              'Best fit image API verified:',
-              bestFitResult &&
-                bestFitResult.status === 'success' &&
-                !!bestFitResult.imageData
-            );
-          } catch (bestFitError) {
-            console.error(
-              'Best fit image API verification failed:',
-              bestFitError
-            );
-            // Continue even if this specific API fails
-          }
-        } catch (suitPicturesError) {
-          console.error(
-            'Suit pictures API verification failed:',
-            suitPicturesError
-          );
-          // Continue even if this specific API fails
-        }
-
         // Mark API as verified
         setIsApiVerified(true);
         apiVerifiedRef.current = true;
@@ -182,10 +148,10 @@ export default function LoadingPage() {
           Math.min(newProgress, 100).toFixed(1) + '%'
         );
 
-        // If progress reaches 100% and API is verified, transition to step2
+        // If progress reaches 100% and API is verified, transition to generateReport
         if (newProgress >= 100 && apiVerifiedRef.current) {
           console.log(
-            'Loading complete and API verified, preparing transition to step2'
+            'Loading complete and API verified, preparing transition to generateReport'
           );
           clearInterval(interval);
           // Start transition animation
@@ -193,8 +159,8 @@ export default function LoadingPage() {
 
           // Delay navigation to ensure animation displays properly
           setTimeout(() => {
-            console.log('Navigating to step2');
-            router.replace('/personalized-recommendation/step2');
+            console.log('Navigating to generateReport');
+            router.replace('/personalized-recommendation/generateReport');
           }, 100);
           return 100;
         }

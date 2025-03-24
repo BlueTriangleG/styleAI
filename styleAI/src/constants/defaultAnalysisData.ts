@@ -55,25 +55,25 @@ export const defaultStyleRecommendations: StyleRecommendation[] = [
     title: 'Business Casual',
     description:
       'Based on your facial features and body type, business casual attire will complement your appearance perfectly. Focus on well-fitted blazers, button-down shirts, and tailored pants.',
-    examples: ['Style Example 1', 'Style Example 2', 'Style Example 3'],
+    examples: [],
   },
   {
     title: 'Smart Casual',
     description:
       'For a more relaxed yet polished look, smart casual options would work well with your features. Consider premium t-shirts, chinos, and casual jackets.',
-    examples: ['Style Example 1', 'Style Example 2', 'Style Example 3'],
+    examples: [],
   },
   {
     title: 'Formal Wear',
     description:
       'For special occasions, your features would be enhanced by well-tailored suits in navy or charcoal. Consider slim-fit designs with subtle patterns.',
-    examples: ['Style Example 1', 'Style Example 2', 'Style Example 3'],
+    examples: [],
   },
   {
     title: 'Sport',
     description:
       'For special occasions, your features would be enhanced by well-tailored suits in navy or charcoal. Consider slim-fit designs with subtle patterns.',
-    examples: ['Style Example 1', 'Style Example 2', 'Style Example 3'],
+    examples: [],
   },
 ];
 

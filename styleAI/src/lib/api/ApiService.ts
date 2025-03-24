@@ -155,7 +155,7 @@ class ApiService {
       console.log('获取到的穿着建议图片:', result);
 
       if (result.status === 'success') {
-        return result.data;
+        return 'success';
       } else {
         throw new Error(result.error || '获取穿着建议图片失败');
       }

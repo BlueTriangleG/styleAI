@@ -8,8 +8,8 @@ export default function PersonalizedRecommendation() {
   const router = useRouter();
 
   useEffect(() => {
-    // Redirect to step1
-    router.push('/personalized-recommendation/step1');
+    // Redirect to uploadImages
+    router.push('/personalized-recommendation/uploadImages');
   }, [router]);
 
   return (

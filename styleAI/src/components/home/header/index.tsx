@@ -15,7 +15,7 @@ export function Header() {
   const router = useRouter();
 
   const handleStartClick = () => {
-    router.push('/personalized-recommendation/step1');
+    router.push('/personalized-recommendation/uploadImages');
   };
 
   return (

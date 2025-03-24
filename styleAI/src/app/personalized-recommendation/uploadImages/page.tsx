@@ -12,7 +12,7 @@ import {
   getProcessedImagesInfo,
 } from '@/lib/imageProcessor';
 
-export default function Step1() {
+export default function UploadImages() {
   const [image, setImage] = useState<string | null>(null);
   const [isUploading, setIsUploading] = useState(false);
   const [isTransitioning, setIsTransitioning] = useState(false);
