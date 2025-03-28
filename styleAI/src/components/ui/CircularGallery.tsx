@@ -550,19 +550,19 @@ class App {
   ) {
     const defaultItems = [
       {
-        video: "gallery/model1.mp4",
+        video: "gallery/video1.mp4",
         text: 'Video 1',
       },
       {
-        video: "gallery/model2.mp4",
+        video: "gallery/video2.mp4",
         text: 'Video 2',
       },
       {
-        video: "gallery/model3.mp4",
+        video: "gallery/video3.mp4",
         text: 'Video 3',
       },
       {
-        video: "gallery/model4.mp4",
+        video: "gallery/video4.mp4",
         text: 'Video 4',
       },
     ];

@@ -11,7 +11,7 @@ const images = [
   'gallery/outfit2.png',
   'gallery/outfit3.png',
   'gallery/outfit4.png',
-  'gallery/outfit1.png',
+  'gallery/outfit5.png',
 ];
 
 const transformStyles = [
