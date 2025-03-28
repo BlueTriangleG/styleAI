@@ -4,6 +4,10 @@ StyleAI is a sophisticated AI-powered fashion styling assistant application desi
 
 ## Project Overview
 
+StyleAI addresses a common challenge many people face: uncertainty about which clothing styles, colors, and fashion choices best complement their unique physical characteristics. Rather than wasting time on trial and error or seeking potentially unreliable advice, StyleAI offers a scientific, AI-driven approach to personal styling.
+
+Our application analyzes facial features, body proportions, and physical attributes from user photos to generate tailored fashion recommendations. Users receive not only style advice but also visual previews showing how they would look in the recommended outfits, enabling confident shopping decisions without the need for costly personal styling services.
+
 StyleAI consists of two main components:
 - A modern, responsive **Next.js frontend** with React 19
 - A robust **Flask-based API backend** for image processing and AI analysis
@@ -13,16 +17,23 @@ The application allows users to:
 2. Receive personalized style analysis based on facial and body features
 3. Get color palette recommendations that complement their natural attributes
 4. View curated outfit and style suggestions tailored to their unique characteristics
-5. Download and save their style profile for future reference
+5. See visual previews of themselves wearing recommended styles
+6. Download and save their style profile for future reference
 
 ## Key Features
 
 ### User-Focused Features
-- **AI-Powered Style Analysis**: Analyzes facial features, body type, and personal characteristics to create custom style recommendations
+- **AI-Powered Physical Attribute Analysis**: Analyzes facial features, body type, and personal characteristics to identify strengths and potential areas for enhancement
 - **Personalized Color Palette**: Identifies the most flattering colors based on user's skin tone, hair color, and other attributes
 - **Style Categorization**: Classifies users into style categories (Classic, Professional, Elegant, etc.) to tailor recommendations
 - **Outfit Recommendations**: Suggests specific clothing combinations and styles based on AI analysis
-- **Visual Style Guide**: Provides visual examples of recommended clothing styles and outfits
+- **Virtual Try-On Previews**: Generates images showing users wearing recommended outfits to visualize the final look
+- **Style Discovery**: Helps users explore styles they might not have considered but which complement their features
+
+### Future Development Features
+- **Real-Time Fashion Updates**: System will continuously collect the latest fashion trends and match them with user profiles
+- **Style Exploration**: Advanced categorization of fashion datasets to recommend new styles suitable for users' body types and appearances
+- **Extended Style Recommendations**: Enhanced AI models to suggest more varied and seasonally appropriate outfits
 
 ### Technical Features
 - **Advanced Image Processing**: Resizes, compresses, and optimizes images for analysis
@@ -156,6 +167,7 @@ The API server will start at http://localhost:5001
 4. **AI Analysis**: Backend processes images to extract style features and characteristics
 5. **Results**: User receives personalized style analysis and recommendations
 6. **Outfit Suggestions**: System provides outfit and style suggestions based on analysis
+7. **Visual Preview**: User can see how they would look wearing the recommended styles
 
 ## Environment Variables
 
