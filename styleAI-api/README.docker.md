@@ -6,7 +6,7 @@ This guide explains how to build and run the StyleAI API server using Docker.
 
 - [Docker](https://docs.docker.com/get-docker/)
 
-## Quick Start
+## Quick Startw
 
 The easiest way to build and run the StyleAI API server is to use the provided script:
 
