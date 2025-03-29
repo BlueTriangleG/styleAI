@@ -4,13 +4,14 @@ import Image from 'next/image';
 import { useRouter } from 'next/navigation';
 import CircularGallery from '@/components/ui/CircularGallery';
 import BounceCards from '@/components/ui/BounceCards';
+import LiquidChrome from '@/components/background/LiquidChrome';
 
 const images = [
-  process.env.NEXT_PUBLIC_BASE_PATH + '/gallery/outfit1.png',
-  process.env.NEXT_PUBLIC_BASE_PATH + '/gallery/outfit2.png',
-  process.env.NEXT_PUBLIC_BASE_PATH + '/gallery/outfit3.png',
-  process.env.NEXT_PUBLIC_BASE_PATH + '/gallery/outfit4.png',
-  process.env.NEXT_PUBLIC_BASE_PATH + '/gallery/outfit1.png',
+  'gallery/outfit1.png',
+  'gallery/outfit2.png',
+  'gallery/outfit3.png',
+  'gallery/outfit4.png',
+  'gallery/outfit5.png',
 ];
 
 const transformStyles = [
@@ -23,21 +24,21 @@ const transformStyles = [
 
 const galleryItems = [
   {
-    video: process.env.NEXT_PUBLIC_BASE_PATH + '/gallery/test.mp4',
+    video: "gallery/model1.mp4",
     text: 'Video 1',
   },
   {
-    video: process.env.NEXT_PUBLIC_BASE_PATH + '/gallery/test.mp4',
+    video: "gallery/model2.mp4",
     text: 'Video 1',
   },
   {
-    video: process.env.NEXT_PUBLIC_BASE_PATH + '/gallery/test.mp4',
+    video: "gallery/model3.mp4",
     text: 'Video 1',
   },
   {
-    video: process.env.NEXT_PUBLIC_BASE_PATH + '/gallery/test.mp4',
+    video: "gallery/model4.mp4",
     text: 'Video 1',
-  },
+  }
 ];
 
 export function Hero() {
@@ -46,7 +47,7 @@ export function Hero() {
   const containerRef = useRef<HTMLDivElement>(null);
 
   const handleStartClick = () => {
-    router.push('/personalized-recommendation/uploadImages');
+    router.push('/personalized-recommendation/step1');
   };
 
   const scrollToUsecase = () => {
@@ -57,12 +58,12 @@ export function Hero() {
   useEffect(() => {
     const originalStyle = window.getComputedStyle(document.body).overflow;
     document.body.style.overflow = 'hidden';
-
+    
     // Make sure the container can scroll
     if (containerRef.current) {
       containerRef.current.style.overflow = 'auto';
     }
-
+    
     return () => {
       document.body.style.overflow = originalStyle;
     };
@@ -71,13 +72,27 @@ export function Hero() {
   return (
     <div
       ref={containerRef}
-      className="w-screen h-screen overflow-y-auto scroll-smooth snap-y snap-mandatory no-scrollbar">
+      className="w-screen h-screen overflow-y-auto scroll-smooth snap-y snap-mandatory no-scrollbar"
+    >
+      {/* Flowing Background */}
+      <div className="fixed inset-0 z-0 overflow-hidden pointer-events-auto">
+        <LiquidChrome
+          baseColor={[0.9, 0.9, 0.9]}
+          speed={0.2}
+          amplitude={0.5}
+          frequencyX={3}
+          frequencyY={2}
+          interactive={true}
+        />
+        <div className="absolute inset-0 bg-white/10 pointer-events-none"></div>
+      </div>
+
       {/* Hero Section - First Screen */}
-      <section className="w-screen h-screen pt-20 flex justify-center items-center snap-start">
-        <div className="w-[80%] h-[100%] flex flex-col justify-between">
+      <section className="w-screen h-screen flex justify-center items-center snap-start">
+        <div className="w-[80%] h-[80%] flex flex-col justify-around translate-y-[5%] bg-white/20 rounded-xl"> 
           {/* Title */}
           <div className="w-[100%] h-[30%]">
-            <h1 className="p-5 text-center text-5xl font-bold text-[#2D4B37] leading-tight">
+            <h1 className="text-center text-5xl font-bold text-[#2D4B37] leading-tight">
               Generate your outfits
               <br />
               Using <span className="text-[#FF9999]">STYLE-AI</span>
@@ -98,49 +113,48 @@ export function Hero() {
             />
           </div>
           {/* Scroll Down Button */}
-          <div className="w-[100%] h-[15%] mb-5 flex justify-center">
-            <div
-              className="flex flex-col justify-center items-center cursor-pointer group"
-              onClick={scrollToUsecase}>
-              <p className="text-[#2D4B37] font-medium transition-all group-hover:text-[#FF9999]">
-                Explore More
-              </p>
-              <div className="mt-2 animate-bounce transition-transform group-hover:scale-110">
-                <Image
-                  src={process.env.NEXT_PUBLIC_BASE_PATH + '/doubledown.svg'}
-                  alt="Scroll Down"
-                  width={40}
-                  height={40}
+          <div className="w-[100%] h-[15%] flex justify-center">
+            <div 
+              className="flex flex-col justify-around items-center cursor-pointer group"
+              onClick={scrollToUsecase}
+            >
+              <p className="text-[#2D4B37] font-medium transition-all group-hover:text-[#FF9999]">Explore More</p>
+              <div className="animate-bounce transition-transform group-hover:scale-110">
+                <Image 
+                  src="/doubledown.svg" 
+                  alt="Scroll Down" 
+                  width={40} 
+                  height={40} 
                   className="transition-all group-hover:opacity-80"
                 />
               </div>
             </div>
           </div>
-        </div>
+        </div> 
       </section>
 
       {/* Usecase Section - Second Screen */}
       <section
         ref={usecaseRef}
-        className="w-screen h-screen pt-20 flex justify-center items-center snap-start">
-        <div className="w-[80%] h-[100%] flex flex-col justify-between">
+        className="w-screen h-screen flex justify-center items-center snap-start"
+      >
+        <div className="w-[80%] h-[80%] flex flex-col justify-around translate-y-[5%] bg-white/20 rounded-md">
           {/* Title */}
           <div className="w-[100%] h-[30%]">
             <h2 className="p-5 text-center text-5xl font-bold text-[#2D4B37]">
               Use Cases
             </h2>
             <p className="text-center text-1xl text-gray-600">
-              Browse through our collection of fashion styles and find
-              inspiration for your next outfit. Our AI will help you create
-              personalized recommendations based on your preferences.
+              Browse through our collection of fashion styles and find inspiration for your next outfit.
+              Our AI will help you create personalized recommendations based on your preferences.
             </p>
           </div>
           {/* Circular Gallery */}
           <div className="w-[100%] h-[50%] flex items-center">
-            <CircularGallery
+            <CircularGallery 
               items={galleryItems}
-              bend={2}
-              textColor="transparent"
+              bend={2} 
+              textColor="transparent" 
               borderRadius={0.05}
               font="0px var(--font-playfair)"
             />
