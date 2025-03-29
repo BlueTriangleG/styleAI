@@ -13,6 +13,7 @@ export const API_ENDPOINTS = {
   IMAGE_DOWNLOAD: '/api/image/download',
   PERSONALIZED_ANALYSIS: '/api/personalized/analysis',
   WEAR_SUIT_PICTURES: '/api/personalized/wear-suit-pictures',
+  GENERATE_BEST_FIT: '/api/personalized/generate-best-fit',
 };
 
 // API Timeout (ms)

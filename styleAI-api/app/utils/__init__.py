@@ -5,4 +5,6 @@ StyleAI API 工具包
 """
 
 # 导入预加载模块，使其可以通过app.utils.preload访问
-from . import preload 
+from . import preload
+# 导入样式匹配模块，使其可以通过app.utils.style_matching访问
+from . import style_matching 

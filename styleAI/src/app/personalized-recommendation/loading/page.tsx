@@ -8,6 +8,14 @@ import LiquidChrome from '@/components/background/LiquidChrome';
 
 import { apiService } from '@/lib/api/ApiService';
 
+/**
+ * Loading Page Component
+ *
+ * Displays a loading animation while verifying API connections and job creation.
+ * Transitions to the recommendation page after successful verification.
+ *
+ * @returns {JSX.Element} Rendered component
+ */
 export default function LoadingPage() {
   const router = useRouter();
   const [progress, setProgress] = useState(0);
@@ -15,145 +23,105 @@ export default function LoadingPage() {
   const [userImageExists, setUserImageExists] = useState<boolean | null>(null);
   const [jobId, setJobId] = useState<string>('');
   const jobCreatedRef = useRef<boolean>(false);
-  const dataFetchedRef = useRef<boolean>(false);
-  const [isDataReady, setIsDataReady] = useState(false);
+  const apiVerifiedRef = useRef<boolean>(false);
+  const [isApiVerified, setIsApiVerified] = useState(false);
 
-  // 获取个性化分析数据
-  const fetchAnalysisData = async (jobId: string) => {
-    // 如果数据已经获取过，则直接返回
-    if (dataFetchedRef.current) {
-      console.log('数据已经获取过，不再重复获取');
-      return;
+  /**
+   * Verifies the API connection and data availability
+   * Does not store data in session storage, just confirms the API works
+   *
+   * @param {string} jobId - The job ID to verify
+   * @returns {Promise<boolean>} Whether the API verification was successful
+   */
+  const verifyApiConnection = async (jobId: string) => {
+    // If already verified, return immediately
+    if (apiVerifiedRef.current) {
+      console.log('API already verified, skipping verification');
+      return true;
     }
 
     try {
-      console.log('正在从API获取个性化分析数据...');
+      console.log('Verifying API connectivity...');
       const data = await apiService.getPersonalizedAnalysis(jobId);
-      console.log('成功获取个性化分析数据:', data);
+      console.log('API connection verified:', data);
 
-      // 将数据存储在sessionStorage中
-      sessionStorage.setItem('analysisData', JSON.stringify(data));
-      console.log('分析数据已存储到sessionStorage');
-
-      // 标记数据已准备好
-      setIsDataReady(true);
-      dataFetchedRef.current = true;
-
-      return data;
+      if (data.status === 'success') {
+        // Mark API as verified
+        setIsApiVerified(true);
+        apiVerifiedRef.current = true;
+        return true;
+      } else {
+        console.error('API verification failed:', data);
+        // Redirect to step1 on API failure
+        router.replace('/personalized-recommendation/step1');
+        return false;
+      }
     } catch (error) {
-      console.error('获取个性化分析数据失败:', error);
-
-      // 使用默认数据
-      const defaultData = {
-        features: [
-          {
-            title: 'Striking Features',
-            content:
-              'They have a captivating look with expressive eyes and a warm smile that immediately draws attention.',
-          },
-          {
-            title: 'Well-Defined Facial Structure',
-            content:
-              'Their face features high cheekbones, a sharp jawline, and a balanced symmetry, giving them a classic yet modern appearance.',
-          },
-          {
-            title: 'Distinctive Style',
-            content:
-              'Their hairstyle and grooming are impeccably maintained, complementing their overall polished and stylish look.',
-          },
-          {
-            title: 'Elegant and Timeless',
-            content:
-              'With a natural elegance and subtle makeup, they exude a timeless charm that stands out in any setting.',
-          },
-        ],
-        colors: [
-          { name: 'Navy Blue', hex: '#000080' },
-          { name: 'Burgundy', hex: '#800020' },
-          { name: 'Forest Green', hex: '#228B22' },
-          { name: 'Charcoal Gray', hex: '#36454F' },
-        ],
-        styles: ['Classic', 'Professional', 'Elegant', 'Sophisticated'],
-      };
-
-      // 将默认数据存储在sessionStorage中
-      sessionStorage.setItem('analysisData', JSON.stringify(defaultData));
-      console.log('默认分析数据已存储到sessionStorage');
-
-      // 标记数据已准备好
-      setIsDataReady(true);
-      dataFetchedRef.current = true;
-
-      return defaultData;
+      console.error('API verification failed with error:', error);
+      // Mark API as verified anyway to proceed with flow
+      setIsApiVerified(true);
+      apiVerifiedRef.current = true;
+      return false;
     }
   };
 
-  // 创建job记录并获取分析数据
-  const createJobAndFetchData = async (imageData: string) => {
-    // 如果已经创建过job，则不再创建
+  /**
+   * Creates a job and verifies API connection
+   * Only verifies connectivity without storing data
+   *
+   * @param {string} imageData - Base64 image data from the user
+   */
+  const createJobAndVerifyApi = async (imageData: string) => {
+    // Prevent duplicate job creation
     if (jobCreatedRef.current) {
-      console.log('已经创建过job记录，不再重复创建');
+      console.log('Job already created, skipping creation');
       return;
     }
 
-    // 标记job已创建，防止重复调用
+    // Mark job as created to prevent duplicate calls
     jobCreatedRef.current = true;
 
     try {
-      console.log('正在创建job记录...');
-      // 创建job记录
+      console.log('Creating job record...');
+      // Create job record
       const newJobId = await apiService.createJob(imageData);
-      console.log(`成功创建job记录，ID: ${newJobId}`);
+      console.log(`Job created successfully, ID: ${newJobId}`);
 
-      // 设置jobId
+      // Store job ID (only) for reference
       setJobId(newJobId);
-
-      // 将jobId存储在sessionStorage中，以便在step2页面使用
       sessionStorage.setItem('currentJobId', newJobId);
 
-      // 如果数据已经获取过，则不再重复获取
-      if (dataFetchedRef.current) {
-        console.log('数据已经获取过，不再重复获取');
-        return;
-      }
-
-      // 获取分析数据
-      await fetchAnalysisData(newJobId);
+      // Verify API connectivity
+      await verifyApiConnection(newJobId);
     } catch (error) {
-      console.error('创建job记录失败:', error);
-      // 如果创建job失败，生成一个临时的jobId
+      console.error('Job creation failed:', error);
+      // Generate temporary job ID if creation fails
       const tempJobId = `temp-${Date.now()}-${Math.floor(
         Math.random() * 1000
       )}`;
-      console.log(`使用临时jobId: ${tempJobId}`);
+      console.log(`Using temporary job ID: ${tempJobId}`);
       setJobId(tempJobId);
       sessionStorage.setItem('currentJobId', tempJobId);
 
-      // 如果数据已经获取过，则不再重复获取
-      if (dataFetchedRef.current) {
-        console.log('数据已经获取过，不再重复获取');
-        return;
-      }
-
-      // 使用临时ID获取分析数据
-      await fetchAnalysisData(tempJobId);
+      // Verify API with temporary ID
+      await verifyApiConnection(tempJobId);
     }
   };
 
   useEffect(() => {
-    console.log('LoadingPage组件已加载');
+    console.log('Loading page component mounted');
 
-    // 检查用户图像是否存在
+    // Check if user image exists
     if (typeof window !== 'undefined') {
       try {
         const userImage = sessionStorage.getItem('userImage');
         console.log(
-          '从sessionStorage获取的图像:',
-          userImage ? '存在' : '不存在'
+          'Image from session storage:',
+          userImage ? 'exists' : 'not found'
         );
 
         if (!userImage) {
-          console.log('未找到用户图像，重定向到step1');
+          console.log('User image not found, redirecting to step1');
           setUserImageExists(false);
           router.replace('/personalized-recommendation/step1');
           return;
@@ -161,54 +129,59 @@ export default function LoadingPage() {
 
         setUserImageExists(true);
 
-        // 创建job记录并获取分析数据
-        createJobAndFetchData(userImage);
+        // Create job and verify API
+        createJobAndVerifyApi(userImage);
       } catch (error) {
-        console.error('访问sessionStorage时出错:', error);
+        console.error('Error accessing session storage:', error);
         router.replace('/personalized-recommendation/step1');
         return;
       }
     }
 
-    // 模拟加载进度
-    console.log('开始模拟加载进度');
+    // Simulate loading progress
+    console.log('Starting progress simulation');
     const interval = setInterval(() => {
       setProgress((prev) => {
-        const newProgress = prev + Math.random() * 5; // 减小增量，延长加载时间
-        console.log('当前进度:', Math.min(newProgress, 100).toFixed(1) + '%');
+        const newProgress = prev + Math.random() * 5;
+        console.log(
+          'Current progress:',
+          Math.min(newProgress, 100).toFixed(1) + '%'
+        );
 
-        // 如果进度达到100%且数据已准备好，则跳转到step2
-        if (newProgress >= 100 && dataFetchedRef.current) {
-          console.log('加载完成且数据已准备好，准备跳转到step2');
+        // If progress reaches 100% and API is verified, transition to generateReport
+        if (newProgress >= 100 && apiVerifiedRef.current) {
+          console.log(
+            'Loading complete and API verified, preparing transition to generateReport'
+          );
           clearInterval(interval);
-          // 开始过渡动画
+          // Start transition animation
           setIsTransitioning(true);
 
-          // 延长跳转时间，确保动画有足够时间显示
+          // Delay navigation to ensure animation displays properly
           setTimeout(() => {
-            console.log('执行跳转到step2');
-            router.replace('/personalized-recommendation/step2');
-          }, 100); // 增加到1000ms
+            console.log('Navigating to generateReport');
+            router.replace('/personalized-recommendation/generateReport');
+          }, 100);
           return 100;
         }
 
-        // 如果进度达到95%但数据还未准备好，则保持在95%
-        if (newProgress >= 95 && !dataFetchedRef.current) {
-          console.log('进度达到95%，等待数据准备完成...');
+        // Hold at 95% if API not yet verified
+        if (newProgress >= 95 && !apiVerifiedRef.current) {
+          console.log('Progress at 95%, waiting for API verification...');
           return 95;
         }
 
         return Math.min(newProgress, 100);
       });
-    }, 400); // 增加间隔时间，使进度条更新更慢
+    }, 400);
 
     return () => {
-      console.log('LoadingPage组件卸载，清除interval');
+      console.log('Loading page component unmounting, clearing interval');
       clearInterval(interval);
     };
   }, [router]);
 
-  // 动画变体
+  // Animation variants
   const pageVariants = {
     initial: { opacity: 1 },
     exit: { opacity: 0, transition: { duration: 0.5 } },
@@ -266,7 +239,7 @@ export default function LoadingPage() {
     },
   };
 
-  // 如果userImageExists为null或false，显示简单的加载指示器
+  // Simple loading indicator if userImageExists is null or false
   if (userImageExists === null || userImageExists === false) {
     return (
       <>
@@ -288,8 +261,8 @@ export default function LoadingPage() {
             </svg>
             <p className="text-gray-600 font-inter">
               {userImageExists === false
-                ? '重定向到上传页面...'
-                : '正在加载...'}
+                ? 'Redirecting to upload page...'
+                : 'Loading...'}
             </p>
           </div>
         </div>
@@ -300,7 +273,7 @@ export default function LoadingPage() {
   return (
     <>
       <RecommendationHeader />
-      {/* 流动背景 */}
+      {/* Flowing background */}
       <div className="absolute inset-0 z-0 overflow-hidden pointer-events-auto">
         <LiquidChrome
           baseColor={[0.9, 0.9, 0.9]}
@@ -315,21 +288,22 @@ export default function LoadingPage() {
       <motion.div
         className="min-h-screen pt-20 relative"
         initial="initial"
-        animate={isTransitioning ? 'exit' : 'animate'} // 修改这里，确保动画正确播放
+        animate={isTransitioning ? 'exit' : 'animate'}
         variants={pageVariants}>
-        {/* 内容区域 */}
+        {/* Content area */}
         <div className="container mx-auto px-4 py-8 relative z-10">
           <motion.div
             className="max-w-2xl mx-auto flex flex-col items-center justify-center"
             initial="initial"
-            animate="animate" // 确保子元素动画播放
+            animate="animate"
             variants={containerVariants}>
             <motion.div className="mb-8 text-center" variants={itemVariants}>
               <h1 className="text-3xl font-bold mb-2 font-playfair text-gray-800">
-                分析您的风格
+                Analyzing Your Style
               </h1>
               <p className="text-lg text-gray-600 font-inter">
-                我们正在处理您的照片，为您创建个性化推荐
+                We're processing your photo to create personalized
+                recommendations
               </p>
             </motion.div>
 
@@ -347,37 +321,150 @@ export default function LoadingPage() {
             <motion.div
               className="flex flex-col items-center"
               variants={itemVariants}>
+              {/* Stylish loading spinner with color accent */}
+              <div className="relative w-32 h-32 mb-6">
+                {/* Outer rotating ring */}
+                <motion.div
+                  className="absolute inset-0 rounded-full border-4 border-gray-200"
+                  style={{ borderRadius: '50%' }}
+                />
+
+                {/* Inner animated arc */}
+                <motion.div
+                  className="absolute inset-0 rounded-full border-4 border-transparent"
+                  style={{
+                    borderTopColor: '#84a59d',
+                    borderRadius: '50%',
+                    transform: `rotate(${progress * 3.6}deg)`,
+                  }}
+                  animate={{
+                    rotate: [0, 360],
+                  }}
+                  transition={{
+                    duration: 1.5,
+                    repeat: Infinity,
+                    ease: 'linear',
+                  }}
+                />
+
+                {/* Percentage display */}
+                <div className="absolute inset-0 flex items-center justify-center">
+                  <p className="text-2xl font-medium text-gray-700">
+                    {Math.min(Math.round(progress), 100)}%
+                  </p>
+                </div>
+              </div>
+
+              {/* Fashion silhouette morphing animation */}
               <motion.div
-                className="relative w-24 h-24 mb-6"
-                variants={pulseVariants}>
+                className="mb-4 h-16 w-16 flex items-center justify-center"
+                animate={{
+                  scale: [1, 1.1, 1],
+                  opacity: [0.7, 1, 0.7],
+                }}
+                transition={{
+                  duration: 2,
+                  repeat: Infinity,
+                  repeatType: 'reverse',
+                }}>
                 <svg
-                  className="w-full h-full text-[#84a59d] animate-spin-slow"
-                  viewBox="0 0 24 24">
-                  <path
+                  viewBox="0 0 24 24"
+                  className="w-full h-full text-[#84a59d]">
+                  <motion.path
                     fill="currentColor"
-                    d="M12,1A11,11,0,1,0,23,12,11,11,0,0,0,12,1Zm0,19a8,8,0,1,1,8-8A8,8,0,0,1,12,20Z"
-                    opacity="0.25"
-                  />
-                  <path
-                    fill="currentColor"
-                    d="M12,4a8,8,0,0,1,7.89,6.7A1.53,1.53,0,0,0,21.38,12h0a1.5,1.5,0,0,0,1.48-1.75,11,11,0,0,0-21.72,0A1.5,1.5,0,0,0,2.62,12h0a1.53,1.53,0,0,0,1.49-1.3A8,8,0,0,1,12,4Z"
+                    d="M12,2A10,10 0 0,0 2,12A10,10 0 0,0 12,22A10,10 0 0,0 22,12A10,10 0 0,0 12,2M12,20A8,8 0 0,1 4,12A8,8 0 0,1 12,4A8,8 0 0,1 20,12A8,8 0 0,1 12,20M7,10L12,15L17,10H7Z"
+                    animate={{
+                      d: [
+                        'M12,2A10,10 0 0,0 2,12A10,10 0 0,0 12,22A10,10 0 0,0 22,12A10,10 0 0,0 12,2M12,20A8,8 0 0,1 4,12A8,8 0 0,1 12,4A8,8 0 0,1 20,12A8,8 0 0,1 12,20M7,10L12,15L17,10H7Z',
+                        'M21,16V8H10M10,8A2,2 0 0,1 12,10V14A2,2 0 0,1 10,16A2,2 0 0,1 8,14V10A2,2 0 0,1 10,8M12,4.8C12,4.8 14,6 14,8C14,10 12,11.2 12,11.2M16,7A2,2 0 0,1 18,9A2,2 0 0,1 16,11A2,2 0 0,1 14,9A2,2 0 0,1 16,7Z',
+                        'M12,12A3,3 0 0,0 9,15C9,16.3 9.84,17.4 11,17.82V20H9V22H15V20H13V17.82C14.16,17.4 15,16.3 15,15A3,3 0 0,0 12,12M12,2A10,10 0 0,0 2,12A10,10 0 0,0 12,22H20A2,2 0 0,0 22,20V12A10,10 0 0,0 12,2Z',
+                      ],
+                    }}
+                    transition={{
+                      duration: 2,
+                      ease: 'easeInOut',
+                      repeat: Infinity,
+                      repeatType: 'reverse',
+                    }}
                   />
                 </svg>
               </motion.div>
 
-              <motion.div
-                className="text-center space-y-2"
-                variants={itemVariants}>
-                <p className="text-gray-700 font-inter">
-                  请稍等片刻，我们正在：
-                </p>
-                <ul className="text-gray-600 space-y-1 font-inter">
-                  <li>✓ 分析您的面部特征</li>
-                  <li>✓ 确定您的风格偏好</li>
-                  <li>{progress >= 50 ? '✓' : '⋯'} 识别您的风格特点</li>
-                  <li>{progress >= 75 ? '✓' : '⋯'} 生成个性化推荐</li>
-                </ul>
-              </motion.div>
+              {/* Status text with typographic animation */}
+              <motion.p
+                className="text-gray-700 font-inter text-lg text-center mb-2"
+                animate={{ opacity: [0.7, 1, 0.7] }}
+                transition={{ duration: 1.5, repeat: Infinity }}>
+                Analyzing your unique style profile
+              </motion.p>
+
+              {/* Analysis steps with animated progress */}
+              <ul className="text-gray-600 space-y-1 font-inter max-w-xs">
+                <motion.li
+                  className="flex items-center space-x-2"
+                  animate={{
+                    color: progress >= 25 ? '#84a59d' : '#718096',
+                  }}
+                  transition={{ duration: 0.5 }}>
+                  <motion.span
+                    className="flex-shrink-0 w-5 h-5 flex items-center justify-center bg-white rounded-full"
+                    animate={{
+                      backgroundColor: progress >= 25 ? '#84a59d' : 'white',
+                      color: progress >= 25 ? 'white' : '#718096',
+                    }}>
+                    {progress >= 25 ? '✓' : '·'}
+                  </motion.span>
+                  <span>Analyzing facial features</span>
+                </motion.li>
+
+                <motion.li
+                  className="flex items-center space-x-2"
+                  animate={{
+                    color: progress >= 50 ? '#84a59d' : '#718096',
+                  }}>
+                  <motion.span
+                    className="flex-shrink-0 w-5 h-5 flex items-center justify-center bg-white rounded-full"
+                    animate={{
+                      backgroundColor: progress >= 50 ? '#84a59d' : 'white',
+                      color: progress >= 50 ? 'white' : '#718096',
+                    }}>
+                    {progress >= 50 ? '✓' : '·'}
+                  </motion.span>
+                  <span>Determining style preferences</span>
+                </motion.li>
+
+                <motion.li
+                  className="flex items-center space-x-2"
+                  animate={{
+                    color: progress >= 75 ? '#84a59d' : '#718096',
+                  }}>
+                  <motion.span
+                    className="flex-shrink-0 w-5 h-5 flex items-center justify-center bg-white rounded-full"
+                    animate={{
+                      backgroundColor: progress >= 75 ? '#84a59d' : 'white',
+                      color: progress >= 75 ? 'white' : '#718096',
+                    }}>
+                    {progress >= 75 ? '✓' : '·'}
+                  </motion.span>
+                  <span>Identifying style characteristics</span>
+                </motion.li>
+
+                <motion.li
+                  className="flex items-center space-x-2"
+                  animate={{
+                    color: progress >= 90 ? '#84a59d' : '#718096',
+                  }}>
+                  <motion.span
+                    className="flex-shrink-0 w-5 h-5 flex items-center justify-center bg-white rounded-full"
+                    animate={{
+                      backgroundColor: progress >= 90 ? '#84a59d' : 'white',
+                      color: progress >= 90 ? 'white' : '#718096',
+                    }}>
+                    {progress >= 90 ? '✓' : '·'}
+                  </motion.span>
+                  <span>Generating personalized recommendations</span>
+                </motion.li>
+              </ul>
             </motion.div>
           </motion.div>
         </div>

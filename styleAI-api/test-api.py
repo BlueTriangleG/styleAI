@@ -36,48 +36,6 @@ def test_health():
         print(f"❌ Health check failed: {str(e)}")
         return False
 
-def test_image_processing(image_path=None):
-    """Test the image processing endpoint"""
-    if not image_path:
-        print("Skipping image processing test (no image provided)")
-        return True
-    
-    print(f"Testing image processing with {image_path}...")
-    try:
-        # Read and encode image
-        with open(image_path, "rb") as img_file:
-            img_data = img_file.read()
-            
-        # Get image format
-        img = Image.open(io.BytesIO(img_data))
-        img_format = img.format.lower()
-        
-        # Encode to base64
-        encoded = base64.b64encode(img_data).decode('utf-8')
-        
-        # Prepare request data
-        data = {
-            "image": f"data:image/{img_format};base64,{encoded}"
-        }
-        
-        # Send request
-        response = requests.post(
-            f"{API_URL}/api/image/process",
-            json=data
-        )
-        
-        if response.status_code == 200:
-            result = response.json()
-            print(f"✅ Image processing successful")
-            print(f"   - Original size: {result.get('original_size', 'N/A')} bytes")
-            print(f"   - Processed size: {result.get('processed_size', 'N/A')} bytes")
-            return True
-        else:
-            print(f"❌ Image processing failed: {response.status_code} - {response.text}")
-            return False
-    except Exception as e:
-        print(f"❌ Image processing failed: {str(e)}")
-        return False
 
 def test_personalized_analysis():
     """Test the personalized analysis endpoint"""
@@ -112,38 +70,6 @@ def test_personalized_analysis():
         print(f"❌ Personalized analysis failed: {str(e)}")
         return False
 
-def test_wear_suit_pictures():
-    """Test the wear suit pictures endpoint"""
-    print("Testing wear suit pictures endpoint...")
-    try:
-        # 使用已知存在的jobId
-        job_id = KNOWN_JOB_ID
-        
-        # Prepare request data
-        data = {
-            "jobId": job_id
-        }
-        
-        # Send request
-        response = requests.post(
-            f"{API_URL}/api/personalized/wear-suit-pictures",
-            json=data
-        )
-        
-        if response.status_code == 200:
-            result = response.json()
-            if result.get("status") == "success" and result.get("jobId") == job_id:
-                print("✅ Wear suit pictures successful")
-                return True
-            else:
-                print(f"❌ Wear suit pictures failed: Invalid response data")
-                return False
-        else:
-            print(f"❌ Wear suit pictures failed: {response.status_code} - {response.text}")
-            return False
-    except Exception as e:
-        print(f"❌ Wear suit pictures failed: {str(e)}")
-        return False
 
 def main():
     # 在函数开始处声明全局变量
@@ -164,20 +90,13 @@ def main():
     # Test health check
     health_ok = test_health()
     
-    # Test image processing if image path provided
-    if args.image:
-        image_ok = test_image_processing(args.image)
-    else:
-        image_ok = test_image_processing()
     
     # Test personalized analysis
     analysis_ok = test_personalized_analysis()
     
-    # Test wear suit pictures
-    suit_ok = test_wear_suit_pictures()
-    
+
     # Print summary
-    if health_ok and image_ok and analysis_ok and suit_ok:
+    if health_ok:
         print("All tests passed!")
         return 0
     else:

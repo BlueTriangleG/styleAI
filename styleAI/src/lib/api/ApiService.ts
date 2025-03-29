@@ -1,4 +1,8 @@
 import { API_SERVER_URL, API_ENDPOINTS, DEFAULT_HEADERS } from './config';
+import {
+  createJob as createJobAction,
+  getBestFitImage as getBestFitImageAction,
+} from '@/app/actions/jobActions';
 
 /**
  * API Service for connecting to the Flask backend
@@ -116,7 +120,7 @@ class ApiService {
       console.log('获取到的个性化分析数据:', result);
 
       if (result.status === 'success') {
-        return result.analysis;
+        return { analysis: result.analysis, status: result.status };
       } else {
         throw new Error(result.error || '获取个性化分析失败');
       }
@@ -151,6 +155,61 @@ class ApiService {
       console.log('获取到的穿着建议图片:', result);
 
       if (result.status === 'success') {
+        return 'success';
+      } else {
+        throw new Error(result.error || '获取穿着建议图片失败');
+      }
+    } catch (error) {
+      console.error('获取穿着建议图片时出错:', error);
+      throw error;
+    }
+  }
+
+  /**
+   * 获取最佳匹配图片
+   * @param jobId The job ID
+   * @returns Best fit image data
+   */
+  async getBestFitImage(jobId: string): Promise<any> {
+    try {
+      console.log(`正在获取最佳匹配图片，jobId: ${jobId}`);
+
+      // 使用Server Action获取图片
+      const result = await getBestFitImageAction(jobId);
+      console.log('获取到的最佳匹配图片结果:', result);
+
+      return result;
+    } catch (error) {
+      console.error('获取最佳匹配图片时出错:', error);
+      throw error;
+    }
+  }
+
+  /**
+   * Generate best fit image
+   * @param jobId The job ID for generating the best fit image
+   * @returns Result of the generation process
+   */
+  async generateBestFit(jobId: string): Promise<any> {
+    try {
+      console.log(`正在获取穿着建议图片，jobId: ${jobId}`);
+      const response = await fetch(
+        `${this.baseUrl}${API_ENDPOINTS.GENERATE_BEST_FIT}`,
+        {
+          method: 'POST',
+          headers: DEFAULT_HEADERS,
+          body: JSON.stringify({ jobId }),
+        }
+      );
+
+      if (!response.ok) {
+        throw new Error(`API error: ${response.status}`);
+      }
+
+      const result = await response.json();
+      console.log('获取到的穿着建议图片:', result);
+
+      if (result.status === 'success') {
         return result.data;
       } else {
         throw new Error(result.error || '获取穿着建议图片失败');
@@ -170,13 +229,18 @@ class ApiService {
     try {
       console.log('正在创建新的job记录');
 
-      const response = await fetch('/api/jobs/create', {
+      // 从localStorage获取数据库用户ID
+      const dbUserId =
+        typeof window !== 'undefined' ? localStorage.getItem('dbUserId') : null;
+
+      const response = await fetch('/styleai/api/jobs/create', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
           uploadedImage,
+          dbUserId, // 添加数据库用户ID
         }),
         credentials: 'include', // 包含cookie以便服务器可以验证用户身份
       });

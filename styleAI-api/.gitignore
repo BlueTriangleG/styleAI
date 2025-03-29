@@ -57,4 +57,9 @@ yarn-error.log*
 
 # Temporary files
 tmp/
-temp/ 
+temp/
+
+# Large files
+app/utils/algorithms/ALL_final_merged.json
+app/utils/algorithms/men_fashion_filtered.tar.gz
+app/utils/algorithms/ALL_images/ 

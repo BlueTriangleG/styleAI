@@ -11,19 +11,173 @@ import time
 import importlib.util
 
 # 配置日志
+logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
-# 算法模块路径
+# 全局变量
+_model_resources = None
+model_name = "distilbert-base-uncased"
 ALGORITHMS_PATH = os.path.join(os.path.dirname(__file__), 'algorithms')
 
-# 预加载的模型和tokenizer
-model_name = "distilbert-base-uncased"
-device = None
-tokenizer = None
-model = None
+def safe_import_preload():
+    """
+    安全导入预加载模块
+    
+    Returns:
+        module or None: 预加载模块，如果导入失败则返回None
+    """
+    try:
+        # 返回当前模块
+        return sys.modules[__name__]
+    except Exception as e:
+        logger.error(f"导入预加载模块失败: {e}")
+        return None
+
+def get_model_resources():
+    """
+    获取预加载的模型资源
+    
+    Returns:
+        dict: 包含预加载模型资源的字典
+    """
+    global _model_resources
+    
+    if _model_resources is None:
+        logger.warning("模型资源尚未加载")
+        return {}
+        
+    return _model_resources
+
+def preload_models():
+    """
+    预加载模型和其他资源
+    """
+    global _model_resources
+    
+    try:
+        logger.info("开始预加载模型和资源...")
+        
+        # 初始化资源字典
+        _model_resources = {}
+        
+        # 检查是否可以导入torch
+        try:
+            import torch
+            import transformers
+            from transformers import AutoModel, AutoTokenizer
+            
+            # 设置设备
+            _model_resources['device'] = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+            logger.info(f"使用设备: {_model_resources['device']}")
+            
+            # 尝试加载embedding模型和tokenizer
+            try:
+                # 加载tokenizer
+                logger.info(f"加载tokenizer: {model_name}")
+                tokenizer = AutoTokenizer.from_pretrained(model_name)
+                _model_resources['tokenizer'] = tokenizer
+                
+                # 加载模型
+                logger.info(f"加载embedding模型: {model_name}")
+                model = AutoModel.from_pretrained(model_name).to(_model_resources['device'])
+                _model_resources['model'] = model
+                
+                # 验证模型和tokenizer是否正确加载
+                if tokenizer and model:
+                    logger.info("成功加载embedding模型和tokenizer")
+                else:
+                    logger.error("模型或tokenizer加载失败")
+                    if not tokenizer:
+                        logger.error("tokenizer为空")
+                    if not model:
+                        logger.error("model为空")
+            except Exception as e:
+                logger.error(f"加载embedding模型和tokenizer失败: {e}")
+                # 设置为None以便后续检查
+                _model_resources['tokenizer'] = None
+                _model_resources['model'] = None
+        except ImportError as e:
+            logger.warning(f"无法导入必要的库: {e}，跳过模型加载")
+            _model_resources['tokenizer'] = None
+            _model_resources['model'] = None
+            _model_resources['device'] = None
+        
+        # 加载其他资源...
+        
+        logger.info("模型和资源预加载完成")
+        return _model_resources
+    except Exception as e:
+        logger.error(f"预加载模型和资源时出错: {e}")
+        _model_resources = {
+            'tokenizer': None,
+            'model': None,
+            'device': None
+        }
+        return _model_resources
+
+def import_module(module_name):
+    """
+    导入指定的模块
+    
+    Args:
+        module_name (str): 要导入的模块名
+        
+    Returns:
+        module or None: 导入的模块，如果导入失败则返回None
+    """
+    try:
+        module_path = os.path.join(ALGORITHMS_PATH, f"{module_name}.py")
+        spec = importlib.util.spec_from_file_location(module_name, module_path)
+        module = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(module)
+        return module
+    except Exception as e:
+        logger.error(f"导入模块 {module_name} 失败: {e}")
+        return None
+
+def check_dependencies(packages):
+    """
+    检查依赖包是否已安装
+    
+    Args:
+        packages (list): 要检查的包名列表
+        
+    Returns:
+        bool: 所有包都已安装返回True，否则返回False
+    """
+    for package in packages:
+        if importlib.util.find_spec(package) is None:
+            logger.error(f"缺少依赖包: {package}")
+            return False
+    return True
+
+def check_scikit_learn():
+    """
+    检查scikit-learn是否已安装且版本兼容
+    
+    Returns:
+        bool: scikit-learn已安装且版本兼容返回True，否则返回False
+    """
+    try:
+        import sklearn
+        from packaging import version
+        
+        sklearn_version = sklearn.__version__
+        min_version = "0.24.0"
+        
+        if version.parse(sklearn_version) < version.parse(min_version):
+            logger.warning(f"scikit-learn版本过低: {sklearn_version}，建议 >= {min_version}")
+            return False
+            
+        return True
+    except ImportError:
+        logger.warning("scikit-learn未安装")
+        return False
 
 def preload_modules():
-    """预加载算法模块"""
+    """
+    预加载算法模块
+    """
     start_time = time.time()
     logger.info("开始预加载算法模块...")
     
@@ -60,104 +214,31 @@ def preload_modules():
         logger.error(f"预加载算法模块时出错: {str(e)}")
         return False
 
-def preload_models():
-    """预加载模型和tokenizer"""
-    global device, tokenizer, model
-    
-    # 检查必要的依赖是否已安装
-    if not check_dependencies(['torch', 'transformers']):
-        logger.error("缺少必要的依赖，无法预加载模型")
-        return False
-    
-    # 检查scikit-learn是否已安装（不要求特定版本）
-    if not check_scikit_learn():
-        logger.warning("scikit-learn未安装或版本不兼容，某些功能可能受限")
-        # 继续执行，因为我们可以在没有scikit-learn的情况下加载模型
-    
-    start_time = time.time()
-    logger.info("开始预加载模型和tokenizer...")
-    
-    try:
-        # 导入必要的模块
-        import torch
-        from transformers import AutoTokenizer, AutoModel
-        
-        # 设置设备
-        device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-        logger.info(f"使用设备: {device}")
-        
-        # 加载tokenizer和模型
-        tokenizer = AutoTokenizer.from_pretrained(model_name)
-        model = AutoModel.from_pretrained(model_name).to(device)
-        
-        logger.info(f"模型和tokenizer预加载完成，耗时: {time.time() - start_time:.2f}秒")
-        return True
-    except Exception as e:
-        logger.error(f"预加载模型和tokenizer时出错: {str(e)}")
-        return False
-
-def check_dependencies(packages):
-    """检查依赖是否已安装"""
-    missing_packages = []
-    
-    for package in packages:
-        if importlib.util.find_spec(package) is None:
-            missing_packages.append(package)
-    
-    if missing_packages:
-        logger.warning(f"以下依赖包未安装: {', '.join(missing_packages)}")
-        logger.warning(f"请使用以下命令安装: pip install {' '.join(missing_packages)}")
-        return False
-    
-    return True
-
-def check_scikit_learn():
-    """检查scikit-learn是否已安装（不要求特定版本）"""
-    try:
-        if importlib.util.find_spec('sklearn') is None:
-            return False
-        
-        # 尝试导入scikit-learn
-        import sklearn
-        logger.info(f"scikit-learn版本: {sklearn.__version__}")
-        return True
-    except Exception as e:
-        logger.warning(f"检查scikit-learn时出错: {str(e)}")
-        return False
-
-def import_module(module_name):
-    """导入模块并记录日志"""
-    try:
-        start_time = time.time()
-        module = importlib.import_module(module_name)
-        logger.info(f"成功导入模块 {module_name}，耗时: {time.time() - start_time:.2f}秒")
-        return module
-    except Exception as e:
-        logger.error(f"导入模块 {module_name} 时出错: {str(e)}")
-        return None
-
-def get_model_resources():
-    """获取预加载的模型资源"""
-    return {
-        'tokenizer': tokenizer,
-        'model': model,
-        'device': device
-    }
-
 # 初始化函数
+def init():
+    """
+    初始化预加载模块
+    """
+    logger.info("初始化预加载模块...")
+    
+    # 添加算法目录到Python路径
+    if ALGORITHMS_PATH not in sys.path:
+        sys.path.append(ALGORITHMS_PATH)
+        logger.info(f"已将算法目录添加到Python路径: {ALGORITHMS_PATH}")
+    
+    # 预加载模块
+    preload_modules()
+    
+    # 预加载模型
+    preload_models()
+
+# initialize函数作为init函数的别名
 def initialize():
-    """初始化预加载"""
-    logger.info("开始初始化预加载...")
-    
-    # 预加载算法模块
-    modules_loaded = preload_modules()
-    
-    # 如果算法模块加载成功，则预加载模型
-    if modules_loaded:
-        models_loaded = preload_models()
-        if models_loaded:
-            logger.info("预加载初始化完成")
-        else:
-            logger.warning("模型预加载失败，API将使用模拟数据")
-    else:
-        logger.warning("算法模块预加载失败，API将使用模拟数据") 
+    """
+    初始化预加载模块(init函数的别名)
+    这个函数是为了兼容app/__init__.py中的调用
+    """
+    return init()
+
+# 在模块导入时自动初始化
+init() 
