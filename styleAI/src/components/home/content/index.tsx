@@ -7,11 +7,11 @@ import BounceCards from '@/components/ui/BounceCards';
 import LiquidChrome from '@/components/background/LiquidChrome';
 
 const images = [
-  'gallery/outfit1.png',
-  'gallery/outfit2.png',
-  'gallery/outfit3.png',
-  'gallery/outfit4.png',
-  'gallery/outfit5.png',
+  process.env.NEXT_PUBLIC_BASE_PATH + '/gallery/outfit1.png',
+  process.env.NEXT_PUBLIC_BASE_PATH + '/gallery/outfit2.png',
+  process.env.NEXT_PUBLIC_BASE_PATH + '/gallery/outfit3.png',
+  process.env.NEXT_PUBLIC_BASE_PATH + '/gallery/outfit4.png',
+  process.env.NEXT_PUBLIC_BASE_PATH + '/gallery/outfit5.png',
 ];
 
 const transformStyles = [
@@ -24,20 +24,20 @@ const transformStyles = [
 
 const galleryItems = [
   {
-    video: "gallery/model1.mp4",
+    video: process.env.NEXT_PUBLIC_BASE_PATH + "/gallery/model1.mp4",
     text: 'Video 1',
   },
   {
-    video: "gallery/model2.mp4",
-    text: 'Video 1',
+    video: process.env.NEXT_PUBLIC_BASE_PATH + "/gallery/model2.mp4",
+    text: 'Video 2',
   },
   {
-    video: "gallery/model3.mp4",
-    text: 'Video 1',
+    video: process.env.NEXT_PUBLIC_BASE_PATH + "/gallery/model3.mp4",
+    text: 'Video 3',
   },
   {
-    video: "gallery/model4.mp4",
-    text: 'Video 1',
+    video: process.env.NEXT_PUBLIC_BASE_PATH + "/gallery/model4.mp4",
+    text: 'Video 4',
   }
 ];
 
