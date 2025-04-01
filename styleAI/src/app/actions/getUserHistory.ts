@@ -5,6 +5,7 @@ import { getJobsByUserId } from '@/lib/models/job';
 import {
   HistoryReportData,
   StyleRecommendation,
+  TargetDescription,
 } from '@/components/userHistory/types';
 
 /**
@@ -104,12 +105,13 @@ export async function getUserHistory(
             });
           }
 
-          // Process target_description to extract analysis result
+          // Process target_description to extract analysis result and store the full JSON
           let analysisResult = '';
+          let parsedDescription: TargetDescription | null = null;
+
           if (job.target_description) {
             try {
               // Parse JSON if it's a string or buffer
-              let parsedDescription;
               if (Buffer.isBuffer(job.target_description)) {
                 parsedDescription = JSON.parse(
                   job.target_description.toString('utf8')
@@ -118,21 +120,27 @@ export async function getUserHistory(
                 parsedDescription = JSON.parse(job.target_description);
               } else {
                 // It's already an object
-                parsedDescription = job.target_description;
+                parsedDescription = job.target_description as TargetDescription;
               }
 
-              // Extract relevant information for display
-              // This will depend on your specific JSON structure
-              // Simple example assuming target_description has a summary field
-              if (parsedDescription.summary) {
-                analysisResult = parsedDescription.summary;
-              } else if (parsedDescription.analysis) {
-                analysisResult = parsedDescription.analysis;
+              // Extract relevant information for display (summary)
+              if (
+                parsedDescription &&
+                parsedDescription['Your Overall Description'] &&
+                parsedDescription['Your Overall Description'][
+                  'Physical and Temperament Summary'
+                ]
+              ) {
+                analysisResult =
+                  parsedDescription['Your Overall Description'][
+                    'Physical and Temperament Summary'
+                  ];
+              } else if (parsedDescription) {
+                // Fallback if summary not available
+                analysisResult =
+                  'Style analysis completed. Check details for full report.';
               } else {
-                // Create a fallback string
-                analysisResult = `Analysis completed on ${new Date(
-                  job.created_at || Date.now()
-                ).toLocaleDateString()}`;
+                analysisResult = 'Style analysis completed';
               }
             } catch (error) {
               console.error('Error parsing target_description:', error);
@@ -149,8 +157,53 @@ export async function getUserHistory(
             bestFitImage: bestFitImage,
             createdAt: job.created_at
               ? job.created_at.toISOString()
-              : new Date().toISOString(),
+              : new Date('2025-03-10T00:00:00.000Z').toISOString(),
             analysisResult: analysisResult,
+            targetDescription: parsedDescription || {
+              'Structural Features': {
+                'Body Features': {
+                  'Height and Visual Impression': '',
+                  'Head-to-Body Proportion and Visual Effect': '',
+                  'Body Type and Curve Characteristics': '',
+                  'Overall Body Weight Impression': '',
+                  'Shoulder Width and Head-to-Shoulder Ratio': '',
+                  'Waistline Position and Upper-to-Lower Body Proportion': '',
+                  'Limb Length and Visual Proportion': '',
+                  'Limb Thickness and Line Definition': '',
+                  'Body Hair Characteristics': {
+                    'Facial Hair': '',
+                  },
+                },
+                'Facial Features': {
+                  'Hairstyle Details and Style Characteristics': '',
+                  'Face Shape and Visual Outline': '',
+                  'Facial Structure and Visual Features': '',
+                  'Facial Contour and Line Definition': '',
+                  'Neck Length and Line Characteristics': '',
+                },
+              },
+              'Color Features': {
+                'Skin Tone and Visual Characteristics': '',
+                'Hair Color and Saturation': '',
+                'Clothing Color Optimization Suggestions': '',
+              },
+              'Semantic Features': {
+                'Intrinsic Features': {
+                  Gender: '',
+                  'Age Range Visual Estimation': '',
+                },
+                'Temperament Features': {
+                  'Overall Style First Impression': '',
+                  'Personality Impressions from Expression and Posture': '',
+                  'Style Optimization and Temperament Enhancement Suggestions':
+                    '',
+                },
+              },
+              'Your Overall Description': {
+                'Physical and Temperament Summary':
+                  'No detailed analysis available',
+              },
+            },
             otherStyleRecommendations: otherStyleRecommendations,
           };
         } catch (itemError) {
@@ -163,6 +216,51 @@ export async function getUserHistory(
             bestFitImage: '',
             createdAt: new Date().toISOString(),
             analysisResult: 'Error loading job details',
+            targetDescription: {
+              'Structural Features': {
+                'Body Features': {
+                  'Height and Visual Impression': '',
+                  'Head-to-Body Proportion and Visual Effect': '',
+                  'Body Type and Curve Characteristics': '',
+                  'Overall Body Weight Impression': '',
+                  'Shoulder Width and Head-to-Shoulder Ratio': '',
+                  'Waistline Position and Upper-to-Lower Body Proportion': '',
+                  'Limb Length and Visual Proportion': '',
+                  'Limb Thickness and Line Definition': '',
+                  'Body Hair Characteristics': {
+                    'Facial Hair': '',
+                  },
+                },
+                'Facial Features': {
+                  'Hairstyle Details and Style Characteristics': '',
+                  'Face Shape and Visual Outline': '',
+                  'Facial Structure and Visual Features': '',
+                  'Facial Contour and Line Definition': '',
+                  'Neck Length and Line Characteristics': '',
+                },
+              },
+              'Color Features': {
+                'Skin Tone and Visual Characteristics': '',
+                'Hair Color and Saturation': '',
+                'Clothing Color Optimization Suggestions': '',
+              },
+              'Semantic Features': {
+                'Intrinsic Features': {
+                  Gender: '',
+                  'Age Range Visual Estimation': '',
+                },
+                'Temperament Features': {
+                  'Overall Style First Impression': '',
+                  'Personality Impressions from Expression and Posture': '',
+                  'Style Optimization and Temperament Enhancement Suggestions':
+                    '',
+                },
+              },
+              'Your Overall Description': {
+                'Physical and Temperament Summary':
+                  'Error loading analysis data',
+              },
+            },
             otherStyleRecommendations: [],
           };
         }
