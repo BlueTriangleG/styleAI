@@ -13,6 +13,8 @@ import { motion } from 'framer-motion';
 import { RecommendationHeader } from '@/components/recommendation/Header';
 import { AlgorithmGallery } from '@/components/algorithmGallery/AlgorithmGallery';
 import { SectionHeader } from '@/components/algorithmGallery/SectionHeader';
+import LiquidChrome from '@/components/background/LiquidChrome';
+
 import {
   sampleAlgorithms,
   fallbackImages,
@@ -63,36 +65,48 @@ export default function AlgorithmGalleryPage() {
 
   return (
     <motion.div
-      className="min-h-screen bg-gray-50"
+      className="relative min-h-screen bg-gray-50"
       initial="initial"
       animate={isTransitioning ? 'exit' : 'animate'}
       variants={pageVariants}
       transition={{ duration: 0.5 }}>
-      <RecommendationHeader />
+      {/* 背景层，z-index 为 0 */}
+      <div className="absolute inset-0 z-0 overflow-hidden pointer-events-auto">
+        <LiquidChrome
+          baseColor={[0.9, 0.9, 0.9]}
+          speed={0.3}
+          amplitude={0.7}
+          frequencyX={4}
+          frequencyY={3}
+          interactive={true}
+        />
+      </div>
 
-      <main className="w-full max-w-[1600px] mx-auto pt-20 pb-16 overflow-hidden">
-        <div className="text-center px-4 sm:px-6 md:px-8 mb-8">
-          <SectionHeader
-            title="Choose The Style Recommendations You Want"
-            description="We offer a variety of services, click to choose your favorite! Each recommendation is based on advanced AI algorithms that provide in-depth analysis for you, which will definitely be helpful."
-          />
-        </div>
+      {/* 内容层，可以通过设置更高的 z-index 确保其在上面 */}
+      <div className="relative z-10">
+        <RecommendationHeader />
 
-        <div className="mb-16 w-full">
-          <AlgorithmGallery
-            algorithms={processedAlgorithms}
-            onTransitionStart={(id) => {
-              // Start transition animation
-              setIsTransitioning(true);
+        <main className="w-full max-w-[1600px] mx-auto pt-20 pb-16 overflow-hidden">
+          <div className="text-center px-4 sm:px-6 md:px-8 mb-8">
+            <SectionHeader
+              title="Choose The Style Recommendations You Want"
+              description="We offer a variety of services, click to choose your favorite! Each recommendation is based on advanced AI algorithms that provide in-depth analysis for you, which will definitely be helpful."
+            />
+          </div>
 
-              // Delay navigation to allow for animation
-              setTimeout(() => {
-                router.push(`/${id}`);
-              }, 800);
-            }}
-          />
-        </div>
-      </main>
+          <div className="mb-16 w-full">
+            <AlgorithmGallery
+              algorithms={processedAlgorithms}
+              onTransitionStart={(id) => {
+                setIsTransitioning(true);
+                setTimeout(() => {
+                  router.push(`/${id}`);
+                }, 800);
+              }}
+            />
+          </div>
+        </main>
+      </div>
     </motion.div>
   );
 }

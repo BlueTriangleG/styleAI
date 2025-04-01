@@ -13,6 +13,7 @@ export interface Job {
   social_gathering?: Buffer;
   outdoor_sports?: Buffer;
   target_description?: Buffer | string | any;
+  created_at?: Date;
 }
 
 /**
@@ -31,10 +32,11 @@ export async function createJob(
     const insertQuery = `
       INSERT INTO jobs (
         user_id, 
-        uploaded_image
+        uploaded_image,
+        created_at
       ) 
-      VALUES ($1, $2)
-      RETURNING id, user_id;
+      VALUES ($1, $2, CURRENT_TIMESTAMP)
+      RETURNING id, user_id, created_at;
     `;
 
     const result = await query(insertQuery, [userId, uploadedImage]);
