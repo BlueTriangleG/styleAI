@@ -95,16 +95,7 @@ export default function LoadingPage() {
       await verifyApiConnection(newJobId);
     } catch (error) {
       console.error('Job creation failed:', error);
-      // Generate temporary job ID if creation fails
-      const tempJobId = `temp-${Date.now()}-${Math.floor(
-        Math.random() * 1000
-      )}`;
-      console.log(`Using temporary job ID: ${tempJobId}`);
-      setJobId(tempJobId);
-      sessionStorage.setItem('currentJobId', tempJobId);
-
-      // Verify API with temporary ID
-      await verifyApiConnection(tempJobId);
+      throw error;
     }
   };
 
@@ -123,7 +114,7 @@ export default function LoadingPage() {
         if (!userImage) {
           console.log('User image not found, redirecting to step1');
           setUserImageExists(false);
-          router.replace('/personalized-recommendation/step1');
+          router.replace('/getBestFitCloth');
           return;
         }
 
@@ -133,7 +124,7 @@ export default function LoadingPage() {
         createJobAndVerifyApi(userImage);
       } catch (error) {
         console.error('Error accessing session storage:', error);
-        router.replace('/personalized-recommendation/step1');
+        router.replace('/getBestFitCloth');
         return;
       }
     }
@@ -160,7 +151,7 @@ export default function LoadingPage() {
           // Delay navigation to ensure animation displays properly
           setTimeout(() => {
             console.log('Navigating to generateReport');
-            router.replace('/personalized-recommendation/generateReport');
+            router.replace('/getBestFitCloth/generateReport');
           }, 100);
           return 100;
         }
