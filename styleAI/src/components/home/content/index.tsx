@@ -1,7 +1,8 @@
 'use client';
-import { useRef, useEffect } from 'react';
+import { useRef, useEffect, useState } from 'react';
 import Image from 'next/image';
 import { useRouter } from 'next/navigation';
+import { motion } from 'framer-motion';
 import CircularGallery from '@/components/ui/CircularGallery';
 import BounceCards from '@/components/ui/BounceCards';
 
@@ -44,9 +45,23 @@ export function Hero() {
   const router = useRouter();
   const usecaseRef = useRef<HTMLDivElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
+  const [isTransitioning, setIsTransitioning] = useState(false);
+
+  // Animation variants
+  const pageVariants = {
+    initial: { opacity: 0, x: 100 },
+    animate: { opacity: 1, x: 0 },
+    exit: { opacity: 0, x: -100 },
+  };
 
   const handleStartClick = () => {
-    router.push('/personalized-recommendation/uploadImages');
+    // Start transition animation
+    setIsTransitioning(true);
+
+    // Delay navigation to allow for animation
+    setTimeout(() => {
+      router.push('/algorithmGallery');
+    }, 800);
   };
 
   const scrollToUsecase = () => {
@@ -69,9 +84,13 @@ export function Hero() {
   }, []);
 
   return (
-    <div
+    <motion.div
       ref={containerRef}
-      className="w-screen h-screen overflow-y-auto scroll-smooth snap-y snap-mandatory no-scrollbar">
+      className="w-screen h-screen overflow-y-auto scroll-smooth snap-y snap-mandatory no-scrollbar"
+      initial="initial"
+      animate={isTransitioning ? 'exit' : 'animate'}
+      variants={pageVariants}
+      transition={{ duration: 0.5 }}>
       {/* Hero Section - First Screen */}
       <section className="w-screen h-screen pt-20 flex justify-center items-center snap-start">
         <div className="w-[80%] h-[100%] flex flex-col justify-between">
@@ -155,6 +174,6 @@ export function Hero() {
           </div>
         </div>
       </section>
-    </div>
+    </motion.div>
   );
 }
