@@ -3,6 +3,7 @@
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { UserButton, SignedIn, SignedOut, SignInButton } from '@clerk/nextjs';
+import { ClipboardIcon } from '@radix-ui/react-icons';
 
 export function RecommendationHeader() {
   const router = useRouter();
@@ -25,10 +26,17 @@ export function RecommendationHeader() {
               <UserButton
                 appearance={{
                   elements: {
-                    avatarBox: 'w-10 h-10',
+                    avatarBox: 'w-12 h-12',
                   },
-                }}
-              />
+                }}>
+                <UserButton.MenuItems>
+                  <UserButton.Action
+                    label="Report History"
+                    labelIcon={<ClipboardIcon />}
+                    onClick={() => router.push('/reportHistory')}
+                  />
+                </UserButton.MenuItems>
+              </UserButton>
             </div>
           </SignedIn>
 

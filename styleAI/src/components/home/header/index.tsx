@@ -10,7 +10,7 @@ import {
   SignedIn,
   SignedOut,
 } from '@clerk/nextjs';
-import { DotIcon } from '@radix-ui/react-icons';
+import { ClipboardIcon } from '@radix-ui/react-icons';
 import SettingsPage from '@/app/settings/page';
 export function Header() {
   const router = useRouter();
@@ -50,7 +50,7 @@ export function Header() {
                 <UserButton.MenuItems>
                   <UserButton.Action
                     label="Report History"
-                    labelIcon={<DotIcon />}
+                    labelIcon={<ClipboardIcon />}
                     onClick={() => router.push('/reportHistory')}
                   />
                 </UserButton.MenuItems>

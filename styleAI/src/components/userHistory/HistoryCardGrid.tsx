@@ -56,9 +56,14 @@ export function HistoryCardGrid({
     );
   }
 
+  // Sort reports by createdAt date in descending order (newest first)
+  const sortedReports = [...reports].sort(
+    (a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
+  );
+
   return (
     <div className="grid grid-cols-1 gap-8 sm:grid-cols-2 lg:grid-cols-4">
-      {reports.map((report) => (
+      {sortedReports.map((report) => (
         <div key={report.id} className="h-[380px]">
           <HistoryCard report={report} />
         </div>
