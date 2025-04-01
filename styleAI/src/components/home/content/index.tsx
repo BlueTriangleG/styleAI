@@ -1,7 +1,8 @@
 'use client';
-import { useRef, useEffect } from 'react';
+import { useRef, useEffect, useState } from 'react';
 import Image from 'next/image';
 import { useRouter } from 'next/navigation';
+import { motion } from 'framer-motion';
 import CircularGallery from '@/components/ui/CircularGallery';
 import BounceCards from '@/components/ui/BounceCards';
 import LiquidChrome from '@/components/background/LiquidChrome';
@@ -49,9 +50,23 @@ export function Hero() {
   const router = useRouter();
   const usecaseRef = useRef<HTMLDivElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
+  const [isTransitioning, setIsTransitioning] = useState(false);
+
+  // Animation variants
+  const pageVariants = {
+    initial: { opacity: 0, x: 100 },
+    animate: { opacity: 1, x: 0 },
+    exit: { opacity: 0, x: -100 },
+  };
 
   const handleStartClick = () => {
-    router.push('/personalized-recommendation/step1');
+    // Start transition animation
+    setIsTransitioning(true);
+
+    // Delay navigation to allow for animation
+    setTimeout(() => {
+      router.push('/algorithmGallery');
+    }, 800);
   };
 
   const scrollToUsecase = () => {
@@ -74,9 +89,13 @@ export function Hero() {
   }, []);
 
   return (
-    <div
+    <motion.div
       ref={containerRef}
       className="w-screen h-screen overflow-y-auto scroll-smooth snap-y snap-mandatory no-scrollbar"
+      initial="initial"
+      animate={isTransitioning ? 'exit' : 'animate'}
+      variants={pageVariants}
+      transition={{ duration: 0.5 }}
     >
       {/* Flowing Background */}
       <div className="fixed inset-0 z-0 overflow-hidden pointer-events-auto">
@@ -173,6 +192,6 @@ export function Hero() {
           </div>
         </div>
       </section>
-    </div>
+    </motion.div>
   );
 }

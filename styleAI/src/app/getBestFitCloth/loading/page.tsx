@@ -53,7 +53,7 @@ export default function LoadingPage() {
       } else {
         console.error('API verification failed:', data);
         // Redirect to step1 on API failure
-        router.replace('/personalized-recommendation/step1');
+        router.replace('/getBestFitCloth');
         return false;
       }
     } catch (error) {

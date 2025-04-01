@@ -15,7 +15,7 @@ export function Header() {
   const router = useRouter();
 
   const handleStartClick = () => {
-    router.push('/personalized-recommendation/uploadImages');
+    router.push('/algorithmGallery');
   };
 
   return (

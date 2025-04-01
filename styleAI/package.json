@@ -20,6 +20,7 @@
     "@types/js-cookie": "^3.0.6",
     "@types/pg": "^8.11.11",
     "chalk": "^4.1.2",
+    "clsx": "^2.1.1",
     "commander": "^11.1.0",
     "framer-motion": "^12.5.0",
     "fs-extra": "^11.2.0",
@@ -36,6 +37,7 @@
     "react": "^19.0.0",
     "react-dom": "^19.0.0",
     "react-zoom-pan-pinch": "^3.7.0",
+    "tailwind-merge": "^3.1.0",
     "three": "^0.174.0",
     "uuid": "^11.1.0",
     "zustand": "^5.0.3"
@@ -43,6 +45,7 @@
   "devDependencies": {
     "@tailwindcss/postcss": "^4",
     "@types/jsonwebtoken": "^9.0.9",
+    "@types/lodash": "^4.17.16",
     "@types/node": "^20",
     "@types/react": "^19.0.10",
     "@types/react-dom": "^19.0.4",
