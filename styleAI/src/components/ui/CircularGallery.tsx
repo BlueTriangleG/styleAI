@@ -9,6 +9,8 @@ import {
   Texture,
 } from 'ogl';
 
+const basePath = process.env.NEXT_PUBLIC_BASE_PATH;
+
 type GL = Renderer['gl'];
 
 function debounce<T extends (...args: any[]) => void>(func: T, wait: number) {
@@ -550,21 +552,21 @@ class App {
   ) {
     const defaultItems = [
       {
-        video: "gallery/video1.mp4",
-        text: 'Video 1',
+        video: basePath + "/gallery/model1.mp4",
+        text: 'Model 1',
       },
       {
-        video: "gallery/video2.mp4",
-        text: 'Video 2',
+        video: basePath + "/gallery/model2.mp4",
+        text: 'Model 2',
       },
       {
-        video: "gallery/video3.mp4",
-        text: 'Video 3',
+        video: basePath + "/gallery/model3.mp4",
+        text: 'Model 3',
       },
       {
-        video: "gallery/video4.mp4",
-        text: 'Video 4',
-      },
+        video: basePath + "/gallery/model4.mp4",
+        text: 'Model 4',
+      }
     ];
     const galleryItems = items && items.length ? items : defaultItems;
     this.mediasVideos = galleryItems.concat(galleryItems);
