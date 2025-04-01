@@ -339,9 +339,9 @@ class Media {
     };
 
     // Add error handling
-    video.onerror = () => {
-      console.error(`Failed to load video: ${this.video}`);
-    };
+    // video.onerror = () => {
+    //   console.error(`Failed to load video: ${this.video}`);
+    // };
     
     // Set the video source
     video.src = this.video;
