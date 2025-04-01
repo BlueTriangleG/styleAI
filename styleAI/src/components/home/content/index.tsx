@@ -6,13 +6,36 @@ import CircularGallery from '@/components/ui/CircularGallery';
 import BounceCards from '@/components/ui/BounceCards';
 import LiquidChrome from '@/components/background/LiquidChrome';
 
+const basePath = process.env.NEXT_PUBLIC_BASE_PATH;
+
 const images = [
-  process.env.NEXT_PUBLIC_BASE_PATH + '/gallery/outfit1.png',
-  process.env.NEXT_PUBLIC_BASE_PATH + '/gallery/outfit2.png',
-  process.env.NEXT_PUBLIC_BASE_PATH + '/gallery/outfit3.png',
-  process.env.NEXT_PUBLIC_BASE_PATH + '/gallery/outfit4.png',
-  process.env.NEXT_PUBLIC_BASE_PATH + '/gallery/outfit5.png',
+  basePath + '/gallery/outfit1.png',
+  basePath + '/gallery/outfit2.png',
+  basePath + '/gallery/outfit3.png',
+  basePath + '/gallery/outfit4.png',
+  basePath + '/gallery/outfit5.png',
 ];
+
+const galleryItems = [
+  {
+    video: basePath + "/gallery/model1.mp4",
+    text: 'Model 1',
+  },
+  {
+    video: basePath + "/gallery/model2.mp4",
+    text: 'Model 2',
+  },
+  {
+    video: basePath + "/gallery/model3.mp4",
+    text: 'Model 3',
+  },
+  {
+    video: basePath + "/gallery/model4.mp4",
+    text: 'Model 4',
+  }
+];
+
+const doubleDownPath = `${basePath}/doubledown.svg`;
 
 const transformStyles = [
   'rotate(5deg) translate(-150px)',
@@ -20,25 +43,6 @@ const transformStyles = [
   'rotate(-5deg)',
   'rotate(5deg) translate(70px)',
   'rotate(-5deg) translate(150px)',
-];
-
-const galleryItems = [
-  {
-    video: process.env.NEXT_PUBLIC_BASE_PATH + "/gallery/model1.mp4",
-    text: 'Video 1',
-  },
-  {
-    video: process.env.NEXT_PUBLIC_BASE_PATH + "/gallery/model2.mp4",
-    text: 'Video 2',
-  },
-  {
-    video: process.env.NEXT_PUBLIC_BASE_PATH + "/gallery/model3.mp4",
-    text: 'Video 3',
-  },
-  {
-    video: process.env.NEXT_PUBLIC_BASE_PATH + "/gallery/model4.mp4",
-    text: 'Video 4',
-  }
 ];
 
 export function Hero() {
@@ -121,7 +125,7 @@ export function Hero() {
               <p className="text-[#2D4B37] font-medium transition-all group-hover:text-[#FF9999]">Explore More</p>
               <div className="animate-bounce transition-transform group-hover:scale-110">
                 <Image 
-                  src="/doubledown.svg" 
+                  src={doubleDownPath}
                   alt="Scroll Down" 
                   width={40} 
                   height={40} 
