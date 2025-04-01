@@ -7,6 +7,8 @@ import { useAuth } from '@clerk/nextjs';
 import { getUserHistory } from '@/app/actions/getUserHistory';
 import { currentUser } from '@clerk/nextjs/server';
 import { Header } from '@/components/home/header';
+import LiquidChrome from '@/components/background/LiquidChrome';
+
 /**
  * ReportHistory Page
  *
@@ -104,12 +106,22 @@ export default function ReportHistoryPage() {
   return (
     <div className="min-h-screen bg-white pt-20">
       <Header />
+      <div className="fixed inset-0 z-0 overflow-hidden">
+        <LiquidChrome
+          baseColor={[0.9, 0.9, 0.9]}
+          speed={0.2}
+          amplitude={0.5}
+          frequencyX={3}
+          frequencyY={2}
+          interactive={true}
+        />
+        <div className="absolute inset-0 bg-white/10 pointer-events-none"></div>
+      </div>
       <div className="container mx-auto px-4 py-8">
-        <div className="mb-8 flex items-center justify-between border-b border-gray-100 pb-4">
+        <div className="mb-8 flex items-center justify-between  backdrop-blur-sm rounded-lg p-4">
           <h1 className="font-playfair text-3xl font-bold text-gray-800">
             Your reports
           </h1>
-
           <div className="flex space-x-3">
             <button className="rounded-full bg-gray-100 p-2 text-gray-600 transition-colors hover:bg-gray-200">
               <svg

@@ -62,9 +62,9 @@ export function HistoryCardGrid({
   );
 
   return (
-    <div className="grid grid-cols-1 gap-8 sm:grid-cols-2 lg:grid-cols-4">
+    <div className="grid grid-cols-1 gap-10 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
       {sortedReports.map((report) => (
-        <div key={report.id} className="h-[380px]">
+        <div key={report.id} className="h-[550px]">
           <HistoryCard report={report} />
         </div>
       ))}
