@@ -6,7 +6,7 @@ import { HistoryReportData } from '@/components/userHistory/types';
 import { useAuth } from '@clerk/nextjs';
 import { getUserHistory } from '@/app/actions/getUserHistory';
 import { currentUser } from '@clerk/nextjs/server';
-
+import { Header } from '@/components/home/header';
 /**
  * ReportHistory Page
  *
@@ -103,6 +103,7 @@ export default function ReportHistoryPage() {
 
   return (
     <div className="min-h-screen bg-white pt-20">
+      <Header />
       <div className="container mx-auto px-4 py-8">
         <div className="mb-8 flex items-center justify-between border-b border-gray-100 pb-4">
           <h1 className="font-playfair text-3xl font-bold text-gray-800">

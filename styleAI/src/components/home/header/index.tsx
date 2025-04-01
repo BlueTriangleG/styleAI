@@ -51,7 +51,7 @@ export function Header() {
                   <UserButton.Action
                     label="Report History"
                     labelIcon={<DotIcon />}
-                    onClick={() => router.push('/settings')}
+                    onClick={() => router.push('/reportHistory')}
                   />
                 </UserButton.MenuItems>
               </UserButton>
