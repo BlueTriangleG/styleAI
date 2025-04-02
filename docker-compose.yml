@@ -29,6 +29,8 @@ services:
 
   # 前端服务
   frontend:
+    env_file:
+      - './styleAI/.env.local'
     build: ./styleAI
     container_name: styleai-frontend
     restart: unless-stopped
