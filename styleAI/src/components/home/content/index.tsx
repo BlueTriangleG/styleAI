@@ -60,7 +60,19 @@ export function Hero() {
     animate: { opacity: 1, x: 0 },
     exit: { opacity: 0, x: -100 },
   };
-
+  const itemVariants = {
+    initial: { y: 20, opacity: 0 },
+    animate: {
+      y: 0,
+      opacity: 1,
+      transition: { duration: 0.5 },
+    },
+    exit: {
+      y: -20,
+      opacity: 0,
+      transition: { duration: 0.3 },
+    },
+  };
   /**
    * Handles the start button click for signed-in users
    * Initiates transition animation and navigates to algorithm gallery
@@ -116,18 +128,30 @@ export function Hero() {
       </div>
 
       {/* Hero Section - First Screen */}
-      <section className="w-screen h-screen flex justify-center items-center snap-start">
-        <div className="w-[80%] h-[80%] flex flex-col justify-around translate-y-[5%] bg-white/20 rounded-xl">
+      <section className="w-screen h-screen flex justify-center items-center snap-start relative">
+        <div className="w-[80%] flex flex-col justify-center rounded-xl">
           {/* Title */}
-          <div className="w-[100%] h-[30%]">
-            <h1 className="text-center text-5xl fFont-bold text-[#2D4B37] leading-tight">
-              Generate your outfits
-              <br />
-              Using <span className="text-[#FF9999]">STYLE-AI</span>
-            </h1>
+          <div className="w-[100%] mb-8 text-center font-playfair">
+            <motion.h1
+              className="text-[#000000] text-5xl font-bold block mb-2"
+              variants={itemVariants}>
+              Generate your best fit outfits
+            </motion.h1>
+            <div className="flex justify-center items-baseline">
+              <motion.h1
+                className="text-[#000000] text-4xl font-medium mr-2"
+                variants={itemVariants}>
+                Using{' '}
+              </motion.h1>
+              <motion.h1
+                className="text-[#FF9999] text-7xl font-bold"
+                variants={itemVariants}>
+                STYLE-AI
+              </motion.h1>
+            </div>
           </div>
           {/* Bounce Cards */}
-          <div className="w-[100%] h-[50%] flex justify-center items-center">
+          <div className="w-[100%] flex justify-center items-center mb-10">
             <BounceCards
               className="custom-bounceCards"
               images={images}
@@ -140,13 +164,32 @@ export function Hero() {
               enableHover={true}
             />
           </div>
-          {/* Scroll Down Button */}
-          <div className="w-[100%] h-[15%] flex justify-center">
+          {/* Start/Sign In Button */}
+          <div className="w-[100%] flex justify-center items-center">
+            <SignedIn>
+              <button
+                onClick={handleStartClick}
+                className="w-[120px] py-2 bg-black text-white rounded-full font-medium hover:bg-gray-800 transition-colors shadow-sm text-base">
+                Start
+              </button>
+            </SignedIn>
+
+            <SignedOut>
+              <SignInButton mode="modal">
+                <button className="w-[160px] py-2 bg-black text-white rounded-full font-medium hover:bg-gray-800 transition-colors shadow-sm text-base">
+                  Start
+                </button>
+              </SignInButton>
+            </SignedOut>
+          </div>
+
+          {/* Scroll Down Button - Positioned at bottom */}
+          <div className="absolute bottom-10 left-0 right-0 flex justify-center">
             <div
               className="flex flex-col justify-around items-center cursor-pointer group"
               onClick={scrollToUsecase}>
-              <p className="text-[#2D4B37] font-medium transition-all group-hover:text-[#FF9999]">
-                Explore More
+              <p className="text-[#2D4B37] font-medium mb-4 transition-all group-hover:text-[#FF9999]">
+                More details
               </p>
               <div className="animate-bounce transition-transform group-hover:scale-110">
                 <Image
@@ -166,7 +209,7 @@ export function Hero() {
       <section
         ref={usecaseRef}
         className="w-screen h-screen flex justify-center items-center snap-start">
-        <div className="w-[80%] h-[80%] flex flex-col justify-around translate-y-[5%] bg-white/20 rounded-md">
+        <div className="w-[80%] h-[80%] flex flex-col justify-around translate-y-[5%] bg-white/20 backdrop-blur-lg rounded-md">
           {/* Title */}
           <div className="w-[100%] h-[30%]">
             <h2 className="p-5 text-center text-5xl font-bold text-[#2D4B37]">
