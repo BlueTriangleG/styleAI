@@ -500,9 +500,9 @@ export default function StyleRecommendations({
             {/* Save button - Match style with other sections */}
             <div className="flex justify-end mt-12">
               <button
-                onClick={() => router.push('/dashboard')}
+                onClick={() => router.push('/reportHistory')}
                 className="px-6 py-3 bg-[#84a59d] hover:bg-[#6b8c85] text-white font-medium rounded-md transition-colors shadow-md font-inter">
-                Save Recommendations
+                View history
               </button>
             </div>
           </div>

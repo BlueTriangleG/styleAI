@@ -10,7 +10,8 @@ import {
   SignedIn,
   SignedOut,
 } from '@clerk/nextjs';
-
+import { ClipboardIcon } from '@radix-ui/react-icons';
+import SettingsPage from '@/app/settings/page';
 export function Header() {
   const router = useRouter();
 
@@ -41,13 +42,19 @@ export function Header() {
             </button>
             <div className="ml-3">
               <UserButton
-                afterSignOutUrl="/"
                 appearance={{
                   elements: {
-                    avatarBox: 'w-10 h-10',
+                    avatarBox: 'w-12 h-12',
                   },
-                }}
-              />
+                }}>
+                <UserButton.MenuItems>
+                  <UserButton.Action
+                    label="Report History"
+                    labelIcon={<ClipboardIcon />}
+                    onClick={() => router.push('/reportHistory')}
+                  />
+                </UserButton.MenuItems>
+              </UserButton>
             </div>
           </SignedIn>
 

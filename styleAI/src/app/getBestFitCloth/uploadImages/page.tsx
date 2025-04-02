@@ -6,6 +6,7 @@ import { useRouter } from 'next/navigation';
 import { RecommendationHeader } from '@/components/recommendation/Header';
 import { motion } from 'framer-motion';
 import LiquidChrome from '@/components/background/LiquidChrome';
+import { Tilt } from '@/components/ui/tilt';
 import {
   processImageClient,
   downloadImage,
@@ -331,7 +332,7 @@ export default function UploadImages() {
       // 延长动画时间，确保有足够时间进行过渡
       setTimeout(() => {
         // 使用replace而不是push，避免浏览器历史记录问题
-        router.replace('/personalized-recommendation/loading');
+        router.replace('/getBestFitCloth/loading');
       }, 800); // 增加到800ms，给动画更多时间
     } else {
       // 如果没有图像，显示提示
@@ -544,7 +545,8 @@ export default function UploadImages() {
                   </div>
                 </div>
               ) : image ? (
-                <div
+                <Tilt
+                  rotationFactor={5}
                   className="relative w-full"
                   style={{
                     height: 'calc(100% - 60px)',
@@ -610,7 +612,7 @@ export default function UploadImages() {
                       Download
                     </button>
                   </div>
-                </div>
+                </Tilt>
               ) : (
                 <div
                   className="w-full bg-white/60 backdrop-blur-xs rounded-md flex flex-col items-center justify-center cursor-pointer hover:bg-gray-200 transition-colors"

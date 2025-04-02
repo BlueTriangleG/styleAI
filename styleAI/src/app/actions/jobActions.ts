@@ -3,6 +3,7 @@
 import { createJob as dbCreateJob, getJobById } from '@/lib/models/job';
 import { v4 as uuidv4 } from 'uuid';
 import { currentUser } from '@clerk/nextjs/server';
+import { error } from 'console';
 
 /**
  * 创建新的job记录
@@ -25,8 +26,8 @@ export async function createJob(
       // 为了简化，我们这里直接使用Clerk用户ID
       userId = user.id;
     } else {
-      console.log('未找到用户，使用临时用户ID');
-      userId = 'temp-' + uuidv4();
+      console.log('未找到用户');
+      throw new Error('未找到用户');
     }
 
     console.log(`使用的用户ID: ${userId}`);

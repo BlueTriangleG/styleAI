@@ -9,10 +9,12 @@ StyleAI addresses a common challenge many people face: uncertainty about which c
 Our application analyzes facial features, body proportions, and physical attributes from user photos to generate tailored fashion recommendations. Users receive not only style advice but also visual previews showing how they would look in the recommended outfits, enabling confident shopping decisions without the need for costly personal styling services.
 
 StyleAI consists of two main components:
+
 - A modern, responsive **Next.js frontend** with React 19
 - A robust **Flask-based API backend** for image processing and AI analysis
 
 The application allows users to:
+
 1. Upload photos of themselves through camera capture or file upload
 2. Receive personalized style analysis based on facial and body features
 3. Get color palette recommendations that complement their natural attributes
@@ -23,6 +25,7 @@ The application allows users to:
 ## Key Features
 
 ### User-Focused Features
+
 - **AI-Powered Physical Attribute Analysis**: Analyzes facial features, body type, and personal characteristics to identify strengths and potential areas for enhancement
 - **Personalized Color Palette**: Identifies the most flattering colors based on user's skin tone, hair color, and other attributes
 - **Style Categorization**: Classifies users into style categories (Classic, Professional, Elegant, etc.) to tailor recommendations
@@ -31,11 +34,13 @@ The application allows users to:
 - **Style Discovery**: Helps users explore styles they might not have considered but which complement their features
 
 ### Future Development Features
+
 - **Real-Time Fashion Updates**: System will continuously collect the latest fashion trends and match them with user profiles
 - **Style Exploration**: Advanced categorization of fashion datasets to recommend new styles suitable for users' body types and appearances
 - **Extended Style Recommendations**: Enhanced AI models to suggest more varied and seasonally appropriate outfits
 
 ### Technical Features
+
 - **Advanced Image Processing**: Resizes, compresses, and optimizes images for analysis
 - **User Authentication**: Secure user account management with Clerk
 - **Responsive UI**: Beautiful, modern interface that works on all devices
@@ -46,6 +51,7 @@ The application allows users to:
 ## Technology Stack
 
 ### Frontend (styleAI/)
+
 - **Framework**: Next.js 15.2.2 with React 19
 - **Styling**: Tailwind CSS 4.x
 - **Animation**: Framer Motion, GSAP
@@ -54,6 +60,7 @@ The application allows users to:
 - **Authentication**: Clerk for secure user management
 
 ### Backend API (styleAI-api/)
+
 - **Framework**: Flask (Python)
 - **Image Processing**: Pillow (PIL)
 - **ML Libraries**: Transformers, PyTorch, scikit-learn (optional)
@@ -67,7 +74,7 @@ styleAI/
 ├── frontend (Next.js application)
 │   ├── src/
 │   │   ├── app/                   # Next.js app router
-│   │   │   ├── personalized-recommendation/  # Style recommendation workflows
+│   │   │   ├── getBestFitCloth/  # Style recommendation workflows
 │   │   │   │   ├── uploadImages/  # Image upload and camera integration
 │   │   │   │   ├── loading/       # Analysis processing screens
 │   │   │   │   └── generateReport/  # Results visualization
@@ -112,6 +119,7 @@ docker-compose up -d
 ```
 
 After running the above commands:
+
 - Frontend will be available at: http://localhost:3000
 - API will be available at: http://localhost:5001
 - Nginx proxy will be available at: http://localhost:80
@@ -143,19 +151,23 @@ The API server will start at http://localhost:5001
 ## API Endpoints
 
 ### Health Check
+
 - `GET /health`: Check if the API server is running
 
 ### Personalized Analysis
+
 - `POST /api/personalized/analysis`: Get personalized style analysis
   - Request: `{"jobId": "your-job-id"}`
   - Response: Analysis data including facial features, body features, recommended colors, and style categories
 
 ### Style Recommendations
+
 - `POST /api/personalized/wear-suit-pictures`: Get outfit recommendations
   - Request: `{"jobId": "your-job-id"}`
   - Response: List of recommended outfits with URLs and descriptions
 
 ### Image Processing
+
 - `POST /api/image/process`: Process and compress images for analysis
 - `POST /api/image/download`: Prepare images for download
 
@@ -172,11 +184,13 @@ The API server will start at http://localhost:5001
 ## Environment Variables
 
 ### Frontend
+
 - `NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY`: Your Clerk publishable key
 - `CLERK_SECRET_KEY`: Your Clerk secret key
 - `NEXT_PUBLIC_API_URL`: URL of the backend API
 
 ### Backend
+
 - `FLASK_APP`: Main Flask application file
 - `FLASK_ENV`: Environment (development/production)
 - `FLASK_DEBUG`: Enable/disable debug mode
@@ -191,13 +205,15 @@ The application is fully containerized and can be deployed using Docker Compose.
 ### Adding New Style Features
 
 To add new style analysis features:
+
 1. Update the AI models in `styleAI-api/app/utils/algorithms/`
 2. Modify the analysis parsing in `styleAI-api/app/routes/personalized.py`
-3. Update the frontend visualization in `styleAI/src/app/personalized-recommendation/generateReport/`
+3. Update the frontend visualization in `styleAI/src/app/getBestFitCloth/`
 
 ### Extending the Frontend
 
 The React components are organized in a modular fashion to make it easy to extend the UI:
+
 - Add new pages in the `styleAI/src/app/` directory using Next.js app router
 - Create reusable components in `styleAI/src/components/`
 - Add new styles in the Tailwind CSS configuration
