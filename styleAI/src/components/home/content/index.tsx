@@ -7,7 +7,7 @@ import CircularGallery from '@/components/ui/CircularGallery';
 import BounceCards from '@/components/ui/BounceCards';
 import LiquidChrome from '@/components/background/LiquidChrome';
 import { useAuth, SignInButton, SignedIn, SignedOut } from '@clerk/nextjs';
-
+import { HeroScrollSection } from '@/components/home/hero-scroll-section';
 const basePath = process.env.NEXT_PUBLIC_BASE_PATH;
 
 const images = [
@@ -50,6 +50,7 @@ const transformStyles = [
 export function Hero() {
   const router = useRouter();
   const usecaseRef = useRef<HTMLDivElement>(null);
+  const scrollSectionRef = useRef<HTMLDivElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
   const [isTransitioning, setIsTransitioning] = useState(false);
   const { isSignedIn } = useAuth();
@@ -89,6 +90,10 @@ export function Hero() {
 
   const scrollToUsecase = () => {
     usecaseRef.current?.scrollIntoView({ behavior: 'smooth' });
+  };
+
+  const scrollToScrollSection = () => {
+    scrollSectionRef.current?.scrollIntoView({ behavior: 'smooth' });
   };
 
   // Allow scrolling within container but prevent body scrolling
@@ -187,7 +192,7 @@ export function Hero() {
           <div className="absolute bottom-10 left-0 right-0 flex justify-center">
             <div
               className="flex flex-col justify-around items-center cursor-pointer group"
-              onClick={scrollToUsecase}>
+              onClick={scrollToScrollSection}>
               <p className="text-[#2D4B37] font-medium mb-4 transition-all group-hover:text-[#FF9999]">
                 More details
               </p>
@@ -204,8 +209,30 @@ export function Hero() {
           </div>
         </div>
       </section>
+      {/* Scroll Animation Section */}
+      <section className="w-screen h-screen flex justify-center items-center snap-start">
+        <HeroScrollSection />
+        {/* <div className="flex justify-center mt-6">
+          <button
+            onClick={scrollToUsecase}
+            className="flex flex-col items-center group">
+            <p className="text-[#2D4B37] font-medium mb-2 transition-all group-hover:text-[#FF9999]">
+              View Use Cases
+            </p>
+            <div className="animate-bounce">
+              <Image
+                src={doubleDownPath}
+                alt="Scroll Down"
+                width={30}
+                height={30}
+                className="transition-all group-hover:opacity-80"
+              />
+            </div>
+          </button>
+        </div> */}
+      </section>
 
-      {/* Usecase Section - Second Screen */}
+      {/* Usecase Section - Last Screen */}
       <section
         ref={usecaseRef}
         className="w-screen h-screen flex justify-center items-center snap-start">
