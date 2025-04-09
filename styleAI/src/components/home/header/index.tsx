@@ -11,7 +11,6 @@ import {
   SignedOut,
 } from '@clerk/nextjs';
 import { ClipboardIcon } from '@radix-ui/react-icons';
-import SettingsPage from '@/app/settings/page';
 export function Header() {
   const router = useRouter();
 
@@ -20,8 +19,8 @@ export function Header() {
   };
 
   return (
-    <header className="fixed top-0 left-0 right-0 bg-white/90 backdrop-blur-sm shadow-sm z-50">
-      <div className="container mx-auto px-4 md:px-8 py-4 flex items-center justify-between">
+    <header className="fixed top-0 left-0 right-0 backdrop-blur-sm z-50">
+      <div className="w-full px-6 md:px-12 py-4 flex items-center justify-between">
         {/* Left side - Logo */}
         <div className="flex items-center">
           <Link
