@@ -1,5 +1,15 @@
 from app import create_app
 import os
+import gc
+import sys
+
+# Set lower memory usage for libraries
+os.environ['TF_MEMORY_ALLOCATION'] = '0.3'  # Use only 30% of memory for TensorFlow if used
+os.environ['OMP_NUM_THREADS'] = '1'  # Limit OpenMP threads
+os.environ['MKL_NUM_THREADS'] = '1'  # Limit MKL threads
+
+# Run garbage collection
+gc.collect()
 
 # Create Flask application instance
 app = create_app()

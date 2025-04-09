@@ -17,6 +17,7 @@ services:
       - ./styleAI-api/app:/app/app
       - ./styleAI-api/app.py:/app/app.py
       - ./styleAI-api/requirements.txt:/app/requirements.txt
+      - ./styleAI-api/gunicorn.conf.py:/app/gunicorn.conf.py
       - ./styleAI-api/temp:/app/temp
     healthcheck:
       test: ['CMD', 'curl', '-f', 'http://localhost:5001/health']
@@ -30,7 +31,7 @@ services:
       resources:
         limits:
           cpus: '2'
-          memory: 2G
+          memory: 3G
 
   # 前端服务
   frontend:

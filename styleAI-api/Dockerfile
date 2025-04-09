@@ -42,8 +42,11 @@ COPY app/utils/algorithms/ALL_final_merged.json app/utils/algorithms/ALL_final_m
 # Copy route modules
 COPY app/routes/*.py app/routes/
 
+# Copy Gunicorn configuration file
+COPY gunicorn.conf.py .
+
 # Expose port
 EXPOSE 5001
 
-# Run with Gunicorn with worker concurrency - memory optimized configuration
-CMD ["gunicorn", "--workers=1", "--threads=4", "--worker-class=gthread", "--bind=0.0.0.0:5001", "--timeout=240", "--max-requests=1000", "--max-requests-jitter=50", "app:create_app()"] 
+# Run with Gunicorn with memory optimization
+CMD ["gunicorn", "--config", "gunicorn.conf.py", "app:create_app()"] 
