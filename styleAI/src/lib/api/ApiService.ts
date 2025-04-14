@@ -27,7 +27,7 @@ class ApiService {
   async processImage(imageData: string): Promise<string> {
     try {
       const response = await fetch(
-        `${this.baseUrl}${API_ENDPOINTS.IMAGE_PROCESS}`,
+        `${API_ENDPOINTS.IMAGE_PROCESS}`,
         {
           method: 'POST',
           headers: DEFAULT_HEADERS,
@@ -64,7 +64,7 @@ class ApiService {
   ): Promise<{ filePath: string; message: string }> {
     try {
       const response = await fetch(
-        `${this.baseUrl}${API_ENDPOINTS.IMAGE_DOWNLOAD}`,
+        `${API_ENDPOINTS.IMAGE_DOWNLOAD}`,
         {
           method: 'POST',
           headers: DEFAULT_HEADERS,
@@ -104,7 +104,7 @@ class ApiService {
     try {
       console.log(`正在获取个性化分析数据，jobId: ${jobId}`);
       const response = await fetch(
-        `${this.baseUrl}${API_ENDPOINTS.PERSONALIZED_ANALYSIS}`,
+        `${API_ENDPOINTS.PERSONALIZED_ANALYSIS}`,
         {
           method: 'POST',
           headers: DEFAULT_HEADERS,
@@ -139,7 +139,7 @@ class ApiService {
     try {
       console.log(`正在获取穿着建议图片，jobId: ${jobId}`);
       const response = await fetch(
-        `${this.baseUrl}${API_ENDPOINTS.WEAR_SUIT_PICTURES}`,
+        `${API_ENDPOINTS.WEAR_SUIT_PICTURES}`,
         {
           method: 'POST',
           headers: DEFAULT_HEADERS,
@@ -194,7 +194,7 @@ class ApiService {
     try {
       console.log(`正在获取穿着建议图片，jobId: ${jobId}`);
       const response = await fetch(
-        `${this.baseUrl}${API_ENDPOINTS.GENERATE_BEST_FIT}`,
+        `${API_ENDPOINTS.GENERATE_BEST_FIT}`,
         {
           method: 'POST',
           headers: DEFAULT_HEADERS,
