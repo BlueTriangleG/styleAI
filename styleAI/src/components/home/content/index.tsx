@@ -53,7 +53,6 @@ export function Hero() {
   const scrollSectionRef = useRef<HTMLDivElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
   const [isTransitioning, setIsTransitioning] = useState(false);
-  const { isSignedIn } = useAuth();
 
   // Animation variants
   const pageVariants = {
@@ -114,7 +113,7 @@ export function Hero() {
   return (
     <motion.div
       ref={containerRef}
-      className="w-screen h-screen overflow-y-auto scroll-smooth snap-y snap-mandatory no-scrollbar"
+      className="w-screen overflow-y-auto no-scrollbar"
       initial="initial"
       animate={isTransitioning ? 'exit' : 'animate'}
       variants={pageVariants}
@@ -133,27 +132,35 @@ export function Hero() {
       </div>
 
       {/* Hero Section - First Screen */}
-      <section className="w-screen h-screen flex justify-center items-center snap-start relative">
-        <div className="w-[80%] flex flex-col justify-center rounded-xl">
+      <main className="w-screen flex justify-center items-center relative">
+        <div className="w-[100%] mt-[15vh] flex flex-col justify-center rounded-xl">
           {/* Title */}
           <div className="w-[100%] mb-8 text-center font-playfair">
             <motion.h1
-              className="text-[#000000] text-5xl font-bold block mb-2"
+              className="text-[#000000] text-3xl sm:text-4xl md:text-5xl lg:text-5xl xl:text-6xl font-bold block"
               variants={itemVariants}>
               Generate your best fit outfits
             </motion.h1>
             <div className="flex justify-center items-baseline">
               <motion.h1
-                className="text-[#000000] text-4xl font-medium mr-2"
+                className="text-[#000000] text-2xl sm:text-3xl md:text-3xl lg:text-5xl xl:text-5xl font-medium mr-2"
                 variants={itemVariants}>
                 Using{' '}
               </motion.h1>
               <motion.h1
-                className="text-[#FF9999] text-7xl font-bold"
+                className="text-[#FF9999] text-4xl sm:text-5xl md:text-6xl lg:text-7xl xl:text-8xl font-bold"
                 variants={itemVariants}>
                 STYLE-AI
               </motion.h1>
             </div>
+            <motion.p
+              className="text-[#333333] font-light text-sm sm:text-base md:text-lg lg:text-xl max-w-3xl mx-auto mt-6 px-4"
+              variants={itemVariants}>
+              StyleAI harnesses cutting‑edge artificial intelligence to deliver
+              bespoke, head‑to‑toe styling recommendations—hairstyles, outfits,
+              and more. Simply snap a photo of yourself to unlock your
+              personalized fashion blueprint.
+            </motion.p>
           </div>
           {/* Bounce Cards */}
           <div className="w-[100%] flex justify-center items-center mb-10">
@@ -169,27 +176,30 @@ export function Hero() {
               enableHover={true}
             />
           </div>
+
+          {/* Scroll Animation Section */}
+
+          <HeroScrollSection />
           {/* Start/Sign In Button */}
-          <div className="w-[100%] flex justify-center items-center">
+          {/* <div className="w-[100%] flex justify-center items-center">
             <SignedIn>
               <button
                 onClick={handleStartClick}
-                className="w-[120px] py-2 bg-black text-white rounded-full font-medium hover:bg-gray-800 transition-colors shadow-sm text-base">
+                className="w-[120px] py-2 bg-black text-white rounded-full font-medium hover:bg-gray-800 transition-colors shadow-sm text-sm sm:text-base">
                 Start
               </button>
             </SignedIn>
 
             <SignedOut>
               <SignInButton mode="modal">
-                <button className="w-[160px] py-2 bg-black text-white rounded-full font-medium hover:bg-gray-800 transition-colors shadow-sm text-base">
+                <button className="w-[160px] py-2 bg-black text-white rounded-full font-medium hover:bg-gray-800 transition-colors shadow-sm text-sm sm:text-base">
                   Start
                 </button>
               </SignInButton>
             </SignedOut>
-          </div>
-
+          </div> */}
           {/* Scroll Down Button - Positioned at bottom */}
-          <div className="absolute bottom-10 left-0 right-0 flex justify-center">
+          {/* <div className="absolute bottom-10 left-0 right-0 flex justify-center">
             <div
               className="flex flex-col justify-around items-center cursor-pointer group"
               onClick={scrollToScrollSection}>
@@ -206,43 +216,21 @@ export function Hero() {
                 />
               </div>
             </div>
-          </div>
+          </div> */}
         </div>
-      </section>
-      {/* Scroll Animation Section */}
-      <section className="w-screen h-screen flex justify-center items-center snap-start">
-        <HeroScrollSection />
-        {/* <div className="flex justify-center mt-6">
-          <button
-            onClick={scrollToUsecase}
-            className="flex flex-col items-center group">
-            <p className="text-[#2D4B37] font-medium mb-2 transition-all group-hover:text-[#FF9999]">
-              View Use Cases
-            </p>
-            <div className="animate-bounce">
-              <Image
-                src={doubleDownPath}
-                alt="Scroll Down"
-                width={30}
-                height={30}
-                className="transition-all group-hover:opacity-80"
-              />
-            </div>
-          </button>
-        </div> */}
-      </section>
+      </main>
 
       {/* Usecase Section - Last Screen */}
       <section
         ref={usecaseRef}
-        className="w-screen h-screen flex justify-center items-center snap-start">
+        className="w-screen h-screen flex justify-center items-center">
         <div className="w-[80%] h-[80%] flex flex-col justify-around translate-y-[5%] bg-white/20 backdrop-blur-lg rounded-md">
           {/* Title */}
           <div className="w-[100%] h-[30%]">
-            <h2 className="p-5 text-center text-5xl font-bold text-[#2D4B37]">
+            <h2 className="p-5 text-center text-3xl sm:text-4xl md:text-4xl lg:text-5xl xl:text-5xl font-bold text-[#2D4B37]">
               Use Cases
             </h2>
-            <p className="text-center text-1xl text-gray-600">
+            <p className="text-center text-sm sm:text-base md:text-lg lg:text-xl xl:text-xl text-gray-600">
               Browse through our collection of fashion styles and find
               inspiration for your next outfit. Our AI will help you create
               personalized recommendations based on your preferences.
@@ -263,14 +251,14 @@ export function Hero() {
             <SignedIn>
               <button
                 onClick={handleStartClick}
-                className="px-6 py-2.5 bg-[#2D4B37] text-white rounded-md font-medium hover:bg-[#1F3526] transition-colors shadow-sm text-base">
+                className="px-6 py-2.5 bg-[#2D4B37] text-white rounded-md font-medium hover:bg-[#1F3526] transition-colors shadow-sm text-sm sm:text-base">
                 Start
               </button>
             </SignedIn>
 
             <SignedOut>
               <SignInButton mode="modal">
-                <button className="px-6 py-2.5 bg-[#2D4B37] text-white rounded-md font-medium hover:bg-[#1F3526] transition-colors shadow-sm text-base">
+                <button className="px-6 py-2.5 bg-[#2D4B37] text-white rounded-md font-medium hover:bg-[#1F3526] transition-colors shadow-sm text-sm sm:text-base">
                   Try it now!
                 </button>
               </SignInButton>

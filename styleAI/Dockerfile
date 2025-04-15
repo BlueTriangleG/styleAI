@@ -5,6 +5,14 @@ COPY package.json package-lock.json* ./
 FROM base AS dependencies
 RUN npm ci
 
+FROM dependencies AS development
+WORKDIR /app
+# We don't need to copy the source code here as it will be mounted as a volume
+ENV NODE_ENV=development
+ENV PORT=3000
+EXPOSE 3000
+CMD ["npm", "run", "dev"]
+
 FROM dependencies AS builder
 COPY . .
 # Build the application - environment variables will be passed at runtime

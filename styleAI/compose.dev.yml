@@ -1,0 +1,43 @@
+version: '3'
+
+services:
+  styleai:
+    env_file:
+      - '.env.local'
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: development # 使用开发环境构建阶段
+    ports:
+      - '3000:3000'
+    environment:
+      NODE_ENV: development
+      PORT: 3000
+    volumes:
+      - .:/app # 将整个项目目录挂载到容器中
+      - /app/node_modules # 防止本地 node_modules 覆盖容器内的
+      - styleai-data:/app/store
+    networks:
+      - styleai-network
+    command: npm run dev # 使用开发服务器启动命令
+    restart: unless-stopped
+
+  nginx:
+    image: nginx:alpine
+    ports:
+      - '80:80'
+      - '443:443'
+    volumes:
+      - ./nginx.conf:/etc/nginx/conf.d/default.conf
+      - .:/app # 同样挂载项目目录以访问静态文件
+    depends_on:
+      - styleai
+    networks:
+      - styleai-network
+    restart: always
+
+volumes:
+  styleai-data:
+
+networks:
+  styleai-network:
