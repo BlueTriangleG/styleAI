@@ -153,14 +153,6 @@ export function Hero() {
                 STYLE-AI
               </motion.h1>
             </div>
-            <motion.p
-              className="text-[#333333] font-light text-sm sm:text-base md:text-lg lg:text-xl max-w-3xl mx-auto mt-6 px-4"
-              variants={itemVariants}>
-              StyleAI harnesses cutting‑edge artificial intelligence to deliver
-              bespoke, head‑to‑toe styling recommendations—hairstyles, outfits,
-              and more. Simply snap a photo of yourself to unlock your
-              personalized fashion blueprint.
-            </motion.p>
           </div>
           {/* Bounce Cards */}
           <div className="w-[100%] flex justify-center items-center mb-10">
@@ -176,28 +168,19 @@ export function Hero() {
               enableHover={true}
             />
           </div>
+          {/* <motion.p
+            className="text-[#333333] font-light text-sm sm:text-base md:text-lg lg:text-xl max-w-3xl mx-auto mt-6 px-4"
+            variants={itemVariants}>
+            StyleAI harnesses cutting‑edge artificial intelligence to deliver
+            bespoke, head‑to‑toe styling recommendations—hairstyles, outfits,
+            and more. Simply snap a photo of yourself to unlock your
+            personalized fashion blueprint.
+          </motion.p> */}
 
           {/* Scroll Animation Section */}
 
           <HeroScrollSection />
-          {/* Start/Sign In Button */}
-          {/* <div className="w-[100%] flex justify-center items-center">
-            <SignedIn>
-              <button
-                onClick={handleStartClick}
-                className="w-[120px] py-2 bg-black text-white rounded-full font-medium hover:bg-gray-800 transition-colors shadow-sm text-sm sm:text-base">
-                Start
-              </button>
-            </SignedIn>
 
-            <SignedOut>
-              <SignInButton mode="modal">
-                <button className="w-[160px] py-2 bg-black text-white rounded-full font-medium hover:bg-gray-800 transition-colors shadow-sm text-sm sm:text-base">
-                  Start
-                </button>
-              </SignInButton>
-            </SignedOut>
-          </div> */}
           {/* Scroll Down Button - Positioned at bottom */}
           {/* <div className="absolute bottom-10 left-0 right-0 flex justify-center">
             <div
@@ -217,55 +200,72 @@ export function Hero() {
               </div>
             </div>
           </div> */}
-        </div>
-      </main>
+          {/* Usecase Section - Last Screen */}
+          <section ref={usecaseRef} className="w-full h-screen flex">
+            <div className="w-[100%] flex flex-col translate-y-[5%] rounded-md gap-10">
+              {/* Title */}
+              <div className="w-[100%] flex flex-col justify-center items-center">
+                <h2 className="p-5 text-center text-3xl sm:text-4xl md:text-4xl lg:text-5xl xl:text-5xl font-bold text-[#2D4B37]">
+                  Use Cases
+                </h2>
+              </div>
+              <div className="w-[100%] flex flex-col justify-center items-center">
+                <p className="text-center w-[50%] text-sm sm:text-base md:text-lg lg:text-xl xl:text-xl text-gray-600">
+                  Browse through our collection of fashion styles and find
+                  inspiration for your next outfit. Our AI will help you create
+                  personalized recommendations based on your preferences.
+                </p>
+              </div>
+              {/* Circular Gallery */}
+              <div className="w-[100%] h-[50%] flex top-0">
+                <CircularGallery
+                  items={galleryItems}
+                  bend={2}
+                  textColor="transparent"
+                  borderRadius={0.05}
+                  font="0px var(--font-playfair)"
+                />
+              </div>
+              {/* Start/Sign In Button */}
+              {/* <div className="w-[100%] h-[10%] flex justify-center items-center mb-5">
+                <SignedIn>
+                  <button
+                    onClick={handleStartClick}
+                    className="px-6 py-2.5 bg-[#2D4B37] text-white rounded-md font-medium hover:bg-[#1F3526] transition-colors shadow-sm text-sm sm:text-base">
+                    Start
+                  </button>
+                </SignedIn>
 
-      {/* Usecase Section - Last Screen */}
-      <section
-        ref={usecaseRef}
-        className="w-screen h-screen flex justify-center items-center">
-        <div className="w-[80%] h-[80%] flex flex-col justify-around translate-y-[5%] bg-white/20 backdrop-blur-lg rounded-md">
-          {/* Title */}
-          <div className="w-[100%] h-[30%]">
-            <h2 className="p-5 text-center text-3xl sm:text-4xl md:text-4xl lg:text-5xl xl:text-5xl font-bold text-[#2D4B37]">
-              Use Cases
-            </h2>
-            <p className="text-center text-sm sm:text-base md:text-lg lg:text-xl xl:text-xl text-gray-600">
-              Browse through our collection of fashion styles and find
-              inspiration for your next outfit. Our AI will help you create
-              personalized recommendations based on your preferences.
-            </p>
-          </div>
-          {/* Circular Gallery */}
-          <div className="w-[100%] h-[50%] flex items-center">
-            <CircularGallery
-              items={galleryItems}
-              bend={2}
-              textColor="transparent"
-              borderRadius={0.05}
-              font="0px var(--font-playfair)"
-            />
-          </div>
+                <SignedOut>
+                  <SignInButton mode="modal">
+                    <button className="px-6 py-2.5 bg-[#2D4B37] text-white rounded-md font-medium hover:bg-[#1F3526] transition-colors shadow-sm text-sm sm:text-base">
+                      Try it now!
+                    </button>
+                  </SignInButton>
+                </SignedOut>
+              </div> */}
+            </div>
+          </section>
           {/* Start/Sign In Button */}
-          <div className="w-[100%] h-[10%] flex justify-center items-center mb-5">
+          <div className="w-[100%] flex justify-center items-center">
             <SignedIn>
               <button
                 onClick={handleStartClick}
-                className="px-6 py-2.5 bg-[#2D4B37] text-white rounded-md font-medium hover:bg-[#1F3526] transition-colors shadow-sm text-sm sm:text-base">
+                className="w-[120px] py-2 bg-black text-white rounded-full font-medium hover:bg-gray-800 transition-colors shadow-sm text-sm sm:text-base">
                 Start
               </button>
             </SignedIn>
 
             <SignedOut>
               <SignInButton mode="modal">
-                <button className="px-6 py-2.5 bg-[#2D4B37] text-white rounded-md font-medium hover:bg-[#1F3526] transition-colors shadow-sm text-sm sm:text-base">
-                  Try it now!
+                <button className="w-[160px] py-2 bg-black text-white rounded-full font-medium hover:bg-gray-800 transition-colors shadow-sm text-sm sm:text-base">
+                  Start
                 </button>
               </SignInButton>
             </SignedOut>
           </div>
         </div>
-      </section>
+      </main>
     </motion.div>
   );
 }
