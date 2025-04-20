@@ -34,6 +34,11 @@ export function Header() {
         <div className="flex items-center space-x-4">
           <SignedIn>
             {/* Only shown when user is signed in */}
+            <Link
+              href="/checkout/embedded/quickstart"
+              className="bg-white text-[#2D4B37] border border-[#2D4B37] px-6 py-2.5 rounded-md font-medium hover:bg-gray-50 transition-colors shadow-sm text-base flex items-center">
+              <span className="mr-1">💎</span> Subscribe
+            </Link>
             <button
               onClick={handleStartClick}
               className="bg-[#2D4B37] text-white px-6 py-2.5 rounded-md font-medium hover:bg-[#1F3526] transition-colors shadow-sm text-base">
@@ -59,6 +64,11 @@ export function Header() {
 
           <SignedOut>
             {/* Only shown when user is signed out */}
+            <Link
+              href="/checkout/embedded/quickstart"
+              className="bg-white text-[#2D4B37] border border-[#2D4B37] px-6 py-2.5 rounded-md font-medium hover:bg-gray-50 transition-colors shadow-sm text-base flex items-center">
+              <span className="mr-1">💎</span> Subscribe
+            </Link>
             <SignInButton mode="modal">
               <button className="bg-[#2D4B37] text-white px-6 py-2.5 rounded-md font-medium hover:bg-[#1F3526] transition-colors shadow-sm text-base">
                 Sign In
