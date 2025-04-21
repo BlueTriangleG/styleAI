@@ -131,3 +131,176 @@ export async function getCheckoutStatus(data: { sessionId: string }): Promise<{
     return { error: 'Failed to retrieve checkout session' };
   }
 }
+
+/**
+ * Schema for createCreditInvoice input
+ */
+const createCreditInvoiceSchema = z.object({
+  amount: z.number().min(1, 'Amount must be at least 1 cent'),
+  credits: z.number().min(1, 'Credits must be at least 1'),
+  description: z.string().optional(),
+});
+
+/**
+ * Creates an invoice for credit purchase and handles the credit granting process
+ * @param {Object} data - The input data containing the amount, credits, and description
+ * @returns {Promise<Object>} Result with invoice URL or error
+ */
+export async function createCreditInvoice(data: {
+  amount: number;
+  credits: number;
+  description?: string;
+}): Promise<{ invoiceUrl: string | null; error?: string }> {
+  try {
+    // Validate input data
+    const validatedData = createCreditInvoiceSchema.parse(data);
+    const { amount, credits, description } = validatedData;
+
+    const stripe = getStripeInstance();
+
+    // Get the authenticated user's customer ID
+    // In a real app, you would get this from your authentication system
+    // This is a simplified example - you need to implement proper user authentication
+    const customerId = await getCurrentUserStripeCustomerId();
+
+    if (!customerId) {
+      return {
+        invoiceUrl: null,
+        error: 'User not authenticated or no Stripe customer found',
+      };
+    }
+
+    // Create a draft invoice for the customer
+    const invoice = await stripe.invoices.create({
+      customer: customerId,
+      collection_method: 'send_invoice',
+      days_until_due: 30,
+      description: description || `Credit purchase: ${credits} points`,
+      metadata: {
+        credits_to_grant: credits.toString(),
+        credit_purchase: 'true',
+      },
+    });
+
+    // Add invoice item for the credit purchase
+    await stripe.invoiceItems.create({
+      customer: customerId,
+      invoice: invoice.id,
+      amount: amount,
+      currency: 'usd',
+      description: description || `Credit package - ${credits} points`,
+    });
+
+    // Finalize the invoice
+    const finalizedInvoice = await stripe.invoices.finalizeInvoice(
+      invoice.id as string
+    );
+
+    // Send the invoice to the customer
+    await stripe.invoices.sendInvoice(invoice.id as string);
+
+    // Return the hosted invoice URL where the customer can pay
+    return { invoiceUrl: finalizedInvoice.hosted_invoice_url || null };
+  } catch (error) {
+    console.error('Error creating credit invoice:', error);
+    return {
+      invoiceUrl: null,
+      error:
+        error instanceof Error
+          ? error.message
+          : 'Failed to create credit invoice',
+    };
+  }
+}
+
+/**
+ * Temporary function to get the current user's Stripe customer ID
+ * In a real application, this would retrieve the customer ID from your authentication system
+ * @returns {Promise<string|null>} The Stripe customer ID or null if not found
+ */
+async function getCurrentUserStripeCustomerId(): Promise<string | null> {
+  // This is a placeholder - in a real app, you would:
+  // 1. Get the authenticated user's ID from your auth system
+  // 2. Look up the user in your database to get their Stripe customer ID
+  // 3. Return the Stripe customer ID
+
+  // For testing, you can return a hard-coded customer ID
+  // WARNING: Replace this with proper authentication in production!
+  return process.env.STRIPE_TEST_CUSTOMER_ID || null;
+}
+
+/**
+ * Function to be called from a webhook handler when an invoice is paid
+ * This grants the purchased credits to the customer
+ * @param {string} invoiceId - The ID of the paid invoice
+ */
+export async function handlePaidCreditInvoice(
+  invoiceId: string
+): Promise<{ success: boolean; error?: string }> {
+  try {
+    const stripe = getStripeInstance();
+
+    // Retrieve the invoice to get customer ID and metadata
+    const invoice = await stripe.invoices.retrieve(invoiceId);
+
+    // Check if this is a credit purchase invoice
+    if (!invoice.metadata?.credit_purchase === true) {
+      return { success: true }; // Not a credit invoice, nothing to do
+    }
+
+    const customerId = invoice.customer as string;
+    const creditsToGrant = parseInt(
+      invoice.metadata?.credits_to_grant || '0',
+      10
+    );
+
+    if (!creditsToGrant) {
+      return {
+        success: false,
+        error: 'No credits amount specified in invoice metadata',
+      };
+    }
+
+    // Grant the credits to the customer
+    // Note: Stripe doesn't have a creditGrants API - this would be implemented
+    // in your own database to track user credits
+    // Example implementation:
+    await updateUserCredits(
+      customerId,
+      creditsToGrant,
+      `Credit Purchase - Invoice ${invoice.number}`
+    );
+
+    return { success: true };
+  } catch (error) {
+    console.error('Error granting credits after invoice payment:', error);
+    return {
+      success: false,
+      error: error instanceof Error ? error.message : 'Failed to grant credits',
+    };
+  }
+}
+
+/**
+ * Updates the user's credit balance in your database
+ * @param {string} customerId - The Stripe customer ID
+ * @param {number} creditsToAdd - The number of credits to add to the user's balance
+ * @param {string} description - Description of the credit update
+ */
+async function updateUserCredits(
+  customerId: string,
+  creditsToAdd: number,
+  description: string
+): Promise<void> {
+  // In a real application, you would:
+  // 1. Connect to your database
+  // 2. Retrieve the user associated with this Stripe customer ID
+  // 3. Update their credit balance
+  // 4. Log the transaction
+
+  console.log(
+    `[DEMO] Added ${creditsToAdd} credits to customer ${customerId}: ${description}`
+  );
+
+  // This is a placeholder - implement your actual database update logic here
+}
