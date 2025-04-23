@@ -4,6 +4,7 @@
 GREEN='\033[0;32m'
 YELLOW='\033[1;33m'
 RED='\033[0;31m'
+BLUE='\033[0;34m'
 NC='\033[0m' # No Color
 
 # 显示标题
@@ -39,7 +40,7 @@ function build_and_start() {
     if [ $? -eq 0 ]; then
         echo -e "${GREEN}服务已成功启动!${NC}"
         echo -e "前端界面: ${GREEN}http://localhost${NC}"
-        echo -e "API服务: ${GREEN}http://localhost:5001${NC}"
+        echo -e "API服务 (Gunicorn): ${GREEN}http://localhost:5001${NC}"
     else
         echo -e "${RED}启动服务失败，请检查日志。${NC}"
         exit 1

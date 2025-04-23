@@ -1,81 +1,63 @@
-# Server Actions 使用说明
+# Server Actions
 
-本目录包含了 Next.js Server Actions，这些函数可以直接从客户端组件调用，无需创建 API 路由。
+This directory contains Next.js server actions that handle server-side logic for the application.
 
-## 可用的 Server Actions
+## Available Actions
 
-### 1. Job 相关 Actions (`jobActions.ts`)
+### `stripeActions.ts`
 
-#### `createJob`
+Server actions for Stripe payment integration.
 
-创建新的 job 记录，可以包含用户上传的图片。
+#### `createCheckoutSession`
 
-```typescript
-import { createJob } from '@/app/actions/jobActions';
-
-// 使用示例
-const jobId = await createJob(base64ImageData);
-console.log(`创建的job ID: ${jobId}`);
-```
-
-#### `getBestFitImage`
-
-获取特定 job 的最佳匹配图片。
+Creates a Stripe checkout session for a product.
 
 ```typescript
-import { getBestFitImage } from '@/app/actions/jobActions';
+import { createCheckoutSession } from '@/app/actions/stripeActions';
 
-// 使用示例
-const result = await getBestFitImage(jobId);
-if (result.status === 'success') {
-  const imageDataUrl = `data:image/jpeg;base64,${result.imageData}`;
-  // 使用图片数据...
+// Example usage in a client component
+const result = await createCheckoutSession({
+  productId: 'prod_SABGtwXELcJ7EZ',
+});
+
+if (result.error || !result.clientSecret) {
+  // Handle error
+} else {
+  // Use the client secret with Stripe.js
+  const clientSecret = result.clientSecret;
 }
 ```
 
-#### `generateBestFit`
+#### `getCheckoutStatus`
 
-为特定 job 生成最佳匹配图片。
+Gets the status of a Stripe checkout session.
 
 ```typescript
-import { generateBestFit } from '@/app/actions/jobActions';
+import { getCheckoutStatus } from '@/app/actions/stripeActions';
 
-// 使用示例
-const result = await generateBestFit(jobId);
-if (result.status === 'success') {
-  console.log('图片生成成功');
-  // 生成成功后，可以使用 getBestFitImage 获取图片
+// Example usage in a client component
+const sessionId = 'cs_test_...'; // From URL query
+const result = await getCheckoutStatus({ sessionId });
+
+if (result.error) {
+  // Handle error
+} else {
+  // Use session status
+  const status = result.status;
 }
 ```
 
-## 通过 ApiService 使用
+## Benefits of Server Actions
 
-我们已经更新了 `ApiService` 类，使其内部使用 Server Actions 而不是直接调用 API。客户端代码可以继续使用 `apiService` 实例，无需修改现有代码。
+1. **Direct API Access**: Server actions execute on the server, providing secure access to backend APIs and resources.
+2. **Type Safety**: Fully typed interfaces ensure proper data handling between client and server.
+3. **Progressive Enhancement**: Server actions work with or without JavaScript, improving reliability.
+4. **Reduced API Routes**: Eliminates the need for separate API routes, simplifying the codebase.
+5. **Simplified Error Handling**: Errors can be caught and handled directly in the component calling the action.
 
-```typescript
-import { apiService } from '@/lib/api/ApiService';
+## Usage Guidelines
 
-// 创建 job
-const jobId = await apiService.createJob(imageData);
-
-// 获取最佳匹配图片
-const bestFitResult = await apiService.getBestFitImage(jobId);
-
-// 生成最佳匹配图片
-const generateResult = await apiService.generateBestFit(jobId);
-```
-
-## 优势
-
-使用 Server Actions 替代 API 路由有以下优势：
-
-1. **更简洁的代码** - 无需创建和维护单独的 API 路由文件
-2. **更好的类型安全** - 参数和返回值类型检查更严格
-3. **更少的网络请求** - 直接调用服务器函数，无需额外的 HTTP 请求
-4. **更好的开发体验** - 客户端和服务器代码可以更紧密地集成
-
-## 注意事项
-
-1. Server Actions 必须在服务器上运行，不会暴露服务器端逻辑给客户端
-2. 所有 Server Actions 文件必须以 `'use server';` 指令开头
-3. Server Actions 可以从客户端组件中调用，但不能在客户端运行
+- Import server actions directly into client components.
+- Use `try/catch` for proper error handling.
+- Validate input data on the server using Zod schemas.
+- Provide meaningful error messages to the client.
