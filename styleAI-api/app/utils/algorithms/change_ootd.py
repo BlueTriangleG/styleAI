@@ -29,7 +29,6 @@ def submit_prediction(model_image_url, garment_image_url, category="one-pieces",
         "mode": mode,
         "garment_photo_type": "auto",
         "num_samples": num_samples,
-        "restore_background": True
     }
 
     response = requests.post(f"{BASE_URL}/run", json=input_data, headers=HEADERS)
