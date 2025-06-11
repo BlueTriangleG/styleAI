@@ -3,7 +3,6 @@
 import { useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { createCreditInvoice } from '@/app/actions/stripeActions';
 import { RecommendationHeader } from '@/components/recommendation/Header';
 
 /**
@@ -72,23 +71,9 @@ export default function CreditsPage() {
         throw new Error('Invalid tier selected');
       }
 
-      // Create invoice via server action
-      const result = await createCreditInvoice({
-        amount: tier.price * 100, // Convert to cents
-        credits: tier.points,
-        description: `${tier.name} Credit Package - ${tier.points} points`,
-      });
-
-      if (result.error) {
-        throw new Error(result.error);
-      }
-
-      // Redirect to the invoice payment page
-      if (result.invoiceUrl) {
-        window.location.href = result.invoiceUrl;
-      } else {
-        throw new Error('No invoice URL returned');
-      }
+      // TODO: Implement new payment system
+      // For now, show a message that the feature is under development
+      throw new Error('Payment feature is temporarily unavailable. We are redesigning our payment system. Please check back later.');
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to create invoice');
       console.error('Error creating invoice:', err);

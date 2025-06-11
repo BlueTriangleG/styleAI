@@ -4,48 +4,7 @@ This directory contains Next.js server actions that handle server-side logic for
 
 ## Available Actions
 
-### `stripeActions.ts`
-
-Server actions for Stripe payment integration.
-
-#### `createCheckoutSession`
-
-Creates a Stripe checkout session for a product.
-
-```typescript
-import { createCheckoutSession } from '@/app/actions/stripeActions';
-
-// Example usage in a client component
-const result = await createCheckoutSession({
-  productId: 'prod_SABGtwXELcJ7EZ',
-});
-
-if (result.error || !result.clientSecret) {
-  // Handle error
-} else {
-  // Use the client secret with Stripe.js
-  const clientSecret = result.clientSecret;
-}
-```
-
-#### `getCheckoutStatus`
-
-Gets the status of a Stripe checkout session.
-
-```typescript
-import { getCheckoutStatus } from '@/app/actions/stripeActions';
-
-// Example usage in a client component
-const sessionId = 'cs_test_...'; // From URL query
-const result = await getCheckoutStatus({ sessionId });
-
-if (result.error) {
-  // Handle error
-} else {
-  // Use session status
-  const status = result.status;
-}
-```
+_Currently no server actions are implemented. This directory will contain server-side logic for the application._
 
 ## Benefits of Server Actions
 
