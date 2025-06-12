@@ -37,7 +37,7 @@
     "js-cookie": "^3.0.5",
     "jsonwebtoken": "^9.0.2",
     "lucide-react": "^0.514.0",
-    "next": "15.2.2",
+    "next": "^15.3.3",
     "ogl": "^1.0.11",
     "ora": "^5.4.1",
     "pg": "^8.14.0",
@@ -53,21 +53,22 @@
     "zustand": "^5.0.3"
   },
   "devDependencies": {
-    "@tailwindcss/postcss": "^4",
     "@types/jsonwebtoken": "^9.0.9",
     "@types/lodash": "^4.17.16",
     "@types/node": "^20",
     "@types/react": "^19.0.10",
     "@types/react-dom": "^19.0.4",
     "@types/three": "^0.174.0",
+    "autoprefixer": "^10.4.21",
     "css-loader": "^7.1.2",
     "eslint": "9.22.0",
     "eslint-config-next": "15.2.2",
     "less": "^4.2.2",
     "less-loader": "^12.2.0",
+    "postcss": "^8.5.5",
     "sass": "^1.85.1",
     "style-loader": "^4.0.0",
-    "tailwindcss": "^4",
+    "tailwindcss": "^3.4.17",
     "typescript": "^5"
   }
 }

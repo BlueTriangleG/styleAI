@@ -3,7 +3,7 @@ WORKDIR /app
 COPY package.json package-lock.json* ./
 
 FROM base AS dependencies
-RUN npm ci
+RUN npm ci --legacy-peer-deps
 
 FROM dependencies AS development
 WORKDIR /app
