@@ -1,12 +1,12 @@
-'use client';
+"use client";
 
-import { useEffect, useState, useRef } from 'react';
-import { useRouter } from 'next/navigation';
-import { motion } from 'framer-motion';
-import { RecommendationHeader } from '@/components/recommendation/Header';
-import LiquidChrome from '@/components/background/LiquidChrome';
+import { useEffect, useState, useRef } from "react";
+import { useRouter } from "next/navigation";
+import { motion } from "framer-motion";
+import { RecommendationHeader } from "@/components/recommendation/Header";
+import LiquidChrome from "@/components/Background/LiquidChrome";
 
-import { apiService } from '@/lib/api/ApiService';
+import { apiService } from "@/lib/api/ApiService";
 
 /**
  * Loading Page Component
@@ -21,7 +21,7 @@ export default function LoadingPage() {
   const [progress, setProgress] = useState(0);
   const [isTransitioning, setIsTransitioning] = useState(false);
   const [userImageExists, setUserImageExists] = useState<boolean | null>(null);
-  const [jobId, setJobId] = useState<string>('');
+  const [jobId, setJobId] = useState<string>("");
   const jobCreatedRef = useRef<boolean>(false);
   const apiVerifiedRef = useRef<boolean>(false);
   const [isApiVerified, setIsApiVerified] = useState(false);
@@ -36,28 +36,28 @@ export default function LoadingPage() {
   const verifyApiConnection = async (jobId: string) => {
     // If already verified, return immediately
     if (apiVerifiedRef.current) {
-      console.log('API already verified, skipping verification');
+      console.log("API already verified, skipping verification");
       return true;
     }
 
     try {
-      console.log('Verifying API connectivity...');
+      console.log("Verifying API connectivity...");
       const data = await apiService.getPersonalizedAnalysis(jobId);
-      console.log('API connection verified:', data);
+      console.log("API connection verified:", data);
 
-      if (data.status === 'success') {
+      if (data.status === "success") {
         // Mark API as verified
         setIsApiVerified(true);
         apiVerifiedRef.current = true;
         return true;
       } else {
-        console.error('API verification failed:', data);
+        console.error("API verification failed:", data);
         // Redirect to step1 on API failure
-        router.replace('/getBestFitCloth');
+        router.replace("/getBestFitCloth");
         return false;
       }
     } catch (error) {
-      console.error('API verification failed with error:', error);
+      console.error("API verification failed with error:", error);
       // Mark API as verified anyway to proceed with flow
       setIsApiVerified(true);
       apiVerifiedRef.current = true;
@@ -74,7 +74,7 @@ export default function LoadingPage() {
   const createJobAndVerifyApi = async (imageData: string) => {
     // Prevent duplicate job creation
     if (jobCreatedRef.current) {
-      console.log('Job already created, skipping creation');
+      console.log("Job already created, skipping creation");
       return;
     }
 
@@ -82,39 +82,39 @@ export default function LoadingPage() {
     jobCreatedRef.current = true;
 
     try {
-      console.log('Creating job record...');
+      console.log("Creating job record...");
       // Create job record
       const newJobId = await apiService.createJob(imageData);
       console.log(`Job created successfully, ID: ${newJobId}`);
 
       // Store job ID (only) for reference
       setJobId(newJobId);
-      sessionStorage.setItem('currentJobId', newJobId);
+      sessionStorage.setItem("currentJobId", newJobId);
 
       // Verify API connectivity
       await verifyApiConnection(newJobId);
     } catch (error) {
-      console.error('Job creation failed:', error);
+      console.error("Job creation failed:", error);
       throw error;
     }
   };
 
   useEffect(() => {
-    console.log('Loading page component mounted');
+    console.log("Loading page component mounted");
 
     // Check if user image exists
-    if (typeof window !== 'undefined') {
+    if (typeof window !== "undefined") {
       try {
-        const userImage = sessionStorage.getItem('userImage');
+        const userImage = sessionStorage.getItem("userImage");
         console.log(
-          'Image from session storage:',
-          userImage ? 'exists' : 'not found'
+          "Image from session storage:",
+          userImage ? "exists" : "not found"
         );
 
         if (!userImage) {
-          console.log('User image not found, redirecting to step1');
+          console.log("User image not found, redirecting to step1");
           setUserImageExists(false);
-          router.replace('/getBestFitCloth');
+          router.replace("/getBestFitCloth");
           return;
         }
 
@@ -123,26 +123,26 @@ export default function LoadingPage() {
         // Create job and verify API
         createJobAndVerifyApi(userImage);
       } catch (error) {
-        console.error('Error accessing session storage:', error);
-        router.replace('/getBestFitCloth');
+        console.error("Error accessing session storage:", error);
+        router.replace("/getBestFitCloth");
         return;
       }
     }
 
     // Simulate loading progress
-    console.log('Starting progress simulation');
+    console.log("Starting progress simulation");
     const interval = setInterval(() => {
       setProgress((prev) => {
         const newProgress = prev + Math.random() * 5;
         console.log(
-          'Current progress:',
-          Math.min(newProgress, 100).toFixed(1) + '%'
+          "Current progress:",
+          Math.min(newProgress, 100).toFixed(1) + "%"
         );
 
         // If progress reaches 100% and API is verified, transition to generateReport
         if (newProgress >= 100 && apiVerifiedRef.current) {
           console.log(
-            'Loading complete and API verified, preparing transition to generateReport'
+            "Loading complete and API verified, preparing transition to generateReport"
           );
           clearInterval(interval);
           // Start transition animation
@@ -150,15 +150,15 @@ export default function LoadingPage() {
 
           // Delay navigation to ensure animation displays properly
           setTimeout(() => {
-            console.log('Navigating to generateReport');
-            router.replace('/getBestFitCloth/generateReport');
+            console.log("Navigating to generateReport");
+            router.replace("/getBestFitCloth/generateReport");
           }, 100);
           return 100;
         }
 
         // Hold at 95% if API not yet verified
         if (newProgress >= 95 && !apiVerifiedRef.current) {
-          console.log('Progress at 95%, waiting for API verification...');
+          console.log("Progress at 95%, waiting for API verification...");
           return 95;
         }
 
@@ -167,7 +167,7 @@ export default function LoadingPage() {
     }, 400);
 
     return () => {
-      console.log('Loading page component unmounting, clearing interval');
+      console.log("Loading page component unmounting, clearing interval");
       clearInterval(interval);
     };
   }, [router]);
@@ -184,7 +184,7 @@ export default function LoadingPage() {
       opacity: 1,
       transition: {
         duration: 0.5,
-        when: 'beforeChildren',
+        when: "beforeChildren",
         staggerChildren: 0.2,
       },
     },
@@ -192,7 +192,7 @@ export default function LoadingPage() {
       opacity: 0,
       transition: {
         duration: 0.3,
-        when: 'afterChildren',
+        when: "afterChildren",
         staggerChildren: 0.1,
         staggerDirection: -1,
       },
@@ -220,7 +220,7 @@ export default function LoadingPage() {
       transition: {
         duration: 1.5,
         repeat: Infinity,
-        repeatType: 'reverse' as const,
+        repeatType: "reverse" as const,
       },
     },
     exit: {
@@ -252,8 +252,8 @@ export default function LoadingPage() {
             </svg>
             <p className="text-gray-600 font-inter">
               {userImageExists === false
-                ? 'Redirecting to upload page...'
-                : 'Loading...'}
+                ? "Redirecting to upload page..."
+                : "Loading..."}
             </p>
           </div>
         </div>
@@ -279,7 +279,7 @@ export default function LoadingPage() {
       <motion.div
         className="min-h-screen pt-20 relative"
         initial="initial"
-        animate={isTransitioning ? 'exit' : 'animate'}
+        animate={isTransitioning ? "exit" : "animate"}
         variants={pageVariants}>
         {/* Content area */}
         <div className="container mx-auto px-4 py-8 relative z-10">
@@ -317,15 +317,15 @@ export default function LoadingPage() {
                 {/* Outer rotating ring */}
                 <motion.div
                   className="absolute inset-0 rounded-full border-4 border-gray-200"
-                  style={{ borderRadius: '50%' }}
+                  style={{ borderRadius: "50%" }}
                 />
 
                 {/* Inner animated arc */}
                 <motion.div
                   className="absolute inset-0 rounded-full border-4 border-transparent"
                   style={{
-                    borderTopColor: '#84a59d',
-                    borderRadius: '50%',
+                    borderTopColor: "#84a59d",
+                    borderRadius: "50%",
                     transform: `rotate(${progress * 3.6}deg)`,
                   }}
                   animate={{
@@ -334,7 +334,7 @@ export default function LoadingPage() {
                   transition={{
                     duration: 1.5,
                     repeat: Infinity,
-                    ease: 'linear',
+                    ease: "linear",
                   }}
                 />
 
@@ -356,7 +356,7 @@ export default function LoadingPage() {
                 transition={{
                   duration: 2,
                   repeat: Infinity,
-                  repeatType: 'reverse',
+                  repeatType: "reverse",
                 }}>
                 <svg
                   viewBox="0 0 24 24"
@@ -366,16 +366,16 @@ export default function LoadingPage() {
                     d="M12,2A10,10 0 0,0 2,12A10,10 0 0,0 12,22A10,10 0 0,0 22,12A10,10 0 0,0 12,2M12,20A8,8 0 0,1 4,12A8,8 0 0,1 12,4A8,8 0 0,1 20,12A8,8 0 0,1 12,20M7,10L12,15L17,10H7Z"
                     animate={{
                       d: [
-                        'M12,2A10,10 0 0,0 2,12A10,10 0 0,0 12,22A10,10 0 0,0 22,12A10,10 0 0,0 12,2M12,20A8,8 0 0,1 4,12A8,8 0 0,1 12,4A8,8 0 0,1 20,12A8,8 0 0,1 12,20M7,10L12,15L17,10H7Z',
-                        'M21,16V8H10M10,8A2,2 0 0,1 12,10V14A2,2 0 0,1 10,16A2,2 0 0,1 8,14V10A2,2 0 0,1 10,8M12,4.8C12,4.8 14,6 14,8C14,10 12,11.2 12,11.2M16,7A2,2 0 0,1 18,9A2,2 0 0,1 16,11A2,2 0 0,1 14,9A2,2 0 0,1 16,7Z',
-                        'M12,12A3,3 0 0,0 9,15C9,16.3 9.84,17.4 11,17.82V20H9V22H15V20H13V17.82C14.16,17.4 15,16.3 15,15A3,3 0 0,0 12,12M12,2A10,10 0 0,0 2,12A10,10 0 0,0 12,22H20A2,2 0 0,0 22,20V12A10,10 0 0,0 12,2Z',
+                        "M12,2A10,10 0 0,0 2,12A10,10 0 0,0 12,22A10,10 0 0,0 22,12A10,10 0 0,0 12,2M12,20A8,8 0 0,1 4,12A8,8 0 0,1 12,4A8,8 0 0,1 20,12A8,8 0 0,1 12,20M7,10L12,15L17,10H7Z",
+                        "M21,16V8H10M10,8A2,2 0 0,1 12,10V14A2,2 0 0,1 10,16A2,2 0 0,1 8,14V10A2,2 0 0,1 10,8M12,4.8C12,4.8 14,6 14,8C14,10 12,11.2 12,11.2M16,7A2,2 0 0,1 18,9A2,2 0 0,1 16,11A2,2 0 0,1 14,9A2,2 0 0,1 16,7Z",
+                        "M12,12A3,3 0 0,0 9,15C9,16.3 9.84,17.4 11,17.82V20H9V22H15V20H13V17.82C14.16,17.4 15,16.3 15,15A3,3 0 0,0 12,12M12,2A10,10 0 0,0 2,12A10,10 0 0,0 12,22H20A2,2 0 0,0 22,20V12A10,10 0 0,0 12,2Z",
                       ],
                     }}
                     transition={{
                       duration: 2,
-                      ease: 'easeInOut',
+                      ease: "easeInOut",
                       repeat: Infinity,
-                      repeatType: 'reverse',
+                      repeatType: "reverse",
                     }}
                   />
                 </svg>
@@ -394,16 +394,16 @@ export default function LoadingPage() {
                 <motion.li
                   className="flex items-center space-x-2"
                   animate={{
-                    color: progress >= 25 ? '#84a59d' : '#718096',
+                    color: progress >= 25 ? "#84a59d" : "#718096",
                   }}
                   transition={{ duration: 0.5 }}>
                   <motion.span
                     className="flex-shrink-0 w-5 h-5 flex items-center justify-center bg-white rounded-full"
                     animate={{
-                      backgroundColor: progress >= 25 ? '#84a59d' : 'white',
-                      color: progress >= 25 ? 'white' : '#718096',
+                      backgroundColor: progress >= 25 ? "#84a59d" : "white",
+                      color: progress >= 25 ? "white" : "#718096",
                     }}>
-                    {progress >= 25 ? '✓' : '·'}
+                    {progress >= 25 ? "✓" : "·"}
                   </motion.span>
                   <span>Analyzing facial features</span>
                 </motion.li>
@@ -411,15 +411,15 @@ export default function LoadingPage() {
                 <motion.li
                   className="flex items-center space-x-2"
                   animate={{
-                    color: progress >= 50 ? '#84a59d' : '#718096',
+                    color: progress >= 50 ? "#84a59d" : "#718096",
                   }}>
                   <motion.span
                     className="flex-shrink-0 w-5 h-5 flex items-center justify-center bg-white rounded-full"
                     animate={{
-                      backgroundColor: progress >= 50 ? '#84a59d' : 'white',
-                      color: progress >= 50 ? 'white' : '#718096',
+                      backgroundColor: progress >= 50 ? "#84a59d" : "white",
+                      color: progress >= 50 ? "white" : "#718096",
                     }}>
-                    {progress >= 50 ? '✓' : '·'}
+                    {progress >= 50 ? "✓" : "·"}
                   </motion.span>
                   <span>Determining style preferences</span>
                 </motion.li>
@@ -427,15 +427,15 @@ export default function LoadingPage() {
                 <motion.li
                   className="flex items-center space-x-2"
                   animate={{
-                    color: progress >= 75 ? '#84a59d' : '#718096',
+                    color: progress >= 75 ? "#84a59d" : "#718096",
                   }}>
                   <motion.span
                     className="flex-shrink-0 w-5 h-5 flex items-center justify-center bg-white rounded-full"
                     animate={{
-                      backgroundColor: progress >= 75 ? '#84a59d' : 'white',
-                      color: progress >= 75 ? 'white' : '#718096',
+                      backgroundColor: progress >= 75 ? "#84a59d" : "white",
+                      color: progress >= 75 ? "white" : "#718096",
                     }}>
-                    {progress >= 75 ? '✓' : '·'}
+                    {progress >= 75 ? "✓" : "·"}
                   </motion.span>
                   <span>Identifying style characteristics</span>
                 </motion.li>
@@ -443,15 +443,15 @@ export default function LoadingPage() {
                 <motion.li
                   className="flex items-center space-x-2"
                   animate={{
-                    color: progress >= 90 ? '#84a59d' : '#718096',
+                    color: progress >= 90 ? "#84a59d" : "#718096",
                   }}>
                   <motion.span
                     className="flex-shrink-0 w-5 h-5 flex items-center justify-center bg-white rounded-full"
                     animate={{
-                      backgroundColor: progress >= 90 ? '#84a59d' : 'white',
-                      color: progress >= 90 ? 'white' : '#718096',
+                      backgroundColor: progress >= 90 ? "#84a59d" : "white",
+                      color: progress >= 90 ? "white" : "#718096",
                     }}>
-                    {progress >= 90 ? '✓' : '·'}
+                    {progress >= 90 ? "✓" : "·"}
                   </motion.span>
                   <span>Generating personalized recommendations</span>
                 </motion.li>

@@ -1,0 +1,129 @@
+# API Development Patterns
+
+## Overview
+This project uses Next.js App Router API routes with TypeScript. All API routes follow consistent patterns for authentication, error handling, and response formatting.
+
+## API Route Structure
+API routes are located in [src/app/api/](mdc:src/app/api/) and follow the App Router convention:
+- `route.ts` files define HTTP handlers
+- Export named functions: `GET`, `POST`, `PUT`, `DELETE`
+- Use `NextRequest` and `NextResponse` types
+
+## Authentication Pattern
+All protected API routes use Clerk authentication:
+
+```typescript
+import { auth, currentUser } from '@clerk/nextjs/server';
+import { NextRequest, NextResponse } from 'next/server';
+
+export async function POST(request: NextRequest) {
+  try {
+    // Get authenticated user
+    const { userId: clerkUserId } = await auth();
+    
+    if (!clerkUserId) {
+      return NextResponse.json(
+        { error: 'Unauthorized' },
+        { status: 401 }
+      );
+    }
+    
+    // Get full user data if needed
+    const clerkUser = await currentUser();
+    
+    // Your API logic here...
+    
+  } catch (error) {
+    console.error('API Error:', error);
+    return NextResponse.json(
+      { error: 'Internal server error' },
+      { status: 500 }
+    );
+  }
+}
+```
+
+## Error Handling Standards
+- Always wrap API logic in try-catch blocks
+- Log errors with `console.error()`
+- Return appropriate HTTP status codes
+- Use consistent error response format:
+
+```typescript
+return NextResponse.json(
+  { error: 'Error message' },
+  { status: 400 }
+);
+```
+
+## Response Formatting
+- Success responses: `{ data: result }` or direct data
+- Error responses: `{ error: 'message' }`
+- Include relevant metadata when helpful
+
+## Database Operations
+Use the query function from [src/lib/db.ts](mdc:src/lib/db.ts):
+
+```typescript
+import { query } from '@/lib/db';
+
+const result = await query(
+  'SELECT * FROM users WHERE id = $1',
+  [userId]
+);
+```
+
+## User Management Pattern
+For APIs that need user data:
+
+```typescript
+import { getUserByProvider, autoSyncClerkUser } from '@/lib/models/user';
+
+// Try to get user from database
+let user = await getUserByProvider('clerk', clerkUserId);
+
+// Auto-sync if not found
+if (!user) {
+  user = await autoSyncClerkUser(clerkUser);
+}
+```
+
+## Stripe Integration Pattern
+For payment-related APIs, see [src/app/api/stripe/](mdc:src/app/api/stripe/) examples:
+- Always auto-sync users
+- Create Stripe customers automatically
+- Include metadata for webhook processing
+- Handle Stripe errors appropriately
+
+## Request Validation
+Validate request bodies and parameters:
+
+```typescript
+const { requiredField } = await request.json();
+
+if (!requiredField) {
+  return NextResponse.json(
+    { error: 'Required field is missing' },
+    { status: 400 }
+  );
+}
+```
+
+## CORS and Headers
+- API routes automatically handle CORS for same-origin requests
+- Set appropriate headers for external integrations
+- Use proper content types
+
+## Testing API Routes
+- Test with curl or Postman
+- Include authentication headers/cookies
+- Test error scenarios
+- Verify database changes
+
+## Common Status Codes
+- `200` - Success
+- `201` - Created
+- `400` - Bad Request (validation errors)
+- `401` - Unauthorized (authentication required)
+- `404` - Not Found
+- `500` - Internal Server Error

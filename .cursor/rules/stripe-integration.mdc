@@ -1,0 +1,57 @@
+# Stripe Integration Guide
+
+## Overview
+This project uses Stripe for payment processing with Clerk authentication. All Stripe API routes automatically sync users and create Stripe customers as needed.
+
+## Key Files
+- [src/lib/stripe.ts](mdc:src/lib/stripe.ts) - Stripe client configuration and credit tiers
+- [src/lib/models/user.ts](mdc:src/lib/models/user.ts) - User database operations including auto-sync
+- [src/app/api/stripe/create-checkout-session/route.ts](mdc:src/app/api/stripe/create-checkout-session/route.ts) - Main payment flow
+- [src/app/api/stripe/webhook/route.ts](mdc:src/app/api/stripe/webhook/route.ts) - Webhook handler for payment events
+- [docs/stripe-setup.md](mdc:docs/stripe-setup.md) - Setup and configuration guide
+
+## Authentication Pattern
+All Stripe API routes use Clerk authentication with auto-sync:
+
+```typescript
+import { auth, currentUser } from '@clerk/nextjs/server';
+import { getUserByProvider, autoSyncClerkUser } from '@/lib/models/user';
+
+// Get Clerk user
+const { userId: clerkUserId } = await auth();
+const clerkUser = await currentUser();
+
+// Auto-sync to database if needed
+let user = await getUserByProvider('clerk', clerkUserId);
+if (!user) {
+  user = await autoSyncClerkUser(clerkUser);
+}
+```
+
+## Credit Tiers Configuration
+Credit tiers are defined in [src/lib/stripe.ts](mdc:src/lib/stripe.ts):
+- Basic: $5 / 50 credits
+- Standard: $10 / 120 credits  
+- Premium: $50 / 700 credits
+
+## Environment Variables Required
+- `STRIPE_SECRET_KEY` - Stripe secret key
+- `NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY` - Stripe publishable key
+- `STRIPE_WEBHOOK_SECRET` - Webhook endpoint secret
+- `APP_URL` - Application base URL for redirects
+
+## API Route Patterns
+- Always use Clerk authentication
+- Auto-sync users to database
+- Create Stripe customers automatically
+- Include both `userId` and `clerkUserId` in metadata
+- Handle errors gracefully with appropriate status codes
+
+## Webhook Handling
+Webhooks process `checkout.session.completed` events to add credits to users automatically using the `userId` from session metadata.
+
+## Testing
+- Use Stripe test mode for development
+- Test webhook events using Stripe CLI
+- Verify user auto-sync functionality
+- Check credit addition after successful payments

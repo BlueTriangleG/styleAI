@@ -1,17 +1,17 @@
-'use client';
+"use client";
 
-import { useState, useRef, useEffect } from 'react';
-import Image from 'next/image';
-import { useRouter } from 'next/navigation';
-import { RecommendationHeader } from '@/components/recommendation/Header';
-import { motion } from 'framer-motion';
-import LiquidChrome from '@/components/background/LiquidChrome';
-import { Tilt } from '@/components/ui/tilt';
+import { useState, useRef, useEffect } from "react";
+import Image from "next/image";
+import { useRouter } from "next/navigation";
+import { RecommendationHeader } from "@/components/recommendation/Header";
+import { motion } from "framer-motion";
+import LiquidChrome from "@/components/Background/LiquidChrome";
+import { Tilt } from "@/components/ui/tilt";
 import {
   processImageClient,
   downloadImage,
   getProcessedImagesInfo,
-} from '@/lib/imageProcessor';
+} from "@/lib/imageProcessor";
 
 export default function UploadImages() {
   const [image, setImage] = useState<string | null>(null);
@@ -21,7 +21,7 @@ export default function UploadImages() {
   const [hasCamera, setHasCamera] = useState(false);
   const [cameras, setCameras] = useState<MediaDeviceInfo[]>([]);
   const [selectedCamera, setSelectedCamera] = useState<string | null>(null);
-  const [facingMode, setFacingMode] = useState<'user' | 'environment'>('user');
+  const [facingMode, setFacingMode] = useState<"user" | "environment">("user");
   const fileInputRef = useRef<HTMLInputElement>(null);
   const videoRef = useRef<HTMLVideoElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
@@ -37,7 +37,7 @@ export default function UploadImages() {
   useEffect(() => {
     const checkCamera = async () => {
       try {
-        if (typeof navigator !== 'undefined' && navigator.mediaDevices) {
+        if (typeof navigator !== "undefined" && navigator.mediaDevices) {
           // Just check if getUserMedia is supported
           await navigator.mediaDevices.getUserMedia({ video: true });
           setHasCamera(true);
@@ -46,7 +46,7 @@ export default function UploadImages() {
           if (navigator.mediaDevices.enumerateDevices) {
             const devices = await navigator.mediaDevices.enumerateDevices();
             const videoDevices = devices.filter(
-              (device) => device.kind === 'videoinput'
+              (device) => device.kind === "videoinput"
             );
             setCameras(videoDevices);
 
@@ -57,7 +57,7 @@ export default function UploadImages() {
           }
         }
       } catch (err) {
-        console.log('Camera not available or permission denied');
+        console.log("Camera not available or permission denied");
         setHasCamera(false);
       }
     };
@@ -67,7 +67,7 @@ export default function UploadImages() {
 
   // Load processed image information
   useEffect(() => {
-    if (typeof window !== 'undefined') {
+    if (typeof window !== "undefined") {
       const images = getProcessedImagesInfo();
       setProcessedImages(images);
     }
@@ -75,10 +75,10 @@ export default function UploadImages() {
 
   // Handle file selection
   const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    console.log('File selection event triggered', e.target.files);
+    console.log("File selection event triggered", e.target.files);
     const file = e.target.files?.[0];
     if (!file) {
-      console.log('No file selected');
+      console.log("No file selected");
       return;
     }
 
@@ -105,22 +105,22 @@ export default function UploadImages() {
 
       // Clear input value to ensure the same file can be selected again
       if (fileInputRef.current) {
-        fileInputRef.current.value = '';
+        fileInputRef.current.value = "";
       }
     } catch (error) {
-      console.error('Error processing image:', error);
+      console.error("Error processing image:", error);
       setIsUploading(false);
 
       // Also clear input on error
       if (fileInputRef.current) {
-        fileInputRef.current.value = '';
+        fileInputRef.current.value = "";
       }
     }
   };
 
   // Trigger file input click
   const handleUploadClick = () => {
-    console.log('Triggering file upload click event');
+    console.log("Triggering file upload click event");
     // Prevent multiple triggers
     if (fileInputRef.current) {
       fileInputRef.current.click();
@@ -130,7 +130,7 @@ export default function UploadImages() {
   // Switch camera
   const switchCamera = async () => {
     // Toggle between front and back cameras
-    const newFacingMode = facingMode === 'user' ? 'environment' : 'user';
+    const newFacingMode = facingMode === "user" ? "environment" : "user";
     setFacingMode(newFacingMode);
 
     // If there are multiple cameras, try to find the corresponding device
@@ -158,7 +158,7 @@ export default function UploadImages() {
 
   // Start camera
   const startCamera = async (
-    facingMode: 'user' | 'environment' = 'user',
+    facingMode: "user" | "environment" = "user",
     deviceId?: string
   ) => {
     try {
@@ -194,7 +194,7 @@ export default function UploadImages() {
 
       return true;
     } catch (error) {
-      console.error('Error accessing camera:', error);
+      console.error("Error accessing camera:", error);
       return false;
     }
   };
@@ -249,10 +249,10 @@ export default function UploadImages() {
       }
 
       // Draw video frame to canvas
-      const context = canvas.getContext('2d');
+      const context = canvas.getContext("2d");
       if (context) {
         // Clear canvas first
-        context.fillStyle = '#FFFFFF';
+        context.fillStyle = "#FFFFFF";
         context.fillRect(0, 0, canvas.width, canvas.height);
 
         // Draw video frame
@@ -269,7 +269,7 @@ export default function UploadImages() {
         );
 
         // Convert to data URL
-        const photoDataUrl = canvas.toDataURL('image/jpeg', 0.95);
+        const photoDataUrl = canvas.toDataURL("image/jpeg", 0.95);
 
         try {
           // Use new image processing feature to process photo
@@ -281,7 +281,7 @@ export default function UploadImages() {
 
           setImage(processedImage);
         } catch (error) {
-          console.error('Error processing photo:', error);
+          console.error("Error processing photo:", error);
           setImage(photoDataUrl); // If processing fails, use original image
         }
 
@@ -313,16 +313,16 @@ export default function UploadImages() {
   const handleNextClick = () => {
     if (image) {
       // Store the image in session storage or state management
-      if (typeof window !== 'undefined') {
+      if (typeof window !== "undefined") {
         // Only access sessionStorage in browser environment
         try {
           // 确保清除之前的数据
-          sessionStorage.removeItem('userImage');
+          sessionStorage.removeItem("userImage");
           // 存储新的图像数据
-          sessionStorage.setItem('userImage', image);
-          console.log('图像已成功存储到sessionStorage');
+          sessionStorage.setItem("userImage", image);
+          console.log("图像已成功存储到sessionStorage");
         } catch (error) {
-          console.error('存储图像到sessionStorage时出错:', error);
+          console.error("存储图像到sessionStorage时出错:", error);
         }
       }
 
@@ -332,11 +332,11 @@ export default function UploadImages() {
       // 延长动画时间，确保有足够时间进行过渡
       setTimeout(() => {
         // 使用replace而不是push，避免浏览器历史记录问题
-        router.replace('/getBestFitCloth/loading');
+        router.replace("/getBestFitCloth/loading");
       }, 800); // 增加到800ms，给动画更多时间
     } else {
       // 如果没有图像，显示提示
-      alert('请先上传或拍摄一张照片');
+      alert("请先上传或拍摄一张照片");
     }
   };
 
@@ -365,7 +365,7 @@ export default function UploadImages() {
       opacity: 1,
       transition: {
         duration: 0.5,
-        when: 'beforeChildren',
+        when: "beforeChildren",
         staggerChildren: 0.2,
       },
     },
@@ -373,7 +373,7 @@ export default function UploadImages() {
       opacity: 0,
       transition: {
         duration: 0.3,
-        when: 'afterChildren',
+        when: "afterChildren",
         staggerChildren: 0.1,
         staggerDirection: -1,
       },
@@ -400,7 +400,7 @@ export default function UploadImages() {
       <motion.div
         className="min-h-screen pt-20 relative"
         initial="initial"
-        animate={isTransitioning ? 'exit' : 'animate'}
+        animate={isTransitioning ? "exit" : "animate"}
         variants={pageVariants}
         transition={{ duration: 0.5 }}>
         {/* 流动背景 */}
@@ -427,25 +427,25 @@ export default function UploadImages() {
 
           <div
             className="flex flex-col md:flex-row gap-8"
-            style={{ minHeight: 'calc(100vh - 200px)' }}>
+            style={{ minHeight: "calc(100vh - 200px)" }}>
             {/* Left side - Upload area */}
             <motion.div
               className="w-full md:w-1/2 bg-white/60 backdrop-blur-xs rounded-lg p-4 flex flex-col items-center justify-center shadow-lg"
-              style={{ minHeight: 'calc(100vh - 200px)' }}
+              style={{ minHeight: "calc(100vh - 200px)" }}
               variants={containerVariants}>
               {isCameraOpen ? (
                 <div
                   ref={videoDivRef}
                   className="relative w-full flex flex-col items-center justify-center"
                   style={{
-                    height: 'calc(100% - 60px)', // Subtract bottom button height
-                    maxHeight: 'calc(100vh - 250px)',
+                    height: "calc(100% - 60px)", // Subtract bottom button height
+                    maxHeight: "calc(100vh - 250px)",
                   }}>
                   <div
                     className="relative w-full overflow-hidden rounded-md bg-white"
                     style={{
-                      aspectRatio: '3/4',
-                      maxHeight: '100%',
+                      aspectRatio: "3/4",
+                      maxHeight: "100%",
                     }}>
                     <video
                       ref={videoRef}
@@ -484,7 +484,7 @@ export default function UploadImages() {
                     <div className="mt-4 mb-4 w-full max-w-md mx-auto">
                       <div className="relative">
                         <select
-                          value={selectedCamera || ''}
+                          value={selectedCamera || ""}
                           onChange={handleCameraChange}
                           className="w-full appearance-none bg-white/80 backdrop-blur-sm border border-gray-200 text-gray-700 py-3 px-4 pr-8 rounded-md shadow-sm font-inter text-sm focus:outline-none focus:ring-2 focus:ring-[#84a59d] focus:border-transparent transition-all duration-200">
                           {cameras.map((camera) => (
@@ -549,8 +549,8 @@ export default function UploadImages() {
                   rotationFactor={5}
                   className="relative w-full"
                   style={{
-                    height: 'calc(100% - 60px)',
-                    maxHeight: 'calc(100vh - 250px)',
+                    height: "calc(100% - 60px)",
+                    maxHeight: "calc(100vh - 250px)",
                   }}>
                   <Image
                     src={image}
@@ -617,8 +617,8 @@ export default function UploadImages() {
                 <div
                   className="w-full bg-white/60 backdrop-blur-xs rounded-md flex flex-col items-center justify-center cursor-pointer hover:bg-gray-200 transition-colors"
                   style={{
-                    height: 'calc(100% - 20px)',
-                    maxHeight: 'calc(100vh - 250px)',
+                    height: "calc(100% - 20px)",
+                    maxHeight: "calc(100vh - 250px)",
                   }}
                   onClick={(e) => {
                     // 确保点击空白区域时触发文件上传
@@ -707,7 +707,7 @@ export default function UploadImages() {
                     <svg
                       xmlns="http://www.w3.org/2000/svg"
                       className={`h-4 w-4 mr-1 transition-transform ${
-                        showProcessedImages ? 'rotate-90' : ''
+                        showProcessedImages ? "rotate-90" : ""
                       }`}
                       fill="none"
                       viewBox="0 0 24 24"
@@ -720,8 +720,8 @@ export default function UploadImages() {
                       />
                     </svg>
                     {showProcessedImages
-                      ? 'Hide processing record'
-                      : 'Show processing record'}{' '}
+                      ? "Hide processing record"
+                      : "Show processing record"}{" "}
                     ({processedImages.length})
                   </button>
 
@@ -819,8 +819,8 @@ export default function UploadImages() {
                 disabled={!image}
                 className={`w-full py-3 px-6 rounded-md text-white font-medium mt-6 shadow-md font-inter ${
                   image
-                    ? 'bg-[#84a59d] hover:bg-[#6b8c85]'
-                    : 'bg-gray-300 cursor-not-allowed'
+                    ? "bg-[#84a59d] hover:bg-[#6b8c85]"
+                    : "bg-gray-300 cursor-not-allowed"
                 } transition-colors`}
                 variants={itemVariants}
                 whileHover={image ? { scale: 1.05 } : {}}

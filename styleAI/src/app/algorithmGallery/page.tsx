@@ -1,4 +1,4 @@
-'use client';
+"use client";
 
 /**
  * AlgorithmGallery page component
@@ -7,21 +7,21 @@
  * for users to select from and proceed with their style analysis.
  */
 
-import { useState, useEffect } from 'react';
-import { useRouter } from 'next/navigation';
-import { motion } from 'framer-motion';
-import { RecommendationHeader } from '@/components/recommendation/Header';
-import { AlgorithmGallery } from '@/components/algorithmGallery/AlgorithmGallery';
-import { SectionHeader } from '@/components/algorithmGallery/SectionHeader';
-import LiquidChrome from '@/components/background/LiquidChrome';
+import { useState, useEffect } from "react";
+import { useRouter } from "next/navigation";
+import { motion } from "framer-motion";
+import { RecommendationHeader } from "@/components/recommendation/Header";
+import { AlgorithmGallery } from "@/components/algorithmGallery/AlgorithmGallery";
+import { SectionHeader } from "@/components/algorithmGallery/SectionHeader";
+import LiquidChrome from "@/components/Background/LiquidChrome";
 
 import {
   sampleAlgorithms,
   fallbackImages,
-} from '@/components/algorithmGallery/sampleData';
+} from "@/components/algorithmGallery/sampleData";
 
 // Default placeholder for all images in case neither main nor fallback images work
-const DEFAULT_PLACEHOLDER = '/styleai/placeholder.png';
+const DEFAULT_PLACEHOLDER = "/styleai/placeholder.png";
 
 export default function AlgorithmGalleryPage() {
   const [isTransitioning, setIsTransitioning] = useState(false);
@@ -44,13 +44,13 @@ export default function AlgorithmGalleryPage() {
   const generatePlaceholder = (index: number) => {
     // Array of pleasant colors for placeholders
     const colors = [
-      '#2D4B37', // Main brand green
-      '#FF9999', // Brand accent
-      '#6A8D73', // Light green
-      '#D1E6D6', // Pale green
-      '#4A6B53', // Dark green
-      '#B9D4C2', // Another pale green
-      '#1E352F', // Very dark green
+      "#2D4B37", // Main brand green
+      "#FF9999", // Brand accent
+      "#6A8D73", // Light green
+      "#D1E6D6", // Pale green
+      "#4A6B53", // Dark green
+      "#B9D4C2", // Another pale green
+      "#1E352F", // Very dark green
     ];
 
     return colors[index % colors.length];
@@ -67,7 +67,7 @@ export default function AlgorithmGalleryPage() {
     <motion.div
       className="relative min-h-screen bg-gray-50"
       initial="initial"
-      animate={isTransitioning ? 'exit' : 'animate'}
+      animate={isTransitioning ? "exit" : "animate"}
       variants={pageVariants}
       transition={{ duration: 0.5 }}>
       {/* 背景层，z-index 为 0 */}

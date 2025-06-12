@@ -1,11 +1,11 @@
-'use client';
+"use client";
 
-import { useState } from 'react';
-import { useRouter } from 'next/navigation';
-import { RecommendationHeader } from '@/components/recommendation/Header';
-import { motion } from 'framer-motion';
-import LiquidChrome from '@/components/background/LiquidChrome';
-import { UploadImageComponent } from '@/components/uploadImage/UploadImageComponent';
+import { useState } from "react";
+import { useRouter } from "next/navigation";
+import { RecommendationHeader } from "@/components/recommendation/Header";
+import { motion } from "framer-motion";
+import LiquidChrome from "@/components/Background/LiquidChrome";
+import { UploadImageComponent } from "@/components/uploadImage/UploadImageComponent";
 
 /**
  * Upload Images page component
@@ -24,15 +24,15 @@ export default function UploadImages() {
   const handleNextClick = () => {
     if (image) {
       // Store the image in session storage or state management
-      if (typeof window !== 'undefined') {
+      if (typeof window !== "undefined") {
         try {
           // Clear previous data
-          sessionStorage.removeItem('userImage');
+          sessionStorage.removeItem("userImage");
           // Store new image data
-          sessionStorage.setItem('userImage', image);
-          console.log('Image successfully stored in sessionStorage');
+          sessionStorage.setItem("userImage", image);
+          console.log("Image successfully stored in sessionStorage");
         } catch (error) {
-          console.error('Error storing image to sessionStorage:', error);
+          console.error("Error storing image to sessionStorage:", error);
         }
       }
 
@@ -42,11 +42,11 @@ export default function UploadImages() {
       // Extended animation time to ensure sufficient transition time
       setTimeout(() => {
         // Use replace instead of push to avoid browser history issues
-        router.replace('/getBestFitCloth/loading');
+        router.replace("/getBestFitCloth/loading");
       }, 800);
     } else {
       // Show alert if no image is available
-      alert('Please upload or take a photo first');
+      alert("Please upload or take a photo first");
     }
   };
 
@@ -63,7 +63,7 @@ export default function UploadImages() {
       opacity: 1,
       transition: {
         duration: 0.5,
-        when: 'beforeChildren',
+        when: "beforeChildren",
         staggerChildren: 0.2,
       },
     },
@@ -71,7 +71,7 @@ export default function UploadImages() {
       opacity: 0,
       transition: {
         duration: 0.3,
-        when: 'afterChildren',
+        when: "afterChildren",
         staggerChildren: 0.1,
         staggerDirection: -1,
       },
@@ -98,7 +98,7 @@ export default function UploadImages() {
       <motion.div
         className="min-h-screen pt-20 relative"
         initial="initial"
-        animate={isTransitioning ? 'exit' : 'animate'}
+        animate={isTransitioning ? "exit" : "animate"}
         variants={pageVariants}
         transition={{ duration: 0.5 }}>
         {/* Fluid background */}
@@ -125,7 +125,7 @@ export default function UploadImages() {
 
           <div
             className="flex flex-col md:flex-row gap-8"
-            style={{ minHeight: 'calc(100vh - 200px)' }}>
+            style={{ minHeight: "calc(100vh - 200px)" }}>
             {/* Left side - Upload area - Using the extracted component */}
             <UploadImageComponent
               image={image}
@@ -195,8 +195,8 @@ export default function UploadImages() {
                 disabled={!image}
                 className={`w-full py-3 px-6 rounded-md text-white font-medium mt-6 shadow-md font-inter ${
                   image
-                    ? 'bg-[#84a59d] hover:bg-[#6b8c85]'
-                    : 'bg-gray-300 cursor-not-allowed'
+                    ? "bg-[#84a59d] hover:bg-[#6b8c85]"
+                    : "bg-gray-300 cursor-not-allowed"
                 } transition-colors`}
                 variants={itemVariants}
                 whileHover={image ? { scale: 1.05 } : {}}

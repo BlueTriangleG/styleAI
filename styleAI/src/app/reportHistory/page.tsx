@@ -1,13 +1,13 @@
-'use client';
+"use client";
 
-import { useEffect, useState } from 'react';
-import { HistoryCardGrid } from '@/components/userHistory/HistoryCardGrid';
-import { HistoryReportData } from '@/components/userHistory/types';
-import { useAuth } from '@clerk/nextjs';
-import { getUserHistory } from '@/app/actions/getUserHistory';
-import { currentUser } from '@clerk/nextjs/server';
-import { Header } from '@/components/home/header';
-import LiquidChrome from '@/components/background/LiquidChrome';
+import { useEffect, useState } from "react";
+import { HistoryCardGrid } from "@/components/userHistory/HistoryCardGrid";
+import { HistoryReportData } from "@/components/userHistory/types";
+import { useAuth } from "@clerk/nextjs";
+import { getUserHistory } from "@/app/actions/getUserHistory";
+import { currentUser } from "@clerk/nextjs/server";
+import { Header } from "@/components/home/header";
+import LiquidChrome from "@/components/Background/LiquidChrome";
 
 /**
  * ReportHistory Page
@@ -32,17 +32,17 @@ export default function ReportHistoryPage() {
     const syncUser = async () => {
       if (!isLoaded || !isSignedIn) {
         if (isLoaded && !isSignedIn) {
-          setError('Please sign in to view your reports');
+          setError("Please sign in to view your reports");
         }
         return;
       }
 
       try {
         // Make API call to sync user data
-        const response = await fetch('/styleai/api/users/sync', {
-          method: 'POST',
+        const response = await fetch("/styleai/api/users/sync", {
+          method: "POST",
           headers: {
-            'Content-Type': 'application/json',
+            "Content-Type": "application/json",
           },
         });
 
@@ -55,25 +55,25 @@ export default function ReportHistoryPage() {
         }
 
         // Check content type to ensure we're getting JSON
-        const contentType = response.headers.get('content-type');
-        if (!contentType || !contentType.includes('application/json')) {
-          console.error('Response is not JSON:', contentType);
-          throw new Error('Server did not return JSON');
+        const contentType = response.headers.get("content-type");
+        if (!contentType || !contentType.includes("application/json")) {
+          console.error("Response is not JSON:", contentType);
+          throw new Error("Server did not return JSON");
         }
 
         const data = await response.json();
 
         if (data.success && data.userId) {
-          console.log('User synced successfully, userId:', data.userId);
+          console.log("User synced successfully, userId:", data.userId);
           setUserId(data.userId);
         } else {
-          console.error('Failed to sync user:', data.error || 'Unknown error');
-          setError('Failed to authenticate user');
+          console.error("Failed to sync user:", data.error || "Unknown error");
+          setError("Failed to authenticate user");
         }
       } catch (err) {
-        console.error('Error syncing user:', err);
+        console.error("Error syncing user:", err);
         setError(
-          'Failed to load user data. Please check if the API server is running.'
+          "Failed to load user data. Please check if the API server is running."
         );
       }
     };
@@ -87,14 +87,14 @@ export default function ReportHistoryPage() {
       if (!userId) return;
 
       setIsLoading(true);
-      console.log('Fetching reports for user:', userId);
+      console.log("Fetching reports for user:", userId);
       try {
         // Call the server action to get user history
         const historyData = await getUserHistory(userId);
         setReports(historyData);
       } catch (err) {
-        console.error('Error fetching reports:', err);
-        setError('Failed to load your report history');
+        console.error("Error fetching reports:", err);
+        setError("Failed to load your report history");
       } finally {
         setIsLoading(false);
       }

@@ -1,50 +1,50 @@
-'use client';
-import { useRef, useEffect, useState } from 'react';
-import Image from 'next/image';
-import { useRouter } from 'next/navigation';
-import { motion } from 'framer-motion';
-import CircularGallery from '@/components/ui/CircularGallery';
-import BounceCards from '@/components/ui/BounceCards';
-import LiquidChrome from '@/components/background/LiquidChrome';
-import { useAuth, SignInButton, SignedIn, SignedOut } from '@clerk/nextjs';
-import { HeroScrollSection } from '@/components/home/hero-scroll-section';
+"use client";
+import { useRef, useEffect, useState } from "react";
+import Image from "next/image";
+import { useRouter } from "next/navigation";
+import { motion } from "framer-motion";
+import CircularGallery from "@/components/ui/CircularGallery";
+import BounceCards from "@/components/ui/BounceCards";
+import LiquidChrome from "@/components/Background/LiquidChrome";
+import { useAuth, SignInButton, SignedIn, SignedOut } from "@clerk/nextjs";
+import { HeroScrollSection } from "@/components/home/hero-scroll-section";
 const basePath = process.env.NEXT_PUBLIC_BASE_PATH;
 
 const images = [
-  basePath + '/gallery/outfit1.png',
-  basePath + '/gallery/outfit2.png',
-  basePath + '/gallery/outfit3.png',
-  basePath + '/gallery/outfit4.png',
-  basePath + '/gallery/outfit5.png',
+  basePath + "/gallery/outfit1.png",
+  basePath + "/gallery/outfit2.png",
+  basePath + "/gallery/outfit3.png",
+  basePath + "/gallery/outfit4.png",
+  basePath + "/gallery/outfit5.png",
 ];
 
 const galleryItems = [
   {
-    video: basePath + '/gallery/model1.mp4',
-    text: 'Model 1',
+    video: basePath + "/gallery/model1.mp4",
+    text: "Model 1",
   },
   {
-    video: basePath + '/gallery/model2.mp4',
-    text: 'Model 2',
+    video: basePath + "/gallery/model2.mp4",
+    text: "Model 2",
   },
   {
-    video: basePath + '/gallery/model3.mp4',
-    text: 'Model 3',
+    video: basePath + "/gallery/model3.mp4",
+    text: "Model 3",
   },
   {
-    video: basePath + '/gallery/model4.mp4',
-    text: 'Model 4',
+    video: basePath + "/gallery/model4.mp4",
+    text: "Model 4",
   },
 ];
 
 const doubleDownPath = `${basePath}/doubledown.svg`;
 
 const transformStyles = [
-  'rotate(5deg) translate(-150px)',
-  'rotate(0deg) translate(-70px)',
-  'rotate(-5deg)',
-  'rotate(5deg) translate(70px)',
-  'rotate(-5deg) translate(150px)',
+  "rotate(5deg) translate(-150px)",
+  "rotate(0deg) translate(-70px)",
+  "rotate(-5deg)",
+  "rotate(5deg) translate(70px)",
+  "rotate(-5deg) translate(150px)",
 ];
 
 export function Hero() {
@@ -83,26 +83,26 @@ export function Hero() {
 
     // Delay navigation to allow for animation
     setTimeout(() => {
-      router.push('/algorithmGallery');
+      router.push("/algorithmGallery");
     }, 800);
   };
 
   const scrollToUsecase = () => {
-    usecaseRef.current?.scrollIntoView({ behavior: 'smooth' });
+    usecaseRef.current?.scrollIntoView({ behavior: "smooth" });
   };
 
   const scrollToScrollSection = () => {
-    scrollSectionRef.current?.scrollIntoView({ behavior: 'smooth' });
+    scrollSectionRef.current?.scrollIntoView({ behavior: "smooth" });
   };
 
   // Allow scrolling within container but prevent body scrolling
   useEffect(() => {
     const originalStyle = window.getComputedStyle(document.body).overflow;
-    document.body.style.overflow = 'hidden';
+    document.body.style.overflow = "hidden";
 
     // Make sure the container can scroll
     if (containerRef.current) {
-      containerRef.current.style.overflow = 'auto';
+      containerRef.current.style.overflow = "auto";
     }
 
     return () => {
@@ -115,7 +115,7 @@ export function Hero() {
       ref={containerRef}
       className="w-screen overflow-y-auto no-scrollbar"
       initial="initial"
-      animate={isTransitioning ? 'exit' : 'animate'}
+      animate={isTransitioning ? "exit" : "animate"}
       variants={pageVariants}
       transition={{ duration: 0.5 }}>
       {/* Flowing Background */}
@@ -145,7 +145,7 @@ export function Hero() {
               <motion.h1
                 className="text-[#000000] text-2xl sm:text-3xl md:text-3xl lg:text-5xl xl:text-5xl font-medium mr-2"
                 variants={itemVariants}>
-                Using{' '}
+                Using{" "}
               </motion.h1>
               <motion.h1
                 className="text-[#FF9999] text-4xl sm:text-5xl md:text-6xl lg:text-7xl xl:text-8xl font-bold"

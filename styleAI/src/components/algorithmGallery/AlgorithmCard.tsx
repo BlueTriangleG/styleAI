@@ -1,19 +1,17 @@
 /**
  * AlgorithmCard component for displaying individual algorithm options
- *
  * @component
- * @param {Object} props - Component props
- * @param {string} props.title - Title of the algorithm
- * @param {string} props.description - Short description of the algorithm
- * @param {string} props.imageUrl - URL of the algorithm preview image
- * @param {string} props.id - Unique identifier for the algorithm
- * @param {Function} props.onSelect - Callback function when algorithm is clicked
- * @param {string} props.bgColor - Fallback background color if image fails to load
+ * @param {string} title - Title of the algorithm
+ * @param {string} description - Short description of the algorithm
+ * @param {string} imageUrl - URL of the algorithm preview image
+ * @param {string} id - Unique identifier for the algorithm
+ * @param {Function} onSelect - Callback function when algorithm is clicked
+ * @param {string} bgColor - Fallback background color if image fails to load
  */
 
-import { GlareCard } from '@/components/ui/glare-card';
-import { useState } from 'react';
-import { cn } from '@/lib/utils';
+import { GlareCard } from "@/components/ui/glare-card";
+import { useState } from "react";
+import { cn } from "@/lib/utils";
 
 interface AlgorithmCardProps {
   title: string;
@@ -30,7 +28,7 @@ export function AlgorithmCard({
   imageUrl,
   id,
   onSelect,
-  bgColor = '#2D4B37',
+  bgColor = "#2D4B37",
 }: AlgorithmCardProps) {
   const [imageError, setImageError] = useState(false);
   const [isHovered, setIsHovered] = useState(false);
@@ -42,13 +40,12 @@ export function AlgorithmCard({
   return (
     <div
       className={cn(
-        'transition-all duration-300 transform cursor-pointer mx-auto',
-        isHovered ? 'scale-105' : ''
+        "transition-all duration-300 transform cursor-pointer mx-auto",
+        isHovered ? "scale-105" : ""
       )}
       onClick={() => onSelect?.(id)}
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}>
-      {/* Responsive wrapper with adaptive sizing based on screen width */}
       <div className="w-[66vw] h-[88vw] sm:w-[50vw] sm:h-[66vw] md:w-[33vw] md:h-[44vw] lg:w-[25vw] lg:h-[33vw] xl:w-[20vw] xl:h-[26vw] max-w-[450px] max-h-[600px]">
         <GlareCard className="flex flex-col items-start justify-end h-full">
           <div
@@ -65,7 +62,6 @@ export function AlgorithmCard({
                 <div className="absolute inset-0 bg-gradient-to-t from-black/70 to-transparent" />
               </div>
             )}
-            {/* Always show gradient overlay for text readability */}
             {imageError && (
               <div className="absolute inset-0 bg-gradient-to-t from-black/70 to-transparent" />
             )}
@@ -77,13 +73,12 @@ export function AlgorithmCard({
             </h3>
             <p className="text-sm md:text-base text-gray-200">{description}</p>
 
-            {/* Button-like indicator on hover */}
             <div
               className={cn(
-                'absolute bottom-6 right-6 md:bottom-8 md:right-8 bg-white/90 text-black rounded-full p-2 md:p-3 transition-all duration-300 shadow-md',
+                "absolute bottom-6 right-6 md:bottom-8 md:right-8 bg-white/90 text-black rounded-full p-2 md:p-3 transition-all duration-300 shadow-md",
                 isHovered
-                  ? 'opacity-100 translate-y-0'
-                  : 'opacity-0 translate-y-2'
+                  ? "opacity-100 translate-y-0"
+                  : "opacity-0 translate-y-2"
               )}>
               <svg
                 xmlns="http://www.w3.org/2000/svg"

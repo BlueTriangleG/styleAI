@@ -1,23 +1,23 @@
-'use client';
+"use client";
 
-import { useEffect, useState, useRef } from 'react';
-import { motion, useScroll, useTransform } from 'framer-motion';
-import { RecommendationHeader } from '@/components/recommendation/Header';
-import LiquidChrome from '@/components/background/LiquidChrome';
-import StyleRecommendations from '@/components/recommendation/StyleRecommendations';
-import { AnalysisReport } from '@/components/analysis/AnalysisReport';
-import { ScrollIndicator } from '@/components/analysis/ScrollIndicator';
-import { useJobDescription } from '@/hooks/useJobDescription';
-import { useBestFitImage } from '@/hooks/useBestFitImage';
+import { useEffect, useState, useRef } from "react";
+import { motion, useScroll, useTransform } from "framer-motion";
+import { RecommendationHeader } from "@/components/recommendation/Header";
+import LiquidChrome from "@/components/Background/LiquidChrome";
+import StyleRecommendations from "@/components/recommendation/StyleRecommendations";
+import { AnalysisReport } from "@/components/analysis/AnalysisReport";
+import { ScrollIndicator } from "@/components/analysis/ScrollIndicator";
+import { useJobDescription } from "@/hooks/useJobDescription";
+import { useBestFitImage } from "@/hooks/useBestFitImage";
 import {
   defaultStyleRecommendations,
   defaultAnalysisResults,
-} from '@/constants/defaultAnalysisData';
+} from "@/constants/defaultAnalysisData";
 import {
   TransformWrapper,
   TransformComponent,
   useControls,
-} from 'react-zoom-pan-pinch';
+} from "react-zoom-pan-pinch";
 
 /**
  * Image zoom controls component
@@ -112,9 +112,9 @@ export default function GenerateReport() {
   const analysisRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    if (typeof window === 'undefined') return;
+    if (typeof window === "undefined") return;
 
-    const userImageFromStorage = sessionStorage.getItem('userImage');
+    const userImageFromStorage = sessionStorage.getItem("userImage");
     if (userImageFromStorage) {
       setUserImage(userImageFromStorage);
     }
@@ -122,7 +122,7 @@ export default function GenerateReport() {
 
   const { scrollYProgress } = useScroll({
     target: scrollRef,
-    offset: ['start start', 'end start'],
+    offset: ["start start", "end start"],
   });
 
   const opacityTransform = useTransform(scrollYProgress, [0, 0.3], [1, 0]);
@@ -132,7 +132,7 @@ export default function GenerateReport() {
     if (!isPageLoading) {
       const scrollEffectsTimer = setTimeout(() => {
         setEnableScrollEffects(true);
-        console.log('启用滚动效果');
+        console.log("启用滚动效果");
       }, 1500);
 
       return () => {
@@ -144,7 +144,7 @@ export default function GenerateReport() {
   useEffect(() => {
     if (showScrollIndicator) {
       setAllowScroll(true);
-      console.log('允许滚动：设置allowScroll为true');
+      console.log("允许滚动：设置allowScroll为true");
     }
   }, [showScrollIndicator]);
 
@@ -155,13 +155,13 @@ export default function GenerateReport() {
       }
     };
 
-    console.log('当前滚动状态:', allowScroll ? '允许' : '禁止');
-    window.addEventListener('wheel', preventScroll, { passive: false });
-    window.addEventListener('touchmove', preventScroll, { passive: false });
+    console.log("当前滚动状态:", allowScroll ? "允许" : "禁止");
+    window.addEventListener("wheel", preventScroll, { passive: false });
+    window.addEventListener("touchmove", preventScroll, { passive: false });
 
     return () => {
-      window.removeEventListener('wheel', preventScroll);
-      window.removeEventListener('touchmove', preventScroll);
+      window.removeEventListener("wheel", preventScroll);
+      window.removeEventListener("touchmove", preventScroll);
     };
   }, [allowScroll]);
 
@@ -169,7 +169,7 @@ export default function GenerateReport() {
     if (isPageLoading || !analysisData) return;
 
     if (!analysisData.features || !Array.isArray(analysisData.features)) {
-      console.error('分析数据中的features不存在或不是数组:', analysisData);
+      console.error("分析数据中的features不存在或不是数组:", analysisData);
       return;
     }
 
@@ -177,7 +177,7 @@ export default function GenerateReport() {
       setTypingComplete(analysisData.features.length);
       setTimeout(() => {
         setShowScrollIndicator(true);
-        console.log('显示滚动指示器');
+        console.log("显示滚动指示器");
       }, 1000);
       return;
     }
@@ -189,7 +189,7 @@ export default function GenerateReport() {
         } else {
           clearInterval(typingTimer);
           setShowScrollIndicator(true);
-          console.log('显示滚动指示器');
+          console.log("显示滚动指示器");
           return prev;
         }
       });
@@ -200,8 +200,8 @@ export default function GenerateReport() {
 
   const scrollToRecommendations = () => {
     if (recommendationsRef.current) {
-      recommendationsRef.current.scrollIntoView({ behavior: 'smooth' });
-      console.log('滚动到推荐部分');
+      recommendationsRef.current.scrollIntoView({ behavior: "smooth" });
+      console.log("滚动到推荐部分");
     }
   };
 
@@ -231,7 +231,7 @@ export default function GenerateReport() {
         : defaultAnalysisResults.styleMatch,
   };
 
-  console.log('页面渲染状态:', {
+  console.log("页面渲染状态:", {
     isPageLoading,
     isLoadingAnalysis,
     isLoadingBestFit,
@@ -248,7 +248,7 @@ export default function GenerateReport() {
         }
 
         body {
-          overflow: ${allowScroll ? 'auto' : 'hidden'};
+          overflow: ${allowScroll ? "auto" : "hidden"};
           height: 100%;
         }
       `}</style>

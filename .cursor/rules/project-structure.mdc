@@ -1,0 +1,68 @@
+# Project Structure Guide
+
+## Overview
+This is a Next.js 14+ application with App Router, using TypeScript, Clerk authentication, PostgreSQL, and Stripe payments.
+
+## Key Configuration Files
+- [next.config.ts](mdc:next.config.ts) - Next.js config with `basePath: '/styleai'`
+- [package.json](mdc:package.json) - Dependencies and scripts
+- [.env.local](mdc:.env.local) - Environment variables (not in repo)
+- [tailwind.config.ts](mdc:tailwind.config.ts) - Tailwind CSS configuration
+
+## Directory Structure
+
+### `/src/app/` - App Router Pages & API Routes
+- [src/app/layout.tsx](mdc:src/app/layout.tsx) - Root layout with Clerk provider
+- [src/app/page.tsx](mdc:src/app/page.tsx) - Home page
+- [src/app/credits/page.tsx](mdc:src/app/credits/page.tsx) - Credits purchase page
+- [src/app/api/](mdc:src/app/api/) - API routes directory
+  - [src/app/api/stripe/](mdc:src/app/api/stripe/) - Stripe payment endpoints
+  - [src/app/api/users/](mdc:src/app/api/users/) - User management endpoints
+
+### `/src/lib/` - Shared Libraries
+- [src/lib/db.ts](mdc:src/lib/db.ts) - PostgreSQL database connection
+- [src/lib/stripe.ts](mdc:src/lib/stripe.ts) - Stripe client and configuration
+- [src/lib/models/user.ts](mdc:src/lib/models/user.ts) - User database operations
+- [src/lib/auth/](mdc:src/lib/auth/) - Authentication utilities
+
+### `/src/components/` - React Components
+- [src/components/algorithmGallery/](mdc:src/components/algorithmGallery/) - Algorithm gallery components
+- [src/components/home/](mdc:src/components/home/) - Home page components
+- [src/components/recommendation/](mdc:src/components/recommendation/) - Recommendation components
+
+### `/docs/` - Documentation
+- [docs/stripe-setup.md](mdc:docs/stripe-setup.md) - Stripe integration setup guide
+
+## Important Configuration Notes
+
+### Base Path
+The application uses `basePath: '/styleai'` in [next.config.ts](mdc:next.config.ts), so all routes are prefixed with `/styleai/`.
+
+### API Routes
+- All API calls must include the base path: `/styleai/api/...`
+- Example: `fetch('/styleai/api/stripe/create-checkout-session', ...)`
+
+### Environment Variables
+Required environment variables (see [docs/stripe-setup.md](mdc:docs/stripe-setup.md)):
+- `STRIPE_SECRET_KEY`
+- `NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY`
+- `STRIPE_WEBHOOK_SECRET`
+- `APP_URL`
+- `JWT_SECRET`
+- Clerk keys
+- Database connection string
+
+## Development Commands
+- `npm run dev` - Start development server
+- `npm run build` - Build for production
+- `npm run start` - Start production server
+- `npm install --legacy-peer-deps` - Install dependencies (required for this project)
+
+## Key Dependencies
+- Next.js 14+ with App Router
+- React 18+
+- TypeScript
+- Clerk for authentication
+- Stripe for payments
+- PostgreSQL with `pg` driver
+- Tailwind CSS for styling

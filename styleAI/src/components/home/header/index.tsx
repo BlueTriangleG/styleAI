@@ -1,21 +1,23 @@
-'use client';
+"use client";
 
-import Link from 'next/link';
-import styles from './index.module.scss';
-import { useRouter } from 'next/navigation';
+import Link from "next/link";
+import styles from "./index.module.scss";
+import { useRouter } from "next/navigation";
 import {
   UserButton,
   SignInButton,
   SignUpButton,
   SignedIn,
   SignedOut,
-} from '@clerk/nextjs';
-import { ClipboardIcon } from '@radix-ui/react-icons';
+} from "@clerk/nextjs";
+import { ClipboardIcon } from "@radix-ui/react-icons";
+import ModernSubscribeButton from "../../ui/modern-subscribe-button";
+import CreditDisplay from "../../ui/credit-display";
 export function Header() {
   const router = useRouter();
 
   const handleStartClick = () => {
-    router.push('/algorithmGallery');
+    router.push("/algorithmGallery");
   };
 
   return (
@@ -34,11 +36,8 @@ export function Header() {
         <div className="flex items-center space-x-4">
           <SignedIn>
             {/* Only shown when user is signed in */}
-            <Link
-              href="/credits"
-              className="bg-white text-[#2D4B37] border border-[#2D4B37] px-6 py-2.5 rounded-md font-medium hover:bg-gray-50 transition-colors shadow-sm text-base flex items-center">
-              <span className="mr-1">💎</span> Subscribe
-            </Link>
+            <CreditDisplay />
+            <ModernSubscribeButton variant="premium" size="md" />
             <button
               onClick={handleStartClick}
               className="bg-[#2D4B37] text-white px-6 py-2.5 rounded-md font-medium hover:bg-[#1F3526] transition-colors shadow-sm text-base">
@@ -48,14 +47,14 @@ export function Header() {
               <UserButton
                 appearance={{
                   elements: {
-                    avatarBox: 'w-12 h-12',
+                    avatarBox: "w-12 h-12",
                   },
                 }}>
                 <UserButton.MenuItems>
                   <UserButton.Action
                     label="Report History"
                     labelIcon={<ClipboardIcon />}
-                    onClick={() => router.push('/reportHistory')}
+                    onClick={() => router.push("/reportHistory")}
                   />
                 </UserButton.MenuItems>
               </UserButton>
@@ -64,11 +63,7 @@ export function Header() {
 
           <SignedOut>
             {/* Only shown when user is signed out */}
-            <Link
-              href="/credits"
-              className="bg-white text-[#2D4B37] border border-[#2D4B37] px-6 py-2.5 rounded-md font-medium hover:bg-gray-50 transition-colors shadow-sm text-base flex items-center">
-              <span className="mr-1">💎</span> Subscribe
-            </Link>
+            <ModernSubscribeButton variant="premium" size="md" />
             <SignInButton mode="modal">
               <button className="bg-[#2D4B37] text-white px-6 py-2.5 rounded-md font-medium hover:bg-[#1F3526] transition-colors shadow-sm text-base">
                 Sign In

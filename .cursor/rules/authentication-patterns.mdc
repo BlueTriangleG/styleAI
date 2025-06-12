@@ -1,0 +1,59 @@
+# Authentication & User Management Patterns
+
+## Overview
+This project uses Clerk for authentication with PostgreSQL for user data storage. Users are automatically synced between Clerk and the database.
+
+## Key Files
+- [src/middleware.ts](mdc:src/middleware.ts) - Clerk middleware configuration
+- [src/lib/models/user.ts](mdc:src/lib/models/user.ts) - User database operations
+- [src/app/api/users/sync/route.ts](mdc:src/app/api/users/sync/route.ts) - Manual user sync endpoint
+- [src/lib/auth/middleware.ts](mdc:src/lib/auth/middleware.ts) - Legacy JWT middleware (deprecated)
+
+## Authentication Flow
+1. Users authenticate through Clerk
+2. Clerk middleware protects routes automatically
+3. API routes use `auth()` and `currentUser()` from Clerk
+4. Users are auto-synced to database when needed
+
+## User Database Schema
+Users are stored with these key fields:
+- `id` - Primary key (auto-increment)
+- `provider` - Authentication provider ('clerk')
+- `provider_id` - Clerk user ID
+- `email` - User email
+- `username` - Display name
+- `stripe_customer_id` - Stripe customer ID (nullable)
+- `credits` - Available credits (default 0)
+
+## Auto-Sync Pattern
+Use `autoSyncClerkUser()` function to automatically create/update users:
+
+```typescript
+import { autoSyncClerkUser, getUserByProvider } from '@/lib/models/user';
+
+// Try to get existing user
+let user = await getUserByProvider('clerk', clerkUserId);
+
+// Auto-sync if not found
+if (!user) {
+  user = await autoSyncClerkUser(clerkUser);
+}
+```
+
+## Protected Routes
+Routes are protected by Clerk middleware in [src/middleware.ts](mdc:src/middleware.ts):
+- Public routes: `/`, `/sign-in`, `/sign-up`
+- All other routes require authentication
+- API routes are automatically protected
+
+## User Lookup Methods
+- `getUserById(id)` - Get by database ID
+- `getUserByProvider(provider, providerId)` - Get by Clerk ID
+- `autoSyncClerkUser(clerkUser)` - Auto-sync from Clerk
+
+## Best Practices
+- Always use Clerk authentication in API routes
+- Auto-sync users instead of requiring manual sync
+- Include both database ID and Clerk ID in metadata
+- Handle authentication errors gracefully
+- Use `currentUser()` for full user data, `auth()` for just ID
