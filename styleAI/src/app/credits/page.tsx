@@ -1,16 +1,16 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, Suspense } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import ModernPricingPage from "@/components/ui/modern-pricing";
 import { Header } from "@/components/home/header";
 import LiquidChrome from "@/components/Background/LiquidChrome";
 
 /**
- * CreditsPage - Shows available credit purchase options using modern UI
- * Allows users to choose a credit package and proceed to checkout
+ * CreditsContent - Internal component that uses useSearchParams
+ * Separated to be wrapped in Suspense boundary
  */
-export default function CreditsPage() {
+function CreditsContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const [loading, setLoading] = useState<string | null>(null);
@@ -84,6 +84,32 @@ export default function CreditsPage() {
   };
 
   return (
+    <ModernPricingPage
+      onPurchase={handlePurchase}
+      loading={loading}
+      error={error}
+      successMessage={successMessage}
+    />
+  );
+}
+
+/**
+ * Loading fallback component for Suspense boundary
+ */
+function CreditsLoading() {
+  return (
+    <div className="flex items-center justify-center min-h-[400px]">
+      <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
+    </div>
+  );
+}
+
+/**
+ * CreditsPage - Shows available credit purchase options using modern UI
+ * Allows users to choose a credit package and proceed to checkout
+ */
+export default function CreditsPage() {
+  return (
     <div className="relative min-h-screen">
       {/* Flowing Background - Same as Hero Page */}
       <div className="fixed inset-0 z-0 overflow-hidden pointer-events-auto">
@@ -103,12 +129,9 @@ export default function CreditsPage() {
 
       {/* Main Content */}
       <div className="relative z-10 pt-20">
-        <ModernPricingPage
-          onPurchase={handlePurchase}
-          loading={loading}
-          error={error}
-          successMessage={successMessage}
-        />
+        <Suspense fallback={<CreditsLoading />}>
+          <CreditsContent />
+        </Suspense>
       </div>
     </div>
   );
