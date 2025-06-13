@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation";
 import { motion } from "framer-motion";
 import CircularGallery from "@/components/ui/CircularGallery";
 import BounceCards from "@/components/ui/BounceCards";
-import LiquidChrome from "@/components/Background/LiquidChrome";
+import LiquidChrome from "@/components/background/LiquidChrome";
 import { useAuth, SignInButton, SignedIn, SignedOut } from "@clerk/nextjs";
 import { HeroScrollSection } from "@/components/home/hero-scroll-section";
 const basePath = process.env.NEXT_PUBLIC_BASE_PATH;

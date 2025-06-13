@@ -13,7 +13,7 @@ import { motion } from "framer-motion";
 import { RecommendationHeader } from "@/components/recommendation/Header";
 import { AlgorithmGallery } from "@/components/algorithmGallery/AlgorithmGallery";
 import { SectionHeader } from "@/components/algorithmGallery/SectionHeader";
-import LiquidChrome from "@/components/Background/LiquidChrome";
+import LiquidChrome from "@/components/background/LiquidChrome";
 
 import {
   sampleAlgorithms,

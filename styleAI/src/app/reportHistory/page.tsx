@@ -7,7 +7,7 @@ import { useAuth } from "@clerk/nextjs";
 import { getUserHistory } from "@/app/actions/getUserHistory";
 import { currentUser } from "@clerk/nextjs/server";
 import { Header } from "@/components/home/header";
-import LiquidChrome from "@/components/Background/LiquidChrome";
+import LiquidChrome from "@/components/background/LiquidChrome";
 
 /**
  * ReportHistory Page

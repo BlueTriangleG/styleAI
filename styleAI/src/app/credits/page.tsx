@@ -4,7 +4,7 @@ import { useState, useEffect, Suspense } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import ModernPricingPage from "@/components/ui/modern-pricing";
 import { Header } from "@/components/home/header";
-import LiquidChrome from "@/components/Background/LiquidChrome";
+import LiquidChrome from "@/components/background/LiquidChrome";
 
 /**
  * CreditsContent - Internal component that uses useSearchParams

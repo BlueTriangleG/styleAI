@@ -5,7 +5,7 @@ import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { RecommendationHeader } from "@/components/recommendation/Header";
 import { motion } from "framer-motion";
-import LiquidChrome from "@/components/Background/LiquidChrome";
+import LiquidChrome from "@/components/background/LiquidChrome";
 import { Tilt } from "@/components/ui/tilt";
 import {
   processImageClient,

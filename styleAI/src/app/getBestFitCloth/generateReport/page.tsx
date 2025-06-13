@@ -3,7 +3,7 @@
 import { useEffect, useState, useRef } from "react";
 import { motion, useScroll, useTransform } from "framer-motion";
 import { RecommendationHeader } from "@/components/recommendation/Header";
-import LiquidChrome from "@/components/Background/LiquidChrome";
+import LiquidChrome from "@/components/background/LiquidChrome";
 import StyleRecommendations from "@/components/recommendation/StyleRecommendations";
 import { AnalysisReport } from "@/components/analysis/AnalysisReport";
 import { ScrollIndicator } from "@/components/analysis/ScrollIndicator";
