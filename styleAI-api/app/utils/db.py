@@ -8,8 +8,8 @@ import json
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
-# 从环境变量获取数据库连接URL
-DATABASE_URL = os.environ.get('DATABASE_URL', "postgresql://test_owner:npg_riaEfFBXn19H@ep-snowy-bar-a7w4sdqq-pooler.ap-southeast-2.aws.neon.tech/test?sslmode=require")
+# Retrieve DATABASE_URL strictly from environment variable
+DATABASE_URL = os.environ.get('DATABASE_URL')
 
 def get_db_connection():
     """

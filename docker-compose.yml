@@ -5,6 +5,8 @@ services:
   api:
     build: ./styleAI-api
     container_name: styleai-api
+    env_file:
+      - ./styleAI-api/.env
     restart: unless-stopped
     ports:
       - '5001:5001'
