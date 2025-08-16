@@ -4,7 +4,7 @@ import { useEffect, useState, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import { motion } from 'framer-motion';
 import { RecommendationHeader } from '@/components/recommendation/Header';
-import LiquidChrome from '@/components/background/LiquidChrome';
+import LiquidChrome from '@/components/Background/LiquidChrome';
 
 import { apiService } from '@/lib/api/ApiService';
 
