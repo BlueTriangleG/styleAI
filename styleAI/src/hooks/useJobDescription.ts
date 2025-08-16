@@ -109,10 +109,12 @@ export const useJobDescription = (): UseJobDescriptionReturn => {
       if (parsedData && parsedData['Your Overall Description']) {
         const description = parsedData['Your Overall Description'];
         console.log('提取到的整体描述:', description);
-        setOverallDescription(description);
+        // 只有当描述真的不同时才更新状态
+        setOverallDescription(prev => prev !== description ? description : prev);
       } else {
         console.log('未找到整体描述');
-        setOverallDescription('未找到整体描述');
+        const defaultDesc = '未找到整体描述';
+        setOverallDescription(prev => prev !== defaultDesc ? defaultDesc : prev);
       }
 
       // 使用工具函数提取数据
@@ -138,7 +140,14 @@ export const useJobDescription = (): UseJobDescriptionReturn => {
       console.log('提取的颜色:', processedData.colors);
       console.log('提取的风格:', processedData.styles);
 
-      setAnalysisData(processedData);
+      // 只有当数据真的不同时才更新状态
+      setAnalysisData(prev => {
+        if (!prev) return processedData;
+        
+        // 深度比较来避免不必要的更新
+        const isSame = JSON.stringify(prev) === JSON.stringify(processedData);
+        return isSame ? prev : processedData;
+      });
 
       // 存储到sessionStorage以备后用
       sessionStorage.setItem('analysisData', JSON.stringify(parsedData));

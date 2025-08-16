@@ -9,6 +9,7 @@ import { AnalysisReport } from '@/components/analysis/AnalysisReport';
 import { ScrollIndicator } from '@/components/analysis/ScrollIndicator';
 import { useJobDescription } from '@/hooks/useJobDescription';
 import { useBestFitImage } from '@/hooks/useBestFitImage';
+import { ModernLoadingSpinner } from '@/components/loading/ModernLoadingSpinner';
 import {
   defaultStyleRecommendations,
   defaultAnalysisResults,
@@ -85,7 +86,6 @@ const ZoomControls = () => {
 };
 
 export default function GenerateReport() {
-  const [typingComplete, setTypingComplete] = useState<number>(0);
   const [showScrollIndicator, setShowScrollIndicator] = useState(false);
   const [enableScrollEffects, setEnableScrollEffects] = useState(false);
   const [allowScroll, setAllowScroll] = useState(false);
@@ -166,37 +166,15 @@ export default function GenerateReport() {
   }, [allowScroll]);
 
   useEffect(() => {
-    if (isPageLoading || !analysisData) return;
-
-    if (!analysisData.features || !Array.isArray(analysisData.features)) {
-      console.error('分析数据中的features不存在或不是数组:', analysisData);
-      return;
-    }
-
-    if (overallDescription) {
-      setTypingComplete(analysisData.features.length);
-      setTimeout(() => {
+    if (!isPageLoading && analysisData) {
+      // 简单地在数据加载完成后显示滚动指示器
+      const timer = setTimeout(() => {
         setShowScrollIndicator(true);
         console.log('显示滚动指示器');
-      }, 1000);
-      return;
+      }, 2000);
+      return () => clearTimeout(timer);
     }
-
-    const typingTimer = setInterval(() => {
-      setTypingComplete((prev) => {
-        if (prev < analysisData.features.length) {
-          return prev + 1;
-        } else {
-          clearInterval(typingTimer);
-          setShowScrollIndicator(true);
-          console.log('显示滚动指示器');
-          return prev;
-        }
-      });
-    }, 1000);
-
-    return () => clearInterval(typingTimer);
-  }, [isPageLoading, analysisData, overallDescription]);
+  }, [isPageLoading, analysisData]);
 
   const scrollToRecommendations = () => {
     if (recommendationsRef.current) {
@@ -256,36 +234,12 @@ export default function GenerateReport() {
       <RecommendationHeader />
 
       {isLoadingAnalysis && (
-        <div className="fixed inset-0 bg-white z-50 flex items-center justify-center">
-          <div className="flex flex-col items-center">
-            <div className="relative w-16 h-16 mb-3">
-              <svg
-                className="animate-spin text-[#84a59d]"
-                viewBox="0 0 24 24"
-                fill="none"
-                xmlns="http://www.w3.org/2000/svg">
-                <circle
-                  className="opacity-25"
-                  cx="12"
-                  cy="12"
-                  r="10"
-                  stroke="currentColor"
-                  strokeWidth="4"
-                />
-                <path
-                  className="opacity-75"
-                  fill="currentColor"
-                  d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
-                />
-              </svg>
-            </div>
-            <p className="text-gray-600 font-inter text-center">
-              Loading style recommendations...
-            </p>
-            <p className="text-gray-500 font-inter text-sm text-center mt-1">
-              Finding your best matching styles
-            </p>
-          </div>
+        <div className="fixed inset-0 bg-white/95 backdrop-blur-sm z-50 flex items-center justify-center">
+          <ModernLoadingSpinner
+            size="xl"
+            message="Loading style recommendations..."
+            subMessage="Finding your best matching styles"
+          />
         </div>
       )}
 
@@ -377,7 +331,6 @@ export default function GenerateReport() {
                       overallDescription={overallDescription}
                       analysisPoints={analysisData?.features || []}
                       recommendedStyles={analysisData?.styles || []}
-                      typingComplete={typingComplete}
                     />
                   </div>
                 </motion.div>
@@ -385,34 +338,12 @@ export default function GenerateReport() {
             </div>
             {/* 后续内容加载提示 - 当分析已加载但最佳风格推荐仍在加载时显示 */}
             {!isLoadingAnalysis && isLoadingBestFit && (
-              <div className="mt-8 flex flex-col items-center justify-center py-4">
-                <div className="relative w-16 h-16 mb-3">
-                  <svg
-                    className="animate-spin text-[#84a59d]"
-                    viewBox="0 0 24 24"
-                    fill="none"
-                    xmlns="http://www.w3.org/2000/svg">
-                    <circle
-                      className="opacity-25"
-                      cx="12"
-                      cy="12"
-                      r="10"
-                      stroke="currentColor"
-                      strokeWidth="4"
-                    />
-                    <path
-                      className="opacity-75"
-                      fill="currentColor"
-                      d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
-                    />
-                  </svg>
-                </div>
-                <p className="text-gray-600 font-inter text-center">
-                  Loading style recommendations...
-                </p>
-                <p className="text-gray-500 font-inter text-sm text-center mt-1">
-                  Finding your best matching styles
-                </p>
+              <div className="mt-8 flex flex-col items-center justify-center py-8">
+                <ModernLoadingSpinner
+                  size="lg"
+                  message="Generating your best fit..."
+                  subMessage="Creating personalized style recommendations"
+                />
               </div>
             )}
             <ScrollIndicator
@@ -430,6 +361,7 @@ export default function GenerateReport() {
             analysisResults={analysisResults}
             isLoadingBestFit={isLoadingBestFit}
             bestFitError={bestFitError}
+            analysisData={analysisData}
           />
         </div>
       </div>

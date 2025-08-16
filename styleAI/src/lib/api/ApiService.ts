@@ -104,7 +104,7 @@ class ApiService {
     try {
       console.log(`正在获取个性化分析数据，jobId: ${jobId}`);
       const response = await fetch(
-        `${API_ENDPOINTS.PERSONALIZED_ANALYSIS}`,
+        `${this.baseUrl}${API_ENDPOINTS.PERSONALIZED_ANALYSIS}`,
         {
           method: 'POST',
           headers: DEFAULT_HEADERS,
@@ -139,7 +139,7 @@ class ApiService {
     try {
       console.log(`正在获取穿着建议图片，jobId: ${jobId}`);
       const response = await fetch(
-        `${API_ENDPOINTS.WEAR_SUIT_PICTURES}`,
+        `${this.baseUrl}${API_ENDPOINTS.WEAR_SUIT_PICTURES}`,
         {
           method: 'POST',
           headers: DEFAULT_HEADERS,
@@ -194,7 +194,7 @@ class ApiService {
     try {
       console.log(`正在获取穿着建议图片，jobId: ${jobId}`);
       const response = await fetch(
-        `${API_ENDPOINTS.GENERATE_BEST_FIT}`,
+        `${this.baseUrl}${API_ENDPOINTS.GENERATE_BEST_FIT}`,
         {
           method: 'POST',
           headers: DEFAULT_HEADERS,

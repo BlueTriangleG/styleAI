@@ -108,9 +108,14 @@ def top_matches(user_text, model_data, tokenizer, model, device):
         model_attributes, model_scoring = extract_attributes_scoring(model_entry["result"]["data"]["outputs"]["text"])
         
         model_gender = model_attributes.get("Semantic Features.Intrinsic Features.Gender", None)
+        # Apply gender matching preference but don't exclude completely
+        # Add a penalty to similarity for gender mismatch instead of skipping entirely
+        gender_penalty = 0.0
         if user_gender and model_gender and (user_gender != model_gender.lower()):
-            print(f"Skipping {model_entry.get('image')} due to gender mismatch: user {user_gender} vs model {model_gender}")
-            continue
+            gender_penalty = 0.1  # Small penalty for gender mismatch
+            print(f"Gender mismatch penalty applied for {model_entry.get('image')}: user {user_gender} vs model {model_gender}")
+        else:
+            print(f"Gender match or unknown for {model_entry.get('image')}: user {user_gender} vs model {model_gender}")
 
         # aesthetic_score
         aesthetic_score_str = model_scoring.get("Scoring.Aesthetic Score", "0")
@@ -173,9 +178,11 @@ def top_matches(user_text, model_data, tokenizer, model, device):
                 total_weight += weight
         
         weighted_avg_similarity = total_weighted_similarity / total_weight if total_weight > 0 else 0
+        # Apply gender penalty to final similarity score
+        final_similarity = max(0, weighted_avg_similarity - gender_penalty)
         results.append({
             "image": os.path.join(model_entry["image"]),
-            "similarity": weighted_avg_similarity,
+            "similarity": final_similarity,
             "contributions": attr_contributions,
             "score": aesthetic_score
         })

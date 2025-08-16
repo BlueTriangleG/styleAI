@@ -18,6 +18,11 @@ export const useBestFitImage = (): UseBestFitImageReturn => {
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
+  // 安全的状态更新函数，避免重复设置相同值
+  const safeSetError = (newError: string | null) => {
+    setError(prev => prev !== newError ? newError : prev);
+  };
+
   useEffect(() => {
     const fetchImage = async () => {
       if (typeof window === 'undefined') return;
@@ -29,7 +34,7 @@ export const useBestFitImage = (): UseBestFitImageReturn => {
         const jobIdFromStorage = sessionStorage.getItem('currentJobId');
         if (!jobIdFromStorage) {
           console.log('No jobId found, cannot fetch best fit image');
-          setError('No jobId found, cannot fetch best fit image');
+          safeSetError('No jobId found, cannot fetch best fit image');
           setIsLoading(false);
           return;
         }
@@ -38,7 +43,7 @@ export const useBestFitImage = (): UseBestFitImageReturn => {
         await fetchBestFitImage(jobIdFromStorage);
       } catch (error) {
         console.error('Error getting best fit image:', error);
-        setError('Failed to get best fit image, please try again');
+        safeSetError('Failed to get best fit image, please try again');
       } finally {
         setIsLoading(false);
       }
@@ -85,22 +90,22 @@ export const useBestFitImage = (): UseBestFitImageReturn => {
             processSuccessfulResult(bestFitResult);
           } else {
             console.log('Second database fetch failed:', bestFitResult.error);
-            setError(
+            safeSetError(
               bestFitResult.error ||
                 'Failed to get best fit image after generation'
             );
           }
         } else {
-          setError('API service did not return a valid result');
+          safeSetError('API service did not return a valid result');
         }
       } catch (apiError) {
         // Step 4: Handle API service error
         console.error('API service error:', apiError);
-        setError('Failed to generate best fit image from API service');
+        safeSetError('Failed to generate best fit image from API service');
       }
     } catch (error) {
       console.error('Error in fetchBestFitImage flow:', error);
-      setError('Failed to get best fit image');
+      safeSetError('Failed to get best fit image');
       throw error;
     }
   };
@@ -122,7 +127,8 @@ export const useBestFitImage = (): UseBestFitImageReturn => {
 
     // Convert Base64 image data to Data URL
     const imageDataUrl = `data:image/jpeg;base64,${bestFitResult.imageData}`;
-    setBestFitImage(imageDataUrl);
+    // 只有当图片真的不同时才更新状态
+    setBestFitImage(prev => prev !== imageDataUrl ? imageDataUrl : prev);
     console.log('Successfully set best fit image');
 
     // Store in sessionStorage for later use

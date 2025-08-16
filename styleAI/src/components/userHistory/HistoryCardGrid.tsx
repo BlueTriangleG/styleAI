@@ -2,7 +2,7 @@
 
 import { HistoryCard } from './HistoryCard';
 import { HistoryReportData } from './types';
-import { LoadingAnimation } from '@/components/loading/LoadingAnimation';
+import { ModernLoadingSpinner } from '@/components/loading/ModernLoadingSpinner';
 
 /**
  * HistoryCardGrid component
@@ -23,7 +23,11 @@ export function HistoryCardGrid({
   if (isLoading) {
     return (
       <div className="flex h-64 items-center justify-center">
-        <LoadingAnimation message="Loading your reports" showSteps={false} />
+        <ModernLoadingSpinner 
+          size="lg"
+          message="Loading your reports"
+          subMessage="Fetching your style history"
+        />
       </div>
     );
   }

@@ -11,6 +11,7 @@ services:
       - FLASK_APP=app.py
       - FLASK_ENV=development
       - FLASK_DEBUG=1
+      - DATABASE_URL=postgresql://styleAI-db_owner:npg_Zh3rj7PmoeKT@ep-curly-dream-a7noiorc-pooler.ap-southeast-2.aws.neon.tech/styleAI-db?sslmode=require
     volumes:
       - ./app:/app/app
       - ./app.py:/app/app.py
