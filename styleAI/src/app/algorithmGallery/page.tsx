@@ -86,7 +86,7 @@ export default function AlgorithmGalleryPage() {
       <div className="relative z-10">
         <RecommendationHeader />
 
-        <main className="w-full max-w-[1600px] mx-auto pt-20 pb-16 overflow-hidden">
+        <main className="w-full pt-20 pb-16 overflow-hidden">
           <div className="text-center px-4 sm:px-6 md:px-8 mb-8">
             <SectionHeader
               title="Choose The Style Recommendations You Want"

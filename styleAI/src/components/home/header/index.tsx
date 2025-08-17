@@ -48,7 +48,7 @@ export function Header() {
               <UserButton
                 appearance={{
                   elements: {
-                    avatarBox: 'w-12 h-12',
+                    avatarBox: 'w-[42px] h-[42px]',
                   },
                 }}>
                 <UserButton.MenuItems>

@@ -42,7 +42,7 @@ export function AlgorithmCard({
   return (
     <div
       className={cn(
-        'transition-all duration-300 transform cursor-pointer mx-auto',
+        'transition-all duration-300 transform cursor-pointer',
         isHovered ? 'scale-105' : ''
       )}
       onClick={() => onSelect?.(id)}
@@ -72,10 +72,12 @@ export function AlgorithmCard({
           </div>
 
           <div className="relative z-10 p-6 md:p-8 text-white">
-            <h3 className="text-xl md:text-2xl font-bold mb-2 md:mb-3">
+            <h3 className="text-xl md:text-2xl lg:text-3xl font-bold mb-3 md:mb-4 font-playfair leading-tight tracking-tight">
               {title}
             </h3>
-            <p className="text-sm md:text-base text-gray-200">{description}</p>
+            <p className="text-sm md:text-base lg:text-lg text-gray-100 font-inter leading-relaxed font-light opacity-90">
+              {description}
+            </p>
 
             {/* Button-like indicator on hover */}
             <div

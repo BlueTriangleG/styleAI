@@ -369,7 +369,7 @@ export default function GenerateReport() {
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.5 }}
               >
-                <div className="relative">
+                <div className="flex flex-col items-center">
                   {/* 高级加载动画 */}
                   <div className="relative w-32 h-32 mb-6">
                     {/* 外环 */}

@@ -22,12 +22,14 @@ export function SectionHeader({
   className,
 }: SectionHeaderProps) {
   return (
-    <div className={cn('mb-8 text-center', className)}>
-      <h2 className="text-3xl md:text-4xl font-bold text-[#2D4B37] mb-3 font-playfair">
+    <div className={cn('mb-12 text-center', className)}>
+      <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold text-[#2D4B37] mb-6 font-playfair leading-tight tracking-tight">
         {title}
-      </h2>
+      </h1>
       {description && (
-        <p className="text-gray-600 max-w-2xl mx-auto">{description}</p>
+        <p className="text-base sm:text-lg md:text-xl text-gray-700 max-w-4xl mx-auto font-inter leading-relaxed font-light">
+          {description}
+        </p>
       )}
     </div>
   );

@@ -55,10 +55,14 @@ export function AlgorithmGallery({
   const router = useRouter();
   const containerRef = useRef<HTMLDivElement>(null);
   const [isDragging, setIsDragging] = useState(false);
+  const [startX, setStartX] = useState(0);
+  const [scrollLeft, setScrollLeft] = useState(0);
+  const [dragDistance, setDragDistance] = useState(0);
 
   // Navigate to algorithm details page
   const handleCardClick = (id: string) => {
-    if (!isDragging) {
+    // Only navigate if drag distance is small (indicating a click, not a drag)
+    if (dragDistance < 10) {
       if (onTransitionStart) {
         // Use the transition callback if provided
         onTransitionStart(id);
@@ -98,45 +102,107 @@ export function AlgorithmGallery({
     }
   }, [throttledWheelHandler]);
 
-  // Move first visible card to center on first render
+  // Center the first card
   useEffect(() => {
     const container = containerRef.current;
     if (container && container.children.length > 0) {
-      // Get the first card's width
-      const cardWidth = container.children[0].getBoundingClientRect().width;
-      // Calculate container width
-      const containerWidth = container.getBoundingClientRect().width;
-      // Scroll to position the first card in the center
-      const scrollPosition = cardWidth / 2 - containerWidth / 2 + cardWidth;
-      // Set initial scroll position with a slight delay to ensure DOM is ready
       setTimeout(() => {
-        container.scrollLeft = Math.max(0, scrollPosition);
-      }, 100);
+        const firstCard = container.children[0] as HTMLElement;
+        if (firstCard) {
+          const cardWidth = firstCard.getBoundingClientRect().width;
+          const containerWidth = container.getBoundingClientRect().width;
+          // Center the first card
+          const scrollPosition = cardWidth / 2 - containerWidth / 2;
+          container.scrollLeft = Math.max(0, scrollPosition);
+        }
+      }, 200);
     }
   }, []);
 
+  // Handle mouse drag events
+  const handleMouseDown = (e: React.MouseEvent) => {
+    if (containerRef.current) {
+      setIsDragging(true);
+      setStartX(e.pageX - containerRef.current.offsetLeft);
+      setScrollLeft(containerRef.current.scrollLeft);
+      setDragDistance(0);
+    }
+  };
+
+  const handleMouseMove = (e: React.MouseEvent) => {
+    if (!isDragging || !containerRef.current) return;
+    e.preventDefault();
+    const x = e.pageX - containerRef.current.offsetLeft;
+    const distance = Math.abs(x - startX);
+    setDragDistance(distance);
+    
+    // Only scroll if drag distance is significant (more than 5px)
+    if (distance > 5) {
+      const walk = (x - startX) * 2;
+      containerRef.current.scrollLeft = scrollLeft - walk;
+    }
+  };
+
+  const handleMouseUp = () => {
+    // Reset dragging state immediately
+    setIsDragging(false);
+  };
+
+  const handleMouseLeave = () => {
+    setIsDragging(false);
+    setDragDistance(0);
+  };
+
+  // Handle touch drag events
+  const handleTouchStart = (e: React.TouchEvent) => {
+    if (containerRef.current) {
+      setIsDragging(true);
+      setStartX(e.touches[0].pageX - containerRef.current.offsetLeft);
+      setScrollLeft(containerRef.current.scrollLeft);
+      setDragDistance(0);
+    }
+  };
+
+  const handleTouchMove = (e: React.TouchEvent) => {
+    if (!isDragging || !containerRef.current) return;
+    const x = e.touches[0].pageX - containerRef.current.offsetLeft;
+    const distance = Math.abs(x - startX);
+    setDragDistance(distance);
+    
+    // Only scroll if drag distance is significant (more than 5px)
+    if (distance > 5) {
+      const walk = (x - startX) * 2;
+      containerRef.current.scrollLeft = scrollLeft - walk;
+    }
+  };
+
+  const handleTouchEnd = () => {
+    setIsDragging(false);
+  };
+
   return (
     <div className="w-full overflow-hidden">
-      <motion.div
+      <div
         ref={containerRef}
-        className="flex items-center overflow-x-auto py-6 md:py-10 gap-4 md:gap-6 lg:gap-8 no-scrollbar min-h-[400px] md:min-h-[500px] px-4 sm:px-6 md:px-8"
-        drag="x"
-        dragConstraints={{ left: 0, right: 0 }}
-        dragElastic={0.1} // Make drag feel more natural
-        dragTransition={{ bounceStiffness: 600, bounceDamping: 20 }} // Smoother drag transition
-        onDragStart={() => setIsDragging(true)}
-        onDragEnd={() => {
-          // Add a small delay before allowing clicks again to prevent accidental navigation
-          setTimeout(() => setIsDragging(false), 100);
-        }}
+        className="flex items-center justify-center overflow-x-auto py-6 md:py-10 gap-4 md:gap-6 lg:gap-8 no-scrollbar min-h-[400px] md:min-h-[500px]"
+        onMouseDown={handleMouseDown}
+        onMouseMove={handleMouseMove}
+        onMouseUp={handleMouseUp}
+        onMouseLeave={handleMouseLeave}
+        onTouchStart={handleTouchStart}
+        onTouchMove={handleTouchMove}
+        onTouchEnd={handleTouchEnd}
         style={{
           cursor: isDragging ? 'grabbing' : 'grab',
+          userSelect: 'none',
+          paddingLeft: 'calc(50vw - 50%)',
+          paddingRight: 'calc(50vw - 50%)',
         }}>
+        
         {algorithms.map((algorithm) => (
           <div
             key={algorithm.id}
-            className="flex-shrink-0 select-none"
-            style={{ pointerEvents: isDragging ? 'none' : 'auto' }}>
+            className="flex-shrink-0 select-none">
             <AlgorithmCard
               id={algorithm.id}
               title={algorithm.title}
@@ -147,12 +213,12 @@ export function AlgorithmGallery({
             />
           </div>
         ))}
-      </motion.div>
+      </div>
 
       {/* Scroll indicator */}
-      <div className="flex justify-center mt-4 space-x-2">
-        <div className="text-sm text-gray-500">
-          <span>← scroll to explore more algorithms →</span>
+      <div className="flex justify-center mt-8 space-x-2">
+        <div className="text-base md:text-lg text-gray-600 font-inter font-medium tracking-wide">
+          <span className="opacity-75">← scroll to explore more algorithms →</span>
         </div>
       </div>
     </div>
