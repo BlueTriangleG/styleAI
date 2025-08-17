@@ -9,7 +9,7 @@ import { AnalysisReport } from '@/components/analysis/AnalysisReport';
 import { ScrollIndicator } from '@/components/analysis/ScrollIndicator';
 import { useJobDescription } from '@/hooks/useJobDescription';
 import { useBestFitImage } from '@/hooks/useBestFitImage';
-import { ModernLoadingSpinner } from '@/components/loading/ModernLoadingSpinner';
+import { CleanLoadingOverlay } from '@/components/loading/CleanLoadingOverlay';
 import {
   defaultStyleRecommendations,
   defaultAnalysisResults,
@@ -93,6 +93,7 @@ export default function GenerateReport() {
 
   const {
     analysisData,
+    rawAnalysisData,
     isLoading: isLoadingAnalysis,
     error: analysisError,
     overallDescription,
@@ -233,15 +234,36 @@ export default function GenerateReport() {
 
       <RecommendationHeader />
 
-      {isLoadingAnalysis && (
-        <div className="fixed inset-0 bg-white/95 backdrop-blur-sm z-50 flex items-center justify-center">
-          <ModernLoadingSpinner
-            size="xl"
-            message="Loading style recommendations..."
-            subMessage="Finding your best matching styles"
-          />
-        </div>
-      )}
+      <CleanLoadingOverlay
+        isVisible={isLoadingAnalysis}
+        currentStage="analysis"
+        stages={[
+          {
+            id: 'analysis',
+            title: 'Style Analysis',
+            description: 'Analyzing your uploaded image',
+            icon: 'analysis' as const,
+            estimatedDuration: 3000,
+          },
+          {
+            id: 'processing',
+            title: 'AI Processing',
+            description: 'Running advanced style algorithms',
+            icon: 'processing' as const,
+            estimatedDuration: 4000,
+          },
+          {
+            id: 'recommendations',
+            title: 'Generating Results',
+            description: 'Creating your personalized report',
+            icon: 'recommendations' as const,
+            estimatedDuration: 2000,
+          },
+        ]}
+        title="Analyzing Your Style"
+        subtitle="AI is processing your image to create personalized recommendations"
+        theme="light"
+      />
 
       <div className="relative" ref={scrollRef}>
         <motion.div
@@ -276,15 +298,15 @@ export default function GenerateReport() {
             </motion.h1>
 
             <div className="max-w-6xl mx-auto">
-              <div className="flex flex-col md:flex-row gap-8">
+              <div className="flex flex-col md:flex-row gap-8" style={{ height: 'auto' }}>
                 {/* 左侧 - 用户上传图片 */}
                 <div className="w-full md:w-1/2">
-                  <div className="bg-white/60 backdrop-blur-xs p-4 rounded-lg shadow-md h-full">
+                  <div className="bg-white/60 backdrop-blur-xs p-4 rounded-lg shadow-md h-[65vh] flex flex-col">
                     <h2 className="text-xl font-bold mb-4 font-playfair text-gray-800 border-b border-gray-200 pb-2">
                       Your Uploaded Image
                     </h2>
 
-                    <div className="aspect-[3/4] rounded-lg overflow-hidden shadow-sm relative">
+                    <div className="flex-1 min-h-0 rounded-lg overflow-hidden shadow-sm relative">
                       {userImage ? (
                         <div className="absolute inset-0">
                           <TransformWrapper
@@ -319,32 +341,150 @@ export default function GenerateReport() {
 
                 {/* 右侧 - 风格分析结果 */}
                 <motion.div className="w-full md:w-1/2">
-                  <div className="bg-white/60 backdrop-blur-xs p-6 rounded-lg shadow-md h-full">
+                  <div className="bg-white/60 backdrop-blur-xs p-6 rounded-lg shadow-md h-[65vh] flex flex-col">
                     <h2 className="text-2xl font-bold mb-6 font-playfair text-gray-800 border-b border-gray-200 pb-2">
                       Your Style Analysis
                     </h2>
 
-                    <AnalysisReport
-                      isLoadingAnalysis={isLoadingAnalysis}
-                      analysisError={analysisError || bestFitError}
-                      jobId={jobId}
-                      overallDescription={overallDescription}
-                      analysisPoints={analysisData?.features || []}
-                      recommendedStyles={analysisData?.styles || []}
-                    />
+                    <div className="flex-1 min-h-0">
+                      <AnalysisReport
+                        isLoadingAnalysis={isLoadingAnalysis}
+                        analysisError={analysisError || bestFitError}
+                        jobId={jobId}
+                        overallDescription={overallDescription}
+                        analysisPoints={analysisData?.features || []}
+                        recommendedStyles={analysisData?.styles || []}
+                        rawAnalysisData={rawAnalysisData}
+                      />
+                    </div>
                   </div>
                 </motion.div>
               </div>
             </div>
             {/* 后续内容加载提示 - 当分析已加载但最佳风格推荐仍在加载时显示 */}
             {!isLoadingAnalysis && isLoadingBestFit && (
-              <div className="mt-8 flex flex-col items-center justify-center py-8">
-                <ModernLoadingSpinner
-                  size="lg"
-                  message="Generating your best fit..."
-                  subMessage="Creating personalized style recommendations"
-                />
-              </div>
+              <motion.div
+                className="mt-8 flex flex-col items-center justify-center py-12"
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.5 }}
+              >
+                <div className="relative">
+                  {/* 高级加载动画 */}
+                  <div className="relative w-32 h-32 mb-6">
+                    {/* 外环 */}
+                    <motion.div
+                      className="absolute inset-0 border-4 border-[#84a59d]/20 rounded-full"
+                      style={{ borderTopColor: '#84a59d' }}
+                      animate={{ rotate: 360 }}
+                      transition={{ duration: 2, repeat: Infinity, ease: "linear" }}
+                    />
+                    
+                    {/* 中环 */}
+                    <motion.div
+                      className="absolute inset-4 border-3 border-[#84a59d]/10 rounded-full"
+                      style={{ borderRightColor: '#84a59d' }}
+                      animate={{ rotate: -360 }}
+                      transition={{ duration: 3, repeat: Infinity, ease: "linear" }}
+                    />
+                    
+                    {/* 内环光效 */}
+                    <motion.div
+                      className="absolute inset-8 rounded-full"
+                      style={{
+                        background: `conic-gradient(from 0deg, transparent, #84a59d80, transparent)`,
+                        filter: 'blur(4px)',
+                      }}
+                      animate={{ rotate: 360 }}
+                      transition={{ duration: 4, repeat: Infinity, ease: "linear" }}
+                    />
+                    
+                    {/* 中心图标 */}
+                    <motion.div
+                      className="absolute inset-0 flex items-center justify-center text-4xl"
+                      animate={{
+                        scale: [1, 1.1, 1],
+                      }}
+                      transition={{
+                        duration: 2,
+                        repeat: Infinity,
+                        ease: "easeInOut",
+                      }}
+                    >
+                      ✨
+                    </motion.div>
+
+                    {/* 环绕粒子 */}
+                    {[0, 1, 2, 3, 4, 5].map((i) => (
+                      <motion.div
+                        key={i}
+                        className="absolute w-2 h-2 bg-[#84a59d]/60 rounded-full"
+                        style={{
+                          top: '50%',
+                          left: '50%',
+                          transformOrigin: `${40 + i * 5}px 0px`,
+                        }}
+                        animate={{
+                          rotate: 360,
+                          scale: [0, 1, 0],
+                          opacity: [0, 1, 0],
+                        }}
+                        transition={{
+                          duration: 3,
+                          repeat: Infinity,
+                          delay: i * 0.2,
+                          ease: "easeInOut",
+                        }}
+                      />
+                    ))}
+                  </div>
+
+                  {/* 文本信息 */}
+                  <motion.div
+                    className="text-center"
+                    animate={{
+                      opacity: [0.7, 1, 0.7],
+                    }}
+                    transition={{
+                      duration: 2,
+                      repeat: Infinity,
+                      ease: "easeInOut",
+                    }}
+                  >
+                    <h3 className="text-xl font-semibold text-gray-800 mb-2 font-playfair">
+                      Generating Your Best Fit
+                    </h3>
+                    <p className="text-gray-600 font-inter">
+                      Creating personalized style recommendations
+                    </p>
+                  </motion.div>
+
+                  {/* 进度点 */}
+                  <motion.div
+                    className="flex justify-center space-x-2 mt-6"
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    transition={{ delay: 0.5 }}
+                  >
+                    {[0, 1, 2].map((i) => (
+                      <motion.div
+                        key={i}
+                        className="w-2 h-2 bg-[#84a59d]/40 rounded-full"
+                        animate={{
+                          y: [-4, 4, -4],
+                          opacity: [0.4, 1, 0.4],
+                        }}
+                        transition={{
+                          duration: 1.5,
+                          repeat: Infinity,
+                          delay: i * 0.2,
+                          ease: "easeInOut",
+                        }}
+                      />
+                    ))}
+                  </motion.div>
+                </div>
+              </motion.div>
             )}
             <ScrollIndicator
               showScrollIndicator={showScrollIndicator && !!userImage}
@@ -361,7 +501,7 @@ export default function GenerateReport() {
             analysisResults={analysisResults}
             isLoadingBestFit={isLoadingBestFit}
             bestFitError={bestFitError}
-            analysisData={analysisData}
+            analysisData={rawAnalysisData}
           />
         </div>
       </div>

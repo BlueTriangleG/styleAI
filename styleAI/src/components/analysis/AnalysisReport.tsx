@@ -12,6 +12,7 @@ interface AnalysisReportProps {
   overallDescription: string;
   analysisPoints: AnalysisPoint[];
   recommendedStyles: string[];
+  rawAnalysisData?: any; // 原始分析数据
 }
 
 /**
@@ -68,7 +69,24 @@ export const AnalysisReport: React.FC<AnalysisReportProps> = ({
   overallDescription,
   analysisPoints,
   recommendedStyles,
+  rawAnalysisData,
 }) => {
+  // Helper function to safely get nested values
+  const getNestedValue = (obj: any, path: string[]): string => {
+    try {
+      let current = obj;
+      for (const key of path) {
+        if (current && typeof current === 'object' && key in current) {
+          current = current[key];
+        } else {
+          return 'Not specified';
+        }
+      }
+      return typeof current === 'string' ? current : 'Not specified';
+    } catch (error) {
+      return 'Not specified';
+    }
+  };
   if (isLoadingAnalysis) {
     return (
       <div className="flex justify-center items-center h-64">
@@ -95,7 +113,7 @@ export const AnalysisReport: React.FC<AnalysisReportProps> = ({
 
   return (
     <motion.div
-      className="space-y-6 mb-8"
+      className="flex flex-col h-full"
       initial="initial"
       animate="animate"
       variants={contentVariants}
@@ -105,7 +123,8 @@ export const AnalysisReport: React.FC<AnalysisReportProps> = ({
         Data source: {jobId ? `API (JobID: ${jobId})` : 'Local storage'}
       </div>
 
-      <div className="max-h-[450px] overflow-y-auto pr-2 scrollbar-thin scrollbar-thumb-[#84a59d]/40 scrollbar-track-[#84a59d]/10">
+      <div className="flex-1 min-h-0 pr-2">
+        <div className="h-full overflow-y-auto scrollbar-thin scrollbar-thumb-[#84a59d]/40 scrollbar-track-[#84a59d]/10 space-y-6">
         {overallDescription ? (
           // Overall description section
           <motion.div
@@ -180,6 +199,104 @@ export const AnalysisReport: React.FC<AnalysisReportProps> = ({
             </motion.div>
           </motion.div>
         )}
+
+        {/* Detailed Analysis Section from Database */}
+        {(rawAnalysisData || analysisPoints.length > 0) && (
+          <motion.div
+            className="mt-8 p-6 bg-gradient-to-r from-blue-50/50 to-indigo-50/50 rounded-lg shadow-sm border border-blue-100"
+            variants={contentVariants}
+          >
+            <h4 className="font-bold text-gray-800 mb-6 font-playfair text-xl border-b border-blue-200 pb-3">
+              Complete Analysis Report
+            </h4>
+            
+            {/* Key Highlights */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+              <div className="bg-white/70 p-4 rounded-lg border border-blue-200">
+                <h5 className="font-semibold text-gray-800 mb-2 text-sm uppercase tracking-wide">Gender & Age</h5>
+                <p className="text-gray-700 font-inter">
+                  {rawAnalysisData ? 
+                    `${getNestedValue(rawAnalysisData, ['Semantic Features', 'Intrinsic Features', 'Gender'])} • ${getNestedValue(rawAnalysisData, ['Semantic Features', 'Intrinsic Features', 'Age Range Visual Estimation'])}` :
+                    'Analysis in progress...'
+                  }
+                </p>
+              </div>
+              <div className="bg-white/70 p-4 rounded-lg border border-blue-200">
+                <h5 className="font-semibold text-gray-800 mb-2 text-sm uppercase tracking-wide">Face Shape</h5>
+                <p className="text-gray-700 font-inter">
+                  {rawAnalysisData ? 
+                    getNestedValue(rawAnalysisData, ['Structural Features', 'Facial Features', 'Face Shape and Visual Outline']) :
+                    'Analyzing facial structure...'
+                  }
+                </p>
+              </div>
+              <div className="bg-white/70 p-4 rounded-lg border border-blue-200">
+                <h5 className="font-semibold text-gray-800 mb-2 text-sm uppercase tracking-wide">Body Type</h5>
+                <p className="text-gray-700 font-inter">
+                  {rawAnalysisData ? 
+                    getNestedValue(rawAnalysisData, ['Structural Features', 'Body Features', 'Body Type and Curve Characteristics']) :
+                    'Determining body characteristics...'
+                  }
+                </p>
+              </div>
+              <div className="bg-white/70 p-4 rounded-lg border border-blue-200">
+                <h5 className="font-semibold text-gray-800 mb-2 text-sm uppercase tracking-wide">Style Impression</h5>
+                <p className="text-gray-700 font-inter">
+                  {rawAnalysisData ? 
+                    getNestedValue(rawAnalysisData, ['Semantic Features', 'Temperament Features', 'Overall Style First Impression']) :
+                    'Generating style insights...'
+                  }
+                </p>
+              </div>
+            </div>
+
+            {/* Color Analysis */}
+            <div className="mb-6">
+              <h5 className="font-semibold text-gray-800 mb-3 font-playfair text-lg">Color Analysis</h5>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="bg-white/50 p-4 rounded-lg">
+                  <h6 className="font-medium text-gray-700 mb-2">Skin Tone</h6>
+                  <p className="text-gray-600 text-sm">
+                    {rawAnalysisData ? 
+                      getNestedValue(rawAnalysisData, ['Color Features', 'Skin Tone and Visual Characteristics']) :
+                      'Analyzing skin tone characteristics...'
+                    }
+                  </p>
+                </div>
+                <div className="bg-white/50 p-4 rounded-lg">
+                  <h6 className="font-medium text-gray-700 mb-2">Hair Color</h6>
+                  <p className="text-gray-600 text-sm">
+                    {rawAnalysisData ? 
+                      getNestedValue(rawAnalysisData, ['Color Features', 'Hair Color and Saturation']) :
+                      'Processing hair color analysis...'
+                    }
+                  </p>
+                </div>
+              </div>
+              <div className="mt-3 bg-white/50 p-4 rounded-lg">
+                <h6 className="font-medium text-gray-700 mb-2">Recommended Colors</h6>
+                <p className="text-gray-600 text-sm">
+                  {rawAnalysisData ? 
+                    getNestedValue(rawAnalysisData, ['Color Features', 'Clothing Color Optimization Suggestions']) :
+                    'Generating personalized color recommendations...'
+                  }
+                </p>
+              </div>
+            </div>
+
+            {/* Style Optimization */}
+            <div className="bg-white/50 p-4 rounded-lg">
+              <h5 className="font-semibold text-gray-800 mb-3 font-playfair text-lg">Style Optimization</h5>
+              <p className="text-gray-600 leading-relaxed">
+                {rawAnalysisData ? 
+                  getNestedValue(rawAnalysisData, ['Semantic Features', 'Temperament Features', 'Style Optimization and Temperament Enhancement Suggestions']) :
+                  'Creating personalized style enhancement recommendations based on your unique features and preferences...'
+                }
+              </p>
+            </div>
+          </motion.div>
+        )}
+        </div>
       </div>
     </motion.div>
   );

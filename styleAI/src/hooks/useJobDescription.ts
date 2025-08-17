@@ -21,6 +21,7 @@ interface AnalysisData {
 
 interface UseJobDescriptionReturn {
   analysisData: AnalysisData | null;
+  rawAnalysisData: any | null; // 原始分析数据
   isLoading: boolean;
   error: string | null;
   overallDescription: string;
@@ -29,6 +30,7 @@ interface UseJobDescriptionReturn {
 
 export const useJobDescription = (): UseJobDescriptionReturn => {
   const [analysisData, setAnalysisData] = useState<AnalysisData | null>(null);
+  const [rawAnalysisData, setRawAnalysisData] = useState<any | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [overallDescription, setOverallDescription] = useState<string>('');
@@ -105,6 +107,9 @@ export const useJobDescription = (): UseJobDescriptionReturn => {
       console.log('开始处理分析数据');
       console.log('数据结构:', Object.keys(parsedData));
 
+      // 保存原始分析数据
+      setRawAnalysisData(parsedData);
+
       // 提取整体描述
       if (parsedData && parsedData['Your Overall Description']) {
         const description = parsedData['Your Overall Description'];
@@ -159,6 +164,7 @@ export const useJobDescription = (): UseJobDescriptionReturn => {
 
   return {
     analysisData,
+    rawAnalysisData,
     isLoading,
     error,
     overallDescription,

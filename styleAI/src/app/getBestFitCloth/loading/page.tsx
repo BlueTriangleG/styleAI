@@ -5,7 +5,7 @@ import { useRouter } from 'next/navigation';
 import { motion } from 'framer-motion';
 import { RecommendationHeader } from '@/components/recommendation/Header';
 import LiquidChrome from '@/components/Background/LiquidChrome';
-
+import { CleanLoadingOverlay } from '@/components/loading/CleanLoadingOverlay';
 import { apiService } from '@/lib/api/ApiService';
 
 /**
@@ -22,9 +22,49 @@ export default function LoadingPage() {
   const [isTransitioning, setIsTransitioning] = useState(false);
   const [userImageExists, setUserImageExists] = useState<boolean | null>(null);
   const [jobId, setJobId] = useState<string>('');
+  const [currentStage, setCurrentStage] = useState('upload');
   const jobCreatedRef = useRef<boolean>(false);
   const apiVerifiedRef = useRef<boolean>(false);
   const [isApiVerified, setIsApiVerified] = useState(false);
+
+  // Loading stages for UI
+  const loadingStages = [
+    {
+      id: 'upload',
+      title: 'Processing Upload',
+      description: 'Analyzing your uploaded image',
+      icon: 'upload' as const,
+      estimatedDuration: 2000,
+    },
+    {
+      id: 'api-connect',
+      title: 'AI Connection',
+      description: 'Connecting to analysis servers',
+      icon: 'api-connect' as const,
+      estimatedDuration: 1500,
+    },
+    {
+      id: 'analysis',
+      title: 'Deep Analysis', 
+      description: 'AI analyzing your style features',
+      icon: 'analysis' as const,
+      estimatedDuration: 4000,
+    },
+    {
+      id: 'recommendations',
+      title: 'Style Matching',
+      description: 'Generating personalized recommendations',
+      icon: 'recommendations' as const,
+      estimatedDuration: 2500,
+    },
+    {
+      id: 'finalize',
+      title: 'Final Touches',
+      description: 'Preparing your complete report',
+      icon: 'finalize' as const,
+      estimatedDuration: 1000,
+    },
+  ];
 
   /**
    * Verifies the API connection and data availability
@@ -42,6 +82,7 @@ export default function LoadingPage() {
 
     try {
       console.log('Verifying API connectivity...');
+      setCurrentStage('api-connect');
       const data = await apiService.getPersonalizedAnalysis(jobId);
       console.log('API connection verified:', data);
 
@@ -83,7 +124,9 @@ export default function LoadingPage() {
 
     try {
       console.log('Creating job record...');
-      // Create job record
+      setCurrentStage('analysis');
+      
+      // Create job record - this returns a string (jobId) not an object
       const newJobId = await apiService.createJob(imageData);
       console.log(`Job created successfully, ID: ${newJobId}`);
 
@@ -92,6 +135,7 @@ export default function LoadingPage() {
       sessionStorage.setItem('currentJobId', newJobId);
 
       // Verify API connectivity
+      setCurrentStage('recommendations');
       await verifyApiConnection(newJobId);
     } catch (error) {
       console.error('Job creation failed:', error);
@@ -145,6 +189,7 @@ export default function LoadingPage() {
             'Loading complete and API verified, preparing transition to generateReport'
           );
           clearInterval(interval);
+          setCurrentStage('finalize');
           // Start transition animation
           setIsTransitioning(true);
 
@@ -152,7 +197,7 @@ export default function LoadingPage() {
           setTimeout(() => {
             console.log('Navigating to generateReport');
             router.replace('/getBestFitCloth/generateReport');
-          }, 100);
+          }, 1000);
           return 100;
         }
 
@@ -171,64 +216,6 @@ export default function LoadingPage() {
       clearInterval(interval);
     };
   }, [router]);
-
-  // Animation variants
-  const pageVariants = {
-    initial: { opacity: 1 },
-    exit: { opacity: 0, transition: { duration: 0.5 } },
-  };
-
-  const containerVariants = {
-    initial: { opacity: 0 },
-    animate: {
-      opacity: 1,
-      transition: {
-        duration: 0.5,
-        when: 'beforeChildren',
-        staggerChildren: 0.2,
-      },
-    },
-    exit: {
-      opacity: 0,
-      transition: {
-        duration: 0.3,
-        when: 'afterChildren',
-        staggerChildren: 0.1,
-        staggerDirection: -1,
-      },
-    },
-  };
-
-  const itemVariants = {
-    initial: { y: 20, opacity: 0 },
-    animate: {
-      y: 0,
-      opacity: 1,
-      transition: { duration: 0.5 },
-    },
-    exit: {
-      y: -20,
-      opacity: 0,
-      transition: { duration: 0.3 },
-    },
-  };
-
-  const pulseVariants = {
-    initial: { scale: 1 },
-    animate: {
-      scale: [1, 1.05, 1],
-      transition: {
-        duration: 1.5,
-        repeat: Infinity,
-        repeatType: 'reverse' as const,
-      },
-    },
-    exit: {
-      scale: 0,
-      opacity: 0,
-      transition: { duration: 0.3 },
-    },
-  };
 
   // Simple loading indicator if userImageExists is null or false
   if (userImageExists === null || userImageExists === false) {
@@ -263,203 +250,64 @@ export default function LoadingPage() {
 
   return (
     <>
-      <RecommendationHeader />
-      {/* Flowing background */}
-      <div className="absolute inset-0 z-0 overflow-hidden pointer-events-auto">
-        <LiquidChrome
-          baseColor={[0.9, 0.9, 0.9]}
-          speed={0.3}
-          amplitude={0.7}
-          frequencyX={4}
-          frequencyY={3}
-          interactive={true}
-        />
-        <div className="absolute inset-0 bg-white/10 pointer-events-none"></div>
-      </div>
-      <motion.div
-        className="min-h-screen pt-20 relative"
-        initial="initial"
-        animate={isTransitioning ? 'exit' : 'animate'}
-        variants={pageVariants}>
-        {/* Content area */}
-        <div className="container mx-auto px-4 py-8 relative z-10">
-          <motion.div
-            className="max-w-2xl mx-auto flex flex-col items-center justify-center"
-            initial="initial"
-            animate="animate"
-            variants={containerVariants}>
-            <motion.div className="mb-8 text-center" variants={itemVariants}>
-              <h1 className="text-3xl font-bold mb-2 font-playfair text-gray-800">
-                Analyzing Your Style
-              </h1>
-              <p className="text-lg text-gray-600 font-inter">
-                We're processing your photo to create personalized
-                recommendations
-              </p>
-            </motion.div>
-
-            <motion.div className="w-full mb-8" variants={itemVariants}>
-              <div className="w-full bg-gray-200 rounded-full h-4 mb-2">
-                <div
-                  className="bg-[#84a59d] h-4 rounded-full transition-all duration-300 ease-out"
-                  style={{ width: `${progress}%` }}></div>
-              </div>
-              <p className="text-right text-sm text-gray-600 font-inter">
-                {Math.min(Math.round(progress), 100)}%
-              </p>
-            </motion.div>
-
-            <motion.div
-              className="flex flex-col items-center"
-              variants={itemVariants}>
-              {/* Stylish loading spinner with color accent */}
-              <div className="relative w-32 h-32 mb-6">
-                {/* Outer rotating ring */}
-                <motion.div
-                  className="absolute inset-0 rounded-full border-4 border-gray-200"
-                  style={{ borderRadius: '50%' }}
-                />
-
-                {/* Inner animated arc */}
-                <motion.div
-                  className="absolute inset-0 rounded-full border-4 border-transparent"
-                  style={{
-                    borderTopColor: '#84a59d',
-                    borderRadius: '50%',
-                    transform: `rotate(${progress * 3.6}deg)`,
-                  }}
-                  animate={{
-                    rotate: [0, 360],
-                  }}
-                  transition={{
-                    duration: 1.5,
-                    repeat: Infinity,
-                    ease: 'linear',
-                  }}
-                />
-
-                {/* Percentage display */}
-                <div className="absolute inset-0 flex items-center justify-center">
-                  <p className="text-2xl font-medium text-gray-700">
-                    {Math.min(Math.round(progress), 100)}%
-                  </p>
-                </div>
-              </div>
-
-              {/* Fashion silhouette morphing animation */}
-              <motion.div
-                className="mb-4 h-16 w-16 flex items-center justify-center"
-                animate={{
-                  scale: [1, 1.1, 1],
-                  opacity: [0.7, 1, 0.7],
-                }}
-                transition={{
-                  duration: 2,
-                  repeat: Infinity,
-                  repeatType: 'reverse',
-                }}>
-                <svg
-                  viewBox="0 0 24 24"
-                  className="w-full h-full text-[#84a59d]">
-                  <motion.path
-                    fill="currentColor"
-                    d="M12,2A10,10 0 0,0 2,12A10,10 0 0,0 12,22A10,10 0 0,0 22,12A10,10 0 0,0 12,2M12,20A8,8 0 0,1 4,12A8,8 0 0,1 12,4A8,8 0 0,1 20,12A8,8 0 0,1 12,20M7,10L12,15L17,10H7Z"
-                    animate={{
-                      d: [
-                        'M12,2A10,10 0 0,0 2,12A10,10 0 0,0 12,22A10,10 0 0,0 22,12A10,10 0 0,0 12,2M12,20A8,8 0 0,1 4,12A8,8 0 0,1 12,4A8,8 0 0,1 20,12A8,8 0 0,1 12,20M7,10L12,15L17,10H7Z',
-                        'M21,16V8H10M10,8A2,2 0 0,1 12,10V14A2,2 0 0,1 10,16A2,2 0 0,1 8,14V10A2,2 0 0,1 10,8M12,4.8C12,4.8 14,6 14,8C14,10 12,11.2 12,11.2M16,7A2,2 0 0,1 18,9A2,2 0 0,1 16,11A2,2 0 0,1 14,9A2,2 0 0,1 16,7Z',
-                        'M12,12A3,3 0 0,0 9,15C9,16.3 9.84,17.4 11,17.82V20H9V22H15V20H13V17.82C14.16,17.4 15,16.3 15,15A3,3 0 0,0 12,12M12,2A10,10 0 0,0 2,12A10,10 0 0,0 12,22H20A2,2 0 0,0 22,20V12A10,10 0 0,0 12,2Z',
-                      ],
-                    }}
-                    transition={{
-                      duration: 2,
-                      ease: 'easeInOut',
-                      repeat: Infinity,
-                      repeatType: 'reverse',
-                    }}
-                  />
-                </svg>
-              </motion.div>
-
-              {/* Status text with typographic animation */}
-              <motion.p
-                className="text-gray-700 font-inter text-lg text-center mb-2"
-                animate={{ opacity: [0.7, 1, 0.7] }}
-                transition={{ duration: 1.5, repeat: Infinity }}>
-                Analyzing your unique style profile
-              </motion.p>
-
-              {/* Analysis steps with animated progress */}
-              <ul className="text-gray-600 space-y-1 font-inter max-w-xs">
-                <motion.li
-                  className="flex items-center space-x-2"
-                  animate={{
-                    color: progress >= 25 ? '#84a59d' : '#718096',
-                  }}
-                  transition={{ duration: 0.5 }}>
-                  <motion.span
-                    className="flex-shrink-0 w-5 h-5 flex items-center justify-center bg-white rounded-full"
-                    animate={{
-                      backgroundColor: progress >= 25 ? '#84a59d' : 'white',
-                      color: progress >= 25 ? 'white' : '#718096',
-                    }}>
-                    {progress >= 25 ? '✓' : '·'}
-                  </motion.span>
-                  <span>Analyzing facial features</span>
-                </motion.li>
-
-                <motion.li
-                  className="flex items-center space-x-2"
-                  animate={{
-                    color: progress >= 50 ? '#84a59d' : '#718096',
-                  }}>
-                  <motion.span
-                    className="flex-shrink-0 w-5 h-5 flex items-center justify-center bg-white rounded-full"
-                    animate={{
-                      backgroundColor: progress >= 50 ? '#84a59d' : 'white',
-                      color: progress >= 50 ? 'white' : '#718096',
-                    }}>
-                    {progress >= 50 ? '✓' : '·'}
-                  </motion.span>
-                  <span>Determining style preferences</span>
-                </motion.li>
-
-                <motion.li
-                  className="flex items-center space-x-2"
-                  animate={{
-                    color: progress >= 75 ? '#84a59d' : '#718096',
-                  }}>
-                  <motion.span
-                    className="flex-shrink-0 w-5 h-5 flex items-center justify-center bg-white rounded-full"
-                    animate={{
-                      backgroundColor: progress >= 75 ? '#84a59d' : 'white',
-                      color: progress >= 75 ? 'white' : '#718096',
-                    }}>
-                    {progress >= 75 ? '✓' : '·'}
-                  </motion.span>
-                  <span>Identifying style characteristics</span>
-                </motion.li>
-
-                <motion.li
-                  className="flex items-center space-x-2"
-                  animate={{
-                    color: progress >= 90 ? '#84a59d' : '#718096',
-                  }}>
-                  <motion.span
-                    className="flex-shrink-0 w-5 h-5 flex items-center justify-center bg-white rounded-full"
-                    animate={{
-                      backgroundColor: progress >= 90 ? '#84a59d' : 'white',
-                      color: progress >= 90 ? 'white' : '#718096',
-                    }}>
-                    {progress >= 90 ? '✓' : '·'}
-                  </motion.span>
-                  <span>Generating personalized recommendations</span>
-                </motion.li>
-              </ul>
-            </motion.div>
-          </motion.div>
+      <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100">
+        <RecommendationHeader />
+        
+        {/* Background decoration */}
+        <div className="absolute inset-0 overflow-hidden pointer-events-none">
+          <LiquidChrome
+            baseColor={[0.9, 0.95, 0.98]}
+            speed={0.2}
+            amplitude={0.5}
+            frequencyX={3}
+            frequencyY={2}
+            interactive={false}
+          />
         </div>
-      </motion.div>
+
+        {/* Clean loading overlay */}
+        <CleanLoadingOverlay
+          isVisible={!isTransitioning}
+          currentStage={currentStage}
+          progress={progress}
+          stages={loadingStages}
+          onComplete={() => {
+            setIsTransitioning(true);
+            setTimeout(() => {
+              router.replace('/getBestFitCloth/generateReport');
+            }, 500);
+          }}
+          title="StyleAI Processing"
+          subtitle="Creating your personalized style analysis"
+          theme="light"
+        />
+      </div>
+
+      {/* Transition animation */}
+      {isTransitioning && (
+        <motion.div
+          className="fixed inset-0 bg-white z-[60]"
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ duration: 0.5 }}
+        />
+      )}
+
+      {/* Debug info (development mode) */}
+      {process.env.NODE_ENV === 'development' && (
+        <motion.div
+          className="fixed bottom-4 right-4 bg-black/80 text-white p-3 rounded-lg text-xs font-mono z-40"
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 1 }}
+        >
+          <div>Stage: {currentStage}</div>
+          <div>Progress: {Math.round(progress)}%</div>
+          <div>JobID: {jobId || 'N/A'}</div>
+          <div>API Verified: {isApiVerified ? 'Yes' : 'No'}</div>
+          <div>Image: {userImageExists ? 'Found' : 'Not Found'}</div>
+        </motion.div>
+      )}
     </>
   );
 }
