@@ -21,6 +21,7 @@ interface AnalysisData {
 
 interface UseJobDescriptionReturn {
   analysisData: AnalysisData | null;
+  rawAnalysisData: any | null; // 原始分析数据
   isLoading: boolean;
   error: string | null;
   overallDescription: string;
@@ -29,6 +30,7 @@ interface UseJobDescriptionReturn {
 
 export const useJobDescription = (): UseJobDescriptionReturn => {
   const [analysisData, setAnalysisData] = useState<AnalysisData | null>(null);
+  const [rawAnalysisData, setRawAnalysisData] = useState<any | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [overallDescription, setOverallDescription] = useState<string>('');
@@ -105,14 +107,19 @@ export const useJobDescription = (): UseJobDescriptionReturn => {
       console.log('开始处理分析数据');
       console.log('数据结构:', Object.keys(parsedData));
 
+      // 保存原始分析数据
+      setRawAnalysisData(parsedData);
+
       // 提取整体描述
       if (parsedData && parsedData['Your Overall Description']) {
         const description = parsedData['Your Overall Description'];
         console.log('提取到的整体描述:', description);
-        setOverallDescription(description);
+        // 只有当描述真的不同时才更新状态
+        setOverallDescription(prev => prev !== description ? description : prev);
       } else {
         console.log('未找到整体描述');
-        setOverallDescription('未找到整体描述');
+        const defaultDesc = '未找到整体描述';
+        setOverallDescription(prev => prev !== defaultDesc ? defaultDesc : prev);
       }
 
       // 使用工具函数提取数据
@@ -138,7 +145,14 @@ export const useJobDescription = (): UseJobDescriptionReturn => {
       console.log('提取的颜色:', processedData.colors);
       console.log('提取的风格:', processedData.styles);
 
-      setAnalysisData(processedData);
+      // 只有当数据真的不同时才更新状态
+      setAnalysisData(prev => {
+        if (!prev) return processedData;
+        
+        // 深度比较来避免不必要的更新
+        const isSame = JSON.stringify(prev) === JSON.stringify(processedData);
+        return isSame ? prev : processedData;
+      });
 
       // 存储到sessionStorage以备后用
       sessionStorage.setItem('analysisData', JSON.stringify(parsedData));
@@ -150,6 +164,7 @@ export const useJobDescription = (): UseJobDescriptionReturn => {
 
   return {
     analysisData,
+    rawAnalysisData,
     isLoading,
     error,
     overallDescription,

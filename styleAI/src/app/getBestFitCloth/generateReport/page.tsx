@@ -3,12 +3,13 @@
 import { useEffect, useState, useRef } from 'react';
 import { motion, useScroll, useTransform } from 'framer-motion';
 import { RecommendationHeader } from '@/components/recommendation/Header';
-import LiquidChrome from '@/components/background/LiquidChrome';
+import LiquidChrome from '@/components/Background/LiquidChrome';
 import StyleRecommendations from '@/components/recommendation/StyleRecommendations';
 import { AnalysisReport } from '@/components/analysis/AnalysisReport';
 import { ScrollIndicator } from '@/components/analysis/ScrollIndicator';
 import { useJobDescription } from '@/hooks/useJobDescription';
 import { useBestFitImage } from '@/hooks/useBestFitImage';
+import { CleanLoadingOverlay } from '@/components/loading/CleanLoadingOverlay';
 import {
   defaultStyleRecommendations,
   defaultAnalysisResults,
@@ -85,7 +86,6 @@ const ZoomControls = () => {
 };
 
 export default function GenerateReport() {
-  const [typingComplete, setTypingComplete] = useState<number>(0);
   const [showScrollIndicator, setShowScrollIndicator] = useState(false);
   const [enableScrollEffects, setEnableScrollEffects] = useState(false);
   const [allowScroll, setAllowScroll] = useState(false);
@@ -93,6 +93,7 @@ export default function GenerateReport() {
 
   const {
     analysisData,
+    rawAnalysisData,
     isLoading: isLoadingAnalysis,
     error: analysisError,
     overallDescription,
@@ -166,37 +167,15 @@ export default function GenerateReport() {
   }, [allowScroll]);
 
   useEffect(() => {
-    if (isPageLoading || !analysisData) return;
-
-    if (!analysisData.features || !Array.isArray(analysisData.features)) {
-      console.error('分析数据中的features不存在或不是数组:', analysisData);
-      return;
-    }
-
-    if (overallDescription) {
-      setTypingComplete(analysisData.features.length);
-      setTimeout(() => {
+    if (!isPageLoading && analysisData) {
+      // 简单地在数据加载完成后显示滚动指示器
+      const timer = setTimeout(() => {
         setShowScrollIndicator(true);
         console.log('显示滚动指示器');
-      }, 1000);
-      return;
+      }, 2000);
+      return () => clearTimeout(timer);
     }
-
-    const typingTimer = setInterval(() => {
-      setTypingComplete((prev) => {
-        if (prev < analysisData.features.length) {
-          return prev + 1;
-        } else {
-          clearInterval(typingTimer);
-          setShowScrollIndicator(true);
-          console.log('显示滚动指示器');
-          return prev;
-        }
-      });
-    }, 1000);
-
-    return () => clearInterval(typingTimer);
-  }, [isPageLoading, analysisData, overallDescription]);
+  }, [isPageLoading, analysisData]);
 
   const scrollToRecommendations = () => {
     if (recommendationsRef.current) {
@@ -255,39 +234,36 @@ export default function GenerateReport() {
 
       <RecommendationHeader />
 
-      {isLoadingAnalysis && (
-        <div className="fixed inset-0 bg-white z-50 flex items-center justify-center">
-          <div className="flex flex-col items-center">
-            <div className="relative w-16 h-16 mb-3">
-              <svg
-                className="animate-spin text-[#84a59d]"
-                viewBox="0 0 24 24"
-                fill="none"
-                xmlns="http://www.w3.org/2000/svg">
-                <circle
-                  className="opacity-25"
-                  cx="12"
-                  cy="12"
-                  r="10"
-                  stroke="currentColor"
-                  strokeWidth="4"
-                />
-                <path
-                  className="opacity-75"
-                  fill="currentColor"
-                  d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
-                />
-              </svg>
-            </div>
-            <p className="text-gray-600 font-inter text-center">
-              Loading style recommendations...
-            </p>
-            <p className="text-gray-500 font-inter text-sm text-center mt-1">
-              Finding your best matching styles
-            </p>
-          </div>
-        </div>
-      )}
+      <CleanLoadingOverlay
+        isVisible={isLoadingAnalysis}
+        currentStage="analysis"
+        stages={[
+          {
+            id: 'analysis',
+            title: 'Style Analysis',
+            description: 'Analyzing your uploaded image',
+            icon: 'analysis' as const,
+            estimatedDuration: 3000,
+          },
+          {
+            id: 'processing',
+            title: 'AI Processing',
+            description: 'Running advanced style algorithms',
+            icon: 'processing' as const,
+            estimatedDuration: 4000,
+          },
+          {
+            id: 'recommendations',
+            title: 'Generating Results',
+            description: 'Creating your personalized report',
+            icon: 'recommendations' as const,
+            estimatedDuration: 2000,
+          },
+        ]}
+        title="Analyzing Your Style"
+        subtitle="AI is processing your image to create personalized recommendations"
+        theme="light"
+      />
 
       <div className="relative" ref={scrollRef}>
         <motion.div
@@ -322,15 +298,15 @@ export default function GenerateReport() {
             </motion.h1>
 
             <div className="max-w-6xl mx-auto">
-              <div className="flex flex-col md:flex-row gap-8">
+              <div className="flex flex-col md:flex-row gap-8" style={{ height: 'auto' }}>
                 {/* 左侧 - 用户上传图片 */}
                 <div className="w-full md:w-1/2">
-                  <div className="bg-white/60 backdrop-blur-xs p-4 rounded-lg shadow-md h-full">
+                  <div className="bg-white/60 backdrop-blur-xs p-4 rounded-lg shadow-md h-[65vh] flex flex-col">
                     <h2 className="text-xl font-bold mb-4 font-playfair text-gray-800 border-b border-gray-200 pb-2">
                       Your Uploaded Image
                     </h2>
 
-                    <div className="aspect-[3/4] rounded-lg overflow-hidden shadow-sm relative">
+                    <div className="flex-1 min-h-0 rounded-lg overflow-hidden shadow-sm relative">
                       {userImage ? (
                         <div className="absolute inset-0">
                           <TransformWrapper
@@ -365,55 +341,150 @@ export default function GenerateReport() {
 
                 {/* 右侧 - 风格分析结果 */}
                 <motion.div className="w-full md:w-1/2">
-                  <div className="bg-white/60 backdrop-blur-xs p-6 rounded-lg shadow-md h-full">
+                  <div className="bg-white/60 backdrop-blur-xs p-6 rounded-lg shadow-md h-[65vh] flex flex-col">
                     <h2 className="text-2xl font-bold mb-6 font-playfair text-gray-800 border-b border-gray-200 pb-2">
                       Your Style Analysis
                     </h2>
 
-                    <AnalysisReport
-                      isLoadingAnalysis={isLoadingAnalysis}
-                      analysisError={analysisError || bestFitError}
-                      jobId={jobId}
-                      overallDescription={overallDescription}
-                      analysisPoints={analysisData?.features || []}
-                      recommendedStyles={analysisData?.styles || []}
-                      typingComplete={typingComplete}
-                    />
+                    <div className="flex-1 min-h-0">
+                      <AnalysisReport
+                        isLoadingAnalysis={isLoadingAnalysis}
+                        analysisError={analysisError || bestFitError}
+                        jobId={jobId}
+                        overallDescription={overallDescription}
+                        analysisPoints={analysisData?.features || []}
+                        recommendedStyles={analysisData?.styles || []}
+                        rawAnalysisData={rawAnalysisData}
+                      />
+                    </div>
                   </div>
                 </motion.div>
               </div>
             </div>
             {/* 后续内容加载提示 - 当分析已加载但最佳风格推荐仍在加载时显示 */}
             {!isLoadingAnalysis && isLoadingBestFit && (
-              <div className="mt-8 flex flex-col items-center justify-center py-4">
-                <div className="relative w-16 h-16 mb-3">
-                  <svg
-                    className="animate-spin text-[#84a59d]"
-                    viewBox="0 0 24 24"
-                    fill="none"
-                    xmlns="http://www.w3.org/2000/svg">
-                    <circle
-                      className="opacity-25"
-                      cx="12"
-                      cy="12"
-                      r="10"
-                      stroke="currentColor"
-                      strokeWidth="4"
+              <motion.div
+                className="mt-8 flex flex-col items-center justify-center py-12"
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.5 }}
+              >
+                <div className="flex flex-col items-center">
+                  {/* 高级加载动画 */}
+                  <div className="relative w-32 h-32 mb-6">
+                    {/* 外环 */}
+                    <motion.div
+                      className="absolute inset-0 border-4 border-[#84a59d]/20 rounded-full"
+                      style={{ borderTopColor: '#84a59d' }}
+                      animate={{ rotate: 360 }}
+                      transition={{ duration: 2, repeat: Infinity, ease: "linear" }}
                     />
-                    <path
-                      className="opacity-75"
-                      fill="currentColor"
-                      d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                    
+                    {/* 中环 */}
+                    <motion.div
+                      className="absolute inset-4 border-3 border-[#84a59d]/10 rounded-full"
+                      style={{ borderRightColor: '#84a59d' }}
+                      animate={{ rotate: -360 }}
+                      transition={{ duration: 3, repeat: Infinity, ease: "linear" }}
                     />
-                  </svg>
+                    
+                    {/* 内环光效 */}
+                    <motion.div
+                      className="absolute inset-8 rounded-full"
+                      style={{
+                        background: `conic-gradient(from 0deg, transparent, #84a59d80, transparent)`,
+                        filter: 'blur(4px)',
+                      }}
+                      animate={{ rotate: 360 }}
+                      transition={{ duration: 4, repeat: Infinity, ease: "linear" }}
+                    />
+                    
+                    {/* 中心图标 */}
+                    <motion.div
+                      className="absolute inset-0 flex items-center justify-center text-4xl"
+                      animate={{
+                        scale: [1, 1.1, 1],
+                      }}
+                      transition={{
+                        duration: 2,
+                        repeat: Infinity,
+                        ease: "easeInOut",
+                      }}
+                    >
+                      ✨
+                    </motion.div>
+
+                    {/* 环绕粒子 */}
+                    {[0, 1, 2, 3, 4, 5].map((i) => (
+                      <motion.div
+                        key={i}
+                        className="absolute w-2 h-2 bg-[#84a59d]/60 rounded-full"
+                        style={{
+                          top: '50%',
+                          left: '50%',
+                          transformOrigin: `${40 + i * 5}px 0px`,
+                        }}
+                        animate={{
+                          rotate: 360,
+                          scale: [0, 1, 0],
+                          opacity: [0, 1, 0],
+                        }}
+                        transition={{
+                          duration: 3,
+                          repeat: Infinity,
+                          delay: i * 0.2,
+                          ease: "easeInOut",
+                        }}
+                      />
+                    ))}
+                  </div>
+
+                  {/* 文本信息 */}
+                  <motion.div
+                    className="text-center"
+                    animate={{
+                      opacity: [0.7, 1, 0.7],
+                    }}
+                    transition={{
+                      duration: 2,
+                      repeat: Infinity,
+                      ease: "easeInOut",
+                    }}
+                  >
+                    <h3 className="text-xl font-semibold text-gray-800 mb-2 font-playfair">
+                      Generating Your Best Fit
+                    </h3>
+                    <p className="text-gray-600 font-inter">
+                      Creating personalized style recommendations
+                    </p>
+                  </motion.div>
+
+                  {/* 进度点 */}
+                  <motion.div
+                    className="flex justify-center space-x-2 mt-6"
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    transition={{ delay: 0.5 }}
+                  >
+                    {[0, 1, 2].map((i) => (
+                      <motion.div
+                        key={i}
+                        className="w-2 h-2 bg-[#84a59d]/40 rounded-full"
+                        animate={{
+                          y: [-4, 4, -4],
+                          opacity: [0.4, 1, 0.4],
+                        }}
+                        transition={{
+                          duration: 1.5,
+                          repeat: Infinity,
+                          delay: i * 0.2,
+                          ease: "easeInOut",
+                        }}
+                      />
+                    ))}
+                  </motion.div>
                 </div>
-                <p className="text-gray-600 font-inter text-center">
-                  Loading style recommendations...
-                </p>
-                <p className="text-gray-500 font-inter text-sm text-center mt-1">
-                  Finding your best matching styles
-                </p>
-              </div>
+              </motion.div>
             )}
             <ScrollIndicator
               showScrollIndicator={showScrollIndicator && !!userImage}
@@ -430,6 +501,7 @@ export default function GenerateReport() {
             analysisResults={analysisResults}
             isLoadingBestFit={isLoadingBestFit}
             bestFitError={bestFitError}
+            analysisData={rawAnalysisData}
           />
         </div>
       </div>

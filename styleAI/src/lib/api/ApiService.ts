@@ -27,7 +27,7 @@ class ApiService {
   async processImage(imageData: string): Promise<string> {
     try {
       const response = await fetch(
-        `${this.baseUrl}${API_ENDPOINTS.IMAGE_PROCESS}`,
+        `${API_ENDPOINTS.IMAGE_PROCESS}`,
         {
           method: 'POST',
           headers: DEFAULT_HEADERS,
@@ -64,7 +64,7 @@ class ApiService {
   ): Promise<{ filePath: string; message: string }> {
     try {
       const response = await fetch(
-        `${this.baseUrl}${API_ENDPOINTS.IMAGE_DOWNLOAD}`,
+        `${API_ENDPOINTS.IMAGE_DOWNLOAD}`,
         {
           method: 'POST',
           headers: DEFAULT_HEADERS,

@@ -243,6 +243,7 @@ def personalized_analysis():
     从数据库获取图像数据，保存到临时文件，分析图像，并返回个性化分析结果
     """
     job_id = None
+    image_path = None  # 在函数开始就初始化
     try:
         # 获取请求中的JSON数据
         data = request.get_json()
@@ -276,7 +277,6 @@ def personalized_analysis():
         
         # 检查是否有上传的图像
         image_data = job.get('uploaded_image')
-        image_path = None
         image_base64 = None
         is_mock_data = False
         
@@ -376,6 +376,13 @@ def personalized_analysis():
                     else:
                         logger.warning("图像分析未返回结果，使用模拟数据")
                         is_mock_data = True
+                        # 保存模拟数据到数据库
+                        update_success = update_job_description(job_id, MOCK_ANALYSIS_DATA)
+                        if update_success:
+                            logger.info(f"成功将模拟分析结果保存到数据库，jobId: {job_id}")
+                        else:
+                            logger.warning(f"无法将模拟分析结果保存到数据库，jobId: {job_id}")
+                        
                         # 返回模拟数据
                         return jsonify({
                             'status': 'success',
@@ -386,6 +393,13 @@ def personalized_analysis():
                 else:
                     logger.warning("input_analyse模块不可用，使用模拟数据")
                     is_mock_data = True
+                    # 保存模拟数据到数据库
+                    update_success = update_job_description(job_id, MOCK_ANALYSIS_DATA)
+                    if update_success:
+                        logger.info(f"成功将模拟分析结果保存到数据库，jobId: {job_id}")
+                    else:
+                        logger.warning(f"无法将模拟分析结果保存到数据库，jobId: {job_id}")
+                    
                     # 返回模拟数据
                     return jsonify({
                         'status': 'success',
@@ -395,6 +409,13 @@ def personalized_analysis():
                     })
             except Exception as e:
                 logger.error(f"使用input_analyse进行分析时出错: {str(e)}")
+                # 保存模拟数据到数据库
+                update_success = update_job_description(job_id, MOCK_ANALYSIS_DATA)
+                if update_success:
+                    logger.info(f"成功将模拟分析结果保存到数据库，jobId: {job_id}")
+                else:
+                    logger.warning(f"无法将模拟分析结果保存到数据库，jobId: {job_id}")
+                
                 # 出错时返回模拟数据
                 return jsonify({
                     'status': 'success',
@@ -405,6 +426,13 @@ def personalized_analysis():
                 })
         else:
             logger.warning("没有上传的图像数据，使用模拟数据")
+            # 保存模拟数据到数据库
+            update_success = update_job_description(job_id, MOCK_ANALYSIS_DATA)
+            if update_success:
+                logger.info(f"成功将模拟分析结果保存到数据库，jobId: {job_id}")
+            else:
+                logger.warning(f"无法将模拟分析结果保存到数据库，jobId: {job_id}")
+            
             # 没有图像数据时返回模拟数据
             return jsonify({
                 'status': 'success',
@@ -493,101 +521,74 @@ def wear_suit_pictures():
                         if not analysis_data:
                             logger.warning("未找到分析结果，使用模拟数据")
                             is_mock_data = True
-                            return jsonify({
-                                "jobId": job_id,
-                                "timestamp": int(time.time()),
-                                "status": "error",
-                                "error": "No analysis result found. Using mock data.",
-                                "debug_info": "No analysis result found. Using mock data."
-                            }), 400
+                            # 不要返回错误，继续使用模拟数据
+                        else:
+                            # 处理target_description，确保它是有效的格式
+                            try:
+                                if isinstance(analysis_data, dict):
+                                    # 如果已经是dict，则转换为JSON字符串
+                                    analysis_data = convert_nested_objects_to_string(analysis_data)
+                                    analysis_json_str = json.dumps(analysis_data)
+                                    logger.info("已将target_description从dict转换为JSON字符串")
+                                elif isinstance(analysis_data, str):
+                                    # 如果已经是字符串，则验证它是有效的JSON
+                                    json.loads(analysis_data)  # 只是验证，不使用返回值
+                                    analysis_json_str = analysis_data
+                                    logger.info("target_description已经是有效的JSON字符串")
+                                else:
+                                    logger.error(f"无法处理的target_description类型: {type(analysis_data)}")
+                                    is_mock_data = True
+                            except Exception as e:
+                                logger.error(f"处理target_description失败: {e}", exc_info=True)
+                                is_mock_data = True
 
-                        # 处理target_description，确保它是有效的格式
-                        try:
-                            if isinstance(analysis_data, dict):
-                                # 如果已经是dict，则转换为JSON字符串
-                                analysis_data = convert_nested_objects_to_string(analysis_data)
-                                analysis_json_str = json.dumps(analysis_data)
-                                logger.info("已将target_description从dict转换为JSON字符串")
-                            elif isinstance(analysis_data, str):
-                                # 如果已经是字符串，则验证它是有效的JSON
-                                json.loads(analysis_data)  # 只是验证，不使用返回值
-                                analysis_json_str = analysis_data
-                                logger.info("target_description已经是有效的JSON字符串")
-                            else:
-                                logger.error(f"无法处理的target_description类型: {type(analysis_data)}")
-                                return jsonify({
-                                    "status": "error",
-                                    "jobId": job_id,
-                                    "error": "target_description类型无效",
-                                    "debug_info": f"类型为 {type(analysis_data)}"
-                                }), 500
-                        except Exception as e:
-                            logger.error(f"处理target_description失败: {e}", exc_info=True)
-                            return jsonify({
-                                "status": "error",
-                                "jobId": job_id,
-                                "error": "target_description不是有效的JSON格式",
-                                "debug_info": str(e)
-                            }), 500
-
-                        # 获取模型和tokenizer
-                        model = resources.get('model')
-                        tokenizer = resources.get('tokenizer')
-                        device = resources.get('device')
-                        
-                        # 步骤1: 使用embedding_match找到最佳匹配的图片
-                        success, message, best_image_path = find_best_match_image(
-                            analysis_json_str,  # 使用处理后的JSON字符串
-                            tokenizer, 
-                            model, 
-                            device
-                        )
-                        
-                        if not success:
-                            logger.warning(f"查找最佳匹配图片失败: {message}")
-                            return jsonify({
-                                "status": "error",
-                                "jobId": job_id,
-                                "error": message
-                            }), 500
-                        
-                        logger.info(f"成功找到最佳匹配图片: {best_image_path}")
-                        
-                        # 步骤2: 使用change_ootd生成穿着建议图片
-                        success, message, output_image_data = generate_outfit_image(
-                            image_path, 
-                            best_image_path
-                        )
-                        
-                        if not success:
-                            logger.warning(f"生成穿着建议图片失败: {message}")
-                            return jsonify({
-                                "status": "error",
-                                "jobId": job_id,
-                                "error": message
-                            }), 500
-                        
-                        logger.info(f"成功生成穿着建议图片: {message}")
-                        
-                        # 更新数据库中的best_fit字段
-                        update_success = update_job_best_fit(job_id, output_image_data)
-                        
-                        if not update_success:
-                            logger.warning(f"更新job {job_id}的best_fit字段失败")
-                            return jsonify({
-                                "status": "error",
-                                "jobId": job_id,
-                                "error": "更新数据库失败"
-                            }), 500
-                        
-                        # 清理临时文件
-                        cleanup_temp_files(file_paths=[image_path])
-                        
-                        return jsonify({
-                            "status": "success",
-                            "jobId": job_id,
-                            "message": "成功生成最佳穿着建议图片"
-                        }), 200
+                            if not is_mock_data:
+                                # 获取模型和tokenizer
+                                model = resources.get('model')
+                                tokenizer = resources.get('tokenizer')
+                                device = resources.get('device')
+                                
+                                # 步骤1: 使用embedding_match找到最佳匹配的图片
+                                success, message, best_image_path = find_best_match_image(
+                                    analysis_json_str,  # 使用处理后的JSON字符串
+                                    tokenizer, 
+                                    model, 
+                                    device
+                                )
+                                
+                                if not success:
+                                    logger.warning(f"查找最佳匹配图片失败: {message}")
+                                    is_mock_data = True
+                                else:
+                                    logger.info(f"成功找到最佳匹配图片: {best_image_path}")
+                                    
+                                    # 步骤2: 使用change_ootd生成穿着建议图片
+                                    success, message, output_image_data = generate_outfit_image(
+                                        image_path, 
+                                        best_image_path
+                                    )
+                                    
+                                    # 清理临时文件 (在使用完毕后立即清理)
+                                    cleanup_temp_files(file_paths=[image_path])
+                                    
+                                    if not success:
+                                        logger.warning(f"生成穿着建议图片失败: {message}")
+                                        is_mock_data = True
+                                    else:
+                                        logger.info(f"成功生成穿着建议图片: {message}")
+                                        
+                                        # 更新数据库中的best_fit字段
+                                        update_success = update_job_best_fit(job_id, output_image_data)
+                                        
+                                        if not update_success:
+                                            logger.warning(f"更新job {job_id}的best_fit字段失败")
+                                            is_mock_data = True
+                                        else:
+                                            return jsonify({
+                                                "status": "success",
+                                                "jobId": job_id,
+                                                "message": "成功生成最佳穿着建议图片"
+                                            }), 200
                     else:
                         logger.warning("保存图像失败，使用模拟数据")
                         is_mock_data = True

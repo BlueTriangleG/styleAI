@@ -1,4 +1,4 @@
-FROM python:3.10-slim AS base
+FROM python:3.10-slim
 
 # Set working directory
 WORKDIR /app
@@ -9,34 +9,22 @@ ENV PYTHONDONTWRITEBYTECODE=1 \
     FLASK_APP=app.py \
     FLASK_ENV=production
 
-# Install system dependencies
+# Install system dependencies and Python packages in one step
 RUN apt-get update && apt-get install -y --no-install-recommends \
     gcc \
     curl \
     libpq-dev \
+    python3-dev \
     && apt-get clean \
-    && rm -rf /var/lib/apt/lists/*
+    && rm -rf /var/lib/apt/lists/* \
+    && pip install --no-cache-dir flask==2.3.3 flask-cors==4.0.0 pillow==10.0.0 \
+    gunicorn==21.2.0 python-dotenv==1.0.0 psycopg2-binary==2.9.9 \
+    Werkzeug==2.3.7 scikit-learn==1.3.0 torch==2.0.0 numpy==1.24.4 \
+    requests==2.31.0 matplotlib==3.8.0 transformers==4.31.0
 
-# Create a stage for dependency installation
-FROM base AS dependencies
-
-# Copy dependency files
-COPY requirements.txt .
-
-# Install Python dependencies
-RUN pip install --no-cache-dir -r requirements.txt
-
-# Explicitly install scikit-learn
-RUN pip install scikit-learn==1.3.0
-
-# Final stage
-FROM dependencies AS final
-
-# Create temp directory for image storage
-RUN mkdir -p /app/temp && chmod 777 /app/temp
-
-# Create necessary directory structure
-RUN mkdir -p /app/app/utils/algorithms /app/app/routes
+# Create directories
+RUN mkdir -p /app/temp /app/app/utils/algorithms /app/app/routes \
+    && chmod 777 /app/temp
 
 # Copy application code
 COPY app.py .
@@ -54,8 +42,11 @@ COPY app/utils/algorithms/ALL_final_merged.json app/utils/algorithms/ALL_final_m
 # Copy route modules
 COPY app/routes/*.py app/routes/
 
+# Copy Gunicorn configuration file
+COPY gunicorn.conf.py .
+
 # Expose port
 EXPOSE 5001
 
-# Run the application
-CMD ["python", "app.py"] 
+# Run with Gunicorn with memory optimization
+CMD ["gunicorn", "--config", "gunicorn.conf.py", "app:create_app()"] 

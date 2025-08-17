@@ -9,7 +9,7 @@ export default function PersonalizedRecommendation() {
 
   useEffect(() => {
     // Redirect to uploadImages
-    router.push('/personalized-recommendation/uploadImages');
+    router.push('/hair-style/uploadImages');
   }, [router]);
 
   return (
